@@ -7,14 +7,19 @@ set -e
 ENV_NAME="cap-pipeline"
 ENV_FILE="environment.yml"
 
-# Check for submodules (TRASH2)
-if [ -z "$(ls -A modules/TRASH_2 2>/dev/null)" ]; then
-    echo "Initializing submodules..."
-    git submodule update --init --recursive
+# Create the environment first so setup does not require Git on the host.
+if conda env list | awk '{print $1}' | grep -qx "$ENV_NAME"; then
+    echo "Conda environment '$ENV_NAME' already exists; reusing it."
+else
+    echo "Creating conda environment '$ENV_NAME' from $ENV_FILE..."
+    conda env create -f "$ENV_FILE"
 fi
 
-echo "Creating conda environment '$ENV_NAME' from $ENV_FILE..."
-conda env create -f $ENV_FILE
+# Use Git installed inside the Conda environment to initialize TRASH2.
+if [ -z "$(ls -A modules/TRASH_2 2>/dev/null)" ]; then
+    echo "Initializing submodules..."
+    conda run -n "$ENV_NAME" git submodule update --init --recursive
+fi
 
 echo "Activating environment..."
 # Need to source conda.sh to use 'conda activate' in script, or use 'conda run'
