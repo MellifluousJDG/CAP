@@ -19,6 +19,8 @@ tes_filtered_csv <- if (args[5] != "NO_FILE") args[5] else no_edta <- TRUE
 genes_filtered_csv <- if (args[6] != "NO_FILE") args[6] else no_heli <- TRUE
 output_centromeric_scores <- args[7]
 
+# Stabilize random repeat subsampling across runs.
+set.seed(0)
 
 # Load libraries
 suppressMessages({library(seqinr)
