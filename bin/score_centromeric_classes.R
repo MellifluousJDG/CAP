@@ -63,14 +63,15 @@ if(nrow(genome_classes_data) == 0) {
 
 # Load optionals if provided
 # print("load edta")
-if (!no_edta) edta <- read.csv(tes_filtered_csv)
+if (!no_edta) {
+  edta <- read.csv(tes_filtered_csv)
+  if (length(edta) == 0 || nrow(edta) == 0) no_edta <- TRUE
+}
 # print("load genes")
-if (!no_heli) genes <- read.csv(genes_filtered_csv)
-
-if(length(edta) == 0) no_edta <- TRUE
-if(length(genes) == 0) no_heli <- TRUE
-if(nrow(edta) == 0) no_edta <- TRUE
-if(nrow(genes) == 0) no_heli <- TRUE
+if (!no_heli) {
+  genes <- read.csv(genes_filtered_csv)
+  if (length(genes) == 0 || nrow(genes) == 0) no_heli <- TRUE
+}
 
 
 # Score
