@@ -29,9 +29,11 @@ nextflow run vlothec/CAP -profile docker --assembly data/genome.fasta
 ```
 
 ### Option 2: Conda
-Requires [Conda](https://docs.conda.io/en/latest/) (or Mamba) and [Nextflow](https://www.nextflow.io/).
+Requires Conda on 64-bit Linux. Nextflow and Java are included in the CAP environment.
 
-**Linux / macOS:**
+The setup script uses the committed `conda-linux-64.lock` by default on Linux x86-64, reproducing the exact tested package builds. `environment.yml` is the human-maintained dependency specification and is used to update the lock or when no matching platform lock exists.
+
+**Linux x86-64:**
 ```bash
 git clone --recursive https://github.com/vlothec/CAP.git
 cd CAP
@@ -139,8 +141,9 @@ The pipeline generates the following key files in the output directory:
 CAP/
 ├── main.nf                  # Main Nextflow workflow script
 ├── nextflow.config          # Configuration (profiles, params)
-├── environment.yml          # Conda environment definition
-├── setup_conda.sh           # Linux/Mac setup script
+├── environment.yml          # Human-maintained Conda requirements
+├── conda-linux-64.lock      # Exact tested Linux x86-64 packages
+├── setup_conda.sh           # Linux setup script
 ├── setup_conda.ps1          # Windows setup script
 ├── Makefile                 # Convenience commands
 ├── Dockerfile               # Docker image definition

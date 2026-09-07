@@ -6,12 +6,16 @@ set -e
 
 ENV_NAME="cap-pipeline"
 ENV_FILE="environment.yml"
+LOCK_FILE="conda-linux-64.lock"
 
 # Create the environment first so setup does not require Git on the host.
 if conda env list | awk '{print $1}' | grep -qx "$ENV_NAME"; then
     echo "Conda environment '$ENV_NAME' already exists; reusing it."
+elif [ "$(uname -s)" = "Linux" ] && [ "$(uname -m)" = "x86_64" ] && [ -f "$LOCK_FILE" ]; then
+    echo "Creating Conda environment '$ENV_NAME' from reproducible Linux lock..."
+    conda create --name "$ENV_NAME" --file "$LOCK_FILE"
 else
-    echo "Creating conda environment '$ENV_NAME' from $ENV_FILE..."
+    echo "No matching lock for this platform; creating '$ENV_NAME' from $ENV_FILE..."
     conda env create -f "$ENV_FILE"
 fi
 
