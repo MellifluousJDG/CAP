@@ -28,7 +28,7 @@ dependencies:
   - numpy
   - joblib
   - xgboost
-  - scikit-learn
+  - scikit-learn=1.7.2
   
   # Bioinformatics tools
   - mafft
