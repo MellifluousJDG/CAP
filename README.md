@@ -45,6 +45,9 @@ make install
 # Run the pipeline
 conda activate cap-pipeline
 nextflow run . --assembly data/genome.fasta
+
+# Run the bundled one-core smoke test
+make test-conda
 ```
 
 **Windows (PowerShell):**
@@ -58,6 +61,9 @@ cd CAP
 # Run the pipeline
 conda activate cap-pipeline
 nextflow run . --assembly data/genome.fasta
+
+# Run the bundled one-core smoke test
+make test-conda
 ```
 
 ### Option 3: R + renv (Manual)

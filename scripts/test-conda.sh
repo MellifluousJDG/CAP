@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+ENV_NAME="${CAP_ENV_NAME:-cap-pipeline}"
+ASSEMBLY="${ASSEMBLY:-test/ath_Chr1_extraction_trc.fasta}"
+RESULTS_DIR="${RESULTS_DIR:-results_test_conda}"
+WORK_DIR="${WORK_DIR:-work_test_conda}"
+
+if [ ! -f "$ASSEMBLY" ]; then
+    echo "Assembly FASTA not found: $ASSEMBLY" >&2
+    exit 1
+fi
+
+if [ ! -f modules/TRASH_2/src/TRASH.R ]; then
+    echo "TRASH_2 submodule is not initialized; run make install first." >&2
+    exit 1
+fi
+
+if [ ! -x bin/ctw-calc ]; then
+    echo "bin/ctw-calc is missing; run make install or make compile first." >&2
+    exit 1
+fi
+
+if ! conda env list | awk '{print $1}' | grep -qx "$ENV_NAME"; then
+    echo "Conda environment '$ENV_NAME' does not exist; run make install first." >&2
+    exit 1
+fi
+
+rm -rf "$RESULTS_DIR" "$WORK_DIR"
+
+conda run -n "$ENV_NAME" nextflow run . \
+    --assembly "$ASSEMBLY" \
+    --cores 1 \
+    --outdir "$RESULTS_DIR" \
+    -work-dir "$WORK_DIR"
+
+file_count=$(find "$RESULTS_DIR" -maxdepth 1 -type f | wc -l)
+if [ "$file_count" -ne 16 ]; then
+    echo "Expected 16 result files, found $file_count in $RESULTS_DIR." >&2
+    exit 1
+fi
+
+for extension in csv png rds; do
+    if ! find "$RESULTS_DIR" -maxdepth 1 -type f -name "*.$extension" -print -quit | grep -q .; then
+        echo "No .$extension result found in $RESULTS_DIR." >&2
+        exit 1
+    fi
+done
+
+if find "$RESULTS_DIR" -maxdepth 1 -type f -empty -print -quit | grep -q .; then
+    echo "An empty result file was produced in $RESULTS_DIR." >&2
+    exit 1
+fi
+
+echo "Conda smoke test passed: 16 nonempty result files in $RESULTS_DIR."
