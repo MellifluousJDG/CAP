@@ -4,6 +4,9 @@
 
 set -e
 
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
+
 ENV_NAME="${CAP_ENV_NAME:-cap-pipeline}"
 ENV_FILE="environment.yml"
 LOCK_FILE="conda-linux-64.lock"
@@ -16,7 +19,7 @@ elif [ "$(uname -s)" = "Linux" ] && [ "$(uname -m)" = "x86_64" ] && [ -f "$LOCK_
     conda create --name "$ENV_NAME" --file "$LOCK_FILE"
 else
     echo "No matching lock for this platform; creating '$ENV_NAME' from $ENV_FILE..."
-    conda env create -f "$ENV_FILE"
+    conda env create --name "$ENV_NAME" -f "$ENV_FILE"
 fi
 
 # Use Git installed inside the Conda environment to initialize TRASH2.
@@ -33,11 +36,11 @@ echo "Setting up BCT (Bayesian Context Trees)..."
 echo "Attempting to compile local C++ binary (faster)..."
 
 # Try compilation first
-if conda run -n $ENV_NAME make -C bin/src/BCT; then
+if conda run -n "$ENV_NAME" make -C bin/src/BCT; then
     echo "✓ C++ binary compiled successfully."
 else
     echo "⚠️  C++ compilation failed. Falling back to CRAN installation (slower)..."
-    conda run -n $ENV_NAME Rscript install_bioc_packages.R
+    conda run -n "$ENV_NAME" Rscript install_bioc_packages.R
 fi
 
 echo "Setting permissions..."
