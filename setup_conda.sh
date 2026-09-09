@@ -4,7 +4,7 @@
 
 set -e
 
-ENV_NAME="cap-pipeline"
+ENV_NAME="${CAP_ENV_NAME:-cap-pipeline}"
 ENV_FILE="environment.yml"
 LOCK_FILE="conda-linux-64.lock"
 
