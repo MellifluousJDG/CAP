@@ -53,4 +53,15 @@ if find "$RESULTS_DIR" -maxdepth 1 -type f -empty -print -quit | grep -q .; then
     exit 1
 fi
 
-echo "Conda smoke test passed: 16 nonempty result files in $RESULTS_DIR."
+EXPECTED_CHECKSUMS="test/expected-results.sha256"
+if [ ! -f "$EXPECTED_CHECKSUMS" ]; then
+    echo "Expected checksum manifest not found: $EXPECTED_CHECKSUMS" >&2
+    exit 1
+fi
+
+if ! (cd "$RESULTS_DIR" && sha256sum --check "../$EXPECTED_CHECKSUMS"); then
+    echo "Result checksums do not match $EXPECTED_CHECKSUMS." >&2
+    exit 1
+fi
+
+echo "Conda smoke test passed: 16 nonempty files match expected checksums."

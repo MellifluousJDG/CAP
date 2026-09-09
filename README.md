@@ -46,7 +46,7 @@ make install
 conda activate cap-pipeline
 nextflow run . --assembly data/genome.fasta
 
-# Run the bundled one-core smoke test
+# Run the bundled one-core smoke test and verify all 16 output checksums
 make test-conda
 ```
 
@@ -62,7 +62,7 @@ cd CAP
 conda activate cap-pipeline
 nextflow run . --assembly data/genome.fasta
 
-# Run the bundled one-core smoke test
+# Run the bundled one-core smoke test and verify all 16 output checksums
 make test-conda
 ```
 
