@@ -220,6 +220,7 @@ CAP/
 ├── setup_conda.sh                # Conda setup and CTW compilation
 ├── Makefile                      # Convenience commands
 ├── scripts/test-conda.sh         # One-core deterministic smoke test
+├── conf/slurm-site.example.config # Site-specific SLURM configuration template
 ├── test/expected-results.sha256  # Expected test-result checksums
 ├── bin/                          # Pipeline scripts and CTW source
 ├── modules/TRASH_2/              # Pinned Git submodule
@@ -227,9 +228,57 @@ CAP/
 └── test/                         # Bundled test input
 ```
 
-## HPC and SLURM status
+## HPC and SLURM
 
-Local Conda execution is tested. A simple single-job SLURM wrapper and a Nextflow-managed SLURM profile are planned but have not yet been validated on a SLURM cluster. Cluster-specific documentation should not be treated as complete until those tests are performed.
+CAP uses the Nextflow-managed SLURM architecture: Nextflow remains the workflow controller and submits individual CAP processes to SLURM. CAP does not provide a competing wrapper that runs every process locally inside one large allocation.
+
+First install the locked Conda environment on storage visible to the login and compute nodes:
+
+```bash
+make install
+conda activate cap-pipeline
+```
+
+Then start Nextflow with the SLURM profile from a host where `sbatch` and the other SLURM client commands are available:
+
+```bash
+nextflow run . \
+  -profile slurm \
+  --assembly /shared/data/genome.fasta \
+  --outdir /shared/results/cap
+```
+
+Use `-profile slurm`, not `-profile conda,slurm`. The latter asks Nextflow to create per-process environments from `environment.yml`; it does not use the validated named environment created from `conda-linux-64.lock`.
+
+The repository does not hard-code a partition or account because those names are cluster-specific. They can be supplied as command-line parameters:
+
+- `--slurm_queue`: SLURM partition/queue;
+- `--slurm_account`: project or allocation account;
+- `--slurm_time`: process time request, such as `24h`;
+- `--slurm_memory`: process memory request, such as `16 GB`.
+
+For example:
+
+```bash
+nextflow run . \
+  -profile slurm \
+  --slurm_queue compute \
+  --slurm_account my-project \
+  --slurm_time 24h \
+  --slurm_memory '16 GB' \
+  --assembly /shared/data/genome.fasta
+```
+
+Alternatively, copy and edit `conf/slurm-site.example.config`, which overrides the corresponding `process` directives directly, then supply it with:
+
+```bash
+nextflow run . \
+  -profile slurm \
+  -c /path/to/my-site.config \
+  --assembly /shared/data/genome.fasta
+```
+
+The repository, Conda environment, input files, output directory, and Nextflow work directory must be accessible from the compute nodes. The profile can be checked locally for configuration composition, but actual scheduling, filesystem access, accounting, and resource behavior still require validation on a real SLURM cluster.
 
 ## Other packaging methods
 
