@@ -1,7 +1,7 @@
 ENV_NAME ?= cap-pipeline
 ASSEMBLY ?=
 
-.PHONY: install compile run test-conda remove-env clean
+.PHONY: install compile run test-conda remove-env clean-build clean
 
 install:
 	@echo "Setting up Conda environment '$(ENV_NAME)'..."
@@ -23,6 +23,10 @@ test-conda:
 remove-env:
 	@echo "Removing Conda environment '$(ENV_NAME)'..."
 	conda env remove -n "$(ENV_NAME)"
+
+clean-build:
+	@echo "Removing compiled CTW/BCT binary..."
+	rm -f bin/ctw-calc
 
 clean:
 	@echo "DEPRECATED: 'make clean' removes the Conda environment. Use 'make remove-env' instead."

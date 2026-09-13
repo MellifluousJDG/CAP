@@ -74,6 +74,7 @@ CAP_ENV_NAME=my-cap bash setup_conda.sh
 - `make run ASSEMBLY=...` runs CAP on the supplied FASTA assembly.
 - `make test-conda` performs the bundled deterministic one-core regression test.
 - `make remove-env` removes the selected Conda environment.
+- `make clean-build` removes the generated `bin/ctw-calc` binary without removing the environment.
 - `make clean` is deprecated because its name is ambiguous; it currently explains the replacement and delegates to `make remove-env`.
 
 ### Removing the environment
