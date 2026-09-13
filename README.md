@@ -73,6 +73,7 @@ CAP_ENV_NAME=my-cap bash setup_conda.sh
 - `make compile` recompiles CTW/BCT in the selected environment.
 - `make run ASSEMBLY=...` runs CAP on the supplied FASTA assembly.
 - `make test-conda` performs the bundled deterministic one-core regression test.
+- `make test-slurm-config` validates SLURM profile composition without submitting jobs.
 - `make remove-env` removes the selected Conda environment.
 - `make clean-build` removes the generated `bin/ctw-calc` binary without removing the environment.
 - `make clean` is deprecated because its name is ambiguous; it currently explains the replacement and delegates to `make remove-env`.
@@ -220,6 +221,7 @@ CAP/
 ├── setup_conda.sh                # Conda setup and CTW compilation
 ├── Makefile                      # Convenience commands
 ├── scripts/test-conda.sh         # One-core deterministic smoke test
+├── scripts/test-slurm-config.sh  # Scheduler-free SLURM profile test
 ├── conf/slurm-site.example.config # Site-specific SLURM configuration template
 ├── test/expected-results.sha256  # Expected test-result checksums
 ├── bin/                          # Pipeline scripts and CTW source
@@ -278,7 +280,15 @@ nextflow run . \
   --assembly /shared/data/genome.fasta
 ```
 
-The repository, Conda environment, input files, output directory, and Nextflow work directory must be accessible from the compute nodes. The profile can be checked locally for configuration composition, but actual scheduling, filesystem access, accounting, and resource behavior still require validation on a real SLURM cluster.
+The repository, Conda environment, input files, output directory, and Nextflow work directory must be accessible from the compute nodes.
+
+Before using a cluster, validate profile composition locally:
+
+```bash
+make test-slurm-config
+```
+
+This resolves the default and example site configurations and uses Nextflow preview mode to parse the workflow. It deliberately does not call `sbatch` and therefore does not validate actual scheduling, filesystem access, accounting, status polling, cancellation, or compute-node environment propagation. Those behaviors still require a real SLURM cluster.
 
 ## Other packaging methods
 
