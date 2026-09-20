@@ -213,20 +213,20 @@ Additional intermediate CSV files contain detected, filtered, and reclassified r
 
 ```text
 CAP/
-├── main.nf                       # Nextflow workflow
-├── nextflow.config               # Parameters and profiles
-├── environment.yml               # Human-maintained dependencies
-├── conda-linux-64.lock           # Exact tested Linux x86-64 packages
-├── setup_conda.sh                # Conda setup and CTW compilation
-├── Makefile                      # Convenience commands
+├── main.nf                        # Nextflow workflow
+├── nextflow.config                # Parameters and profiles
+├── environment.yml                # Human-maintained dependencies
+├── conda-linux-64.lock            # Exact tested Linux x86-64 packages
+├── setup_conda.sh                 # Conda setup and CTW compilation
+├── Makefile                       # Convenience commands
 ├── scripts/run-cap-slurm.sh       # Single-allocation SLURM launcher
 ├── scripts/test-conda.sh          # One-core deterministic smoke test
 ├── scripts/test-slurm-wrapper.sh  # Scheduler-free launcher tests
-├── test/expected-results.sha256  # Expected test-result checksums
-├── bin/                          # Pipeline scripts and CTW source
-├── modules/TRASH_2/              # Pinned Git submodule
-├── model/                        # Pre-trained models
-└── test/                         # Bundled test input
+├── test/expected-results.sha256   # Expected test-result checksums
+├── bin/                           # Pipeline scripts and CTW source
+├── modules/TRASH_2/               # Pinned Git submodule
+├── model/                         # Pre-trained models
+└── test/                          # Bundled test input
 ```
 
 ## Single-node SLURM execution
