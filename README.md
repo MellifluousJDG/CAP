@@ -223,7 +223,7 @@ Genome assembly
     |                                             |         |
     +──> Process optional annotations ────────────+         v
     |                                                   Predict
-    +──> Calculate GC and CTW ─────────────────────────+  |
+    +──> Calculate GC and CTW ──────────────────────────+  |
                                                         |  |
                                                         v  v
                                                   Plots and reports
