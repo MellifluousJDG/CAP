@@ -24,52 +24,41 @@ Annotation sequence names and coordinates must correspond to the supplied assemb
 
 ## End-to-end flow
 
+In the diagram below, `A --> B` means that B waits for and consumes output from
+A. Separate branches may run concurrently. A stage with several incoming arrows
+waits for every required input.
+
 ```text
 assembly FASTA
-├── CHECK_DEPS
-│   └── verifies nhmmer and MAFFT
-├── TRASH2, unless --trash2 is supplied
-│   ├── <assembly-name>_repeats_with_seq.csv
-│   └── <assembly-name>_arrays.csv
-│       └── FILTER_TRASH
-│           ├── <repeats-stem>_filtered.csv
-│           └── <arrays-stem>_filtered.csv
-│               └── MERGE_CLASSES
-│                   ├── <filtered-repeats-stem>_reclassed.csv
-│                   ├── <filtered-arrays-stem>_reclassed.csv
-│                   └── <filtered-repeats-stem>_genome_classes.csv
-├── GET_METADATA
-│   └── <assembly-stem>_metadata.csv
-├── GC
-│   └── <assembly-stem>_GC.csv
-└── CTW
-    └── <assembly-stem>_CTW.csv
-
-optional --te_gff
-└── PARSE_TES
-    └── <TE-stem>_TEs_parsed.csv
-        └── FILTER_TES
-            └── <parsed-TE-stem>_filtered.csv
-
-optional --gene_gff
-└── PARSE_GENES
-    └── <gene-stem>_genes_parsed.csv
-        └── FILTER_GENES
-            └── <parsed-gene-stem>_filtered.csv
-
-reclassified repeats + metadata + optional annotations
-└── SCORE_CENTROMERIC
-    └── <assembly-stem>_centromeric_scores.csv
-        └── PREDICT_CENTROMERIC
-            └── <scores-stem>_predictions.csv
-
-predictions + repeats + metadata + assembly + GC + CTW + scores
-└── CAP
-    ├── <assembly-stem>_CAP_plot_*.png
-    ├── <assembly-stem>_CAP_repeat_families.csv
-    ├── <assembly-stem>_CAP_model.txt
-    └── <assembly-stem>_CAP_Rdata.rds
+    |
+    +--> CHECK_DEPS --> TRASH2 --------------------------+
+    |                   (or validated --trash2 files)    |
+    |                                                    v
+    |                                              FILTER_TRASH
+    |                                                    |
+    |                                                    +--> MERGE_CLASSES --+
+    |                                                                         |
+    +--> GET_METADATA --------------------------------------------------------+
+    |                                                                         |
+    +--> optional --te_gff --> PARSE_TES --> FILTER_TES ----------------------+--> SCORE_CENTROMERIC
+    |                                                                         |            |
+    +--> optional --gene_gff --> PARSE_GENES --> FILTER_GENES ----------------+            v
+    |                                                                              PREDICT_CENTROMERIC
+    +--> GC -----------------------------------------------------------------------------+  |
+    |                                                                                    |  |
+    +--> CTW ----------------------------------------------------------------------------+  |
+                                                                                         v  v
+                                                                                          CAP
+                                                                                           |
+                                                                                           +--> plots
+                                                                                           +--> repeat-family table
+                                                                                           +--> model summary
+                                                                                           +--> R data
 ```
+
+When neither optional annotation is supplied, CAP sends an internal `NO_FILE`
+value down that branch instead. `GC` and `CTW` do not feed
+`SCORE_CENTROMERIC`; they join the other results at the final `CAP` process.
 
 Nextflow may execute independent branches concurrently. For example, metadata,
 GC, and CTW do not need to wait for repeat filtering. Processes that consume

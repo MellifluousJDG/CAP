@@ -211,16 +211,22 @@ CAP performs six main stages:
 5. **Prediction:** apply the bundled machine-learning model to the calculated scores.
 6. **Visualization and reporting:** produce plots, summaries, tables, and reusable R data.
 
-In summary:
+In the diagram below, `A ──> B` means that B waits for and uses output from A.
+Branches on separate lines may run at the same time, while joined arrows mean that the next stage waits for all required inputs.
 
 ```text
 Genome assembly
-├── Identify, filter, and classify tandem repeats
-├── Calculate sequence features
-└── Process optional TE and gene annotations
-    └── Score candidate centromeric regions
-        └── Predict centromeres
-            └── Create plots and reports
+    |
+    +──> Identify, filter, and classify repeats ──+
+    |                                             |
+    +──> Prepare metadata ────────────────────────+──> Score candidates
+    |                                             |         |
+    +──> Process optional annotations ────────────+         v
+    |                                                   Predict
+    +──> Calculate GC and CTW ─────────────────────────+  |
+                                                        |  |
+                                                        v  v
+                                                  Plots and reports
 ```
 
 Nextflow may run independent stages at the same time and waits automatically when one stage needs another stage's output.
