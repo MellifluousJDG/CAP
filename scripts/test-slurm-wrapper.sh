@@ -5,6 +5,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(cd -- "$SCRIPT_DIR/.." && pwd)"
 WRAPPER="$PROJECT_DIR/scripts/run-cap-slurm.sh"
+NEXTFLOW_CONFIG="$PROJECT_DIR/nextflow.config"
 tmp_dir=$(mktemp -d)
 trap 'rm -rf "$tmp_dir"' EXIT
 
@@ -23,6 +24,16 @@ printf '%s\n' "$@" > "${FAKE_CONDA_ARGS:?}"
 exit "${FAKE_CONDA_STATUS:-0}"
 EOF
 chmod +x "$fake_conda"
+
+if grep -Eq "executor[[:space:]]*=[[:space:]]*['\"]slurm['\"]" \
+    "$NEXTFLOW_CONFIG"; then
+    echo "nextflow.config must not submit individual processes to SLURM." >&2
+    exit 1
+fi
+if grep -Eq '^[[:space:]]*slurm[[:space:]]*\{' "$NEXTFLOW_CONFIG"; then
+    echo "nextflow.config must not define a SLURM profile." >&2
+    exit 1
+fi
 
 expect_failure() {
     expected=$1
