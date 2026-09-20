@@ -24,36 +24,36 @@ Annotation sequence names and coordinates must correspond to the supplied assemb
 
 ## End-to-end flow
 
-In the diagram below, `A --> B` means that B waits for and consumes output from
+In the diagram below, `A ──> B` means that B waits for and consumes output from
 A. Separate branches may run concurrently. A stage with several incoming arrows
 waits for every required input.
 
 ```text
 assembly FASTA
-    |
-    +--> CHECK_DEPS --> TRASH2 --------------------------+
-    |                   (or validated --trash2 files)    |
-    |                                                    v
-    |                                              FILTER_TRASH
-    |                                                    |
-    |                                                    +--> MERGE_CLASSES --+
-    |                                                                         |
-    +--> GET_METADATA --------------------------------------------------------+
-    |                                                                         |
-    +--> optional --te_gff --> PARSE_TES --> FILTER_TES ----------------------+--> SCORE_CENTROMERIC
-    |                                                                         |            |
-    +--> optional --gene_gff --> PARSE_GENES --> FILTER_GENES ----------------+            v
-    |                                                                              PREDICT_CENTROMERIC
-    +--> GC -----------------------------------------------------------------------------+  |
-    |                                                                                    |  |
-    +--> CTW ----------------------------------------------------------------------------+  |
-                                                                                         v  v
+    │
+    ├──> CHECK_DEPS ──> TRASH2 ──────────────────────────┐
+    │                   (or validated --trash2 files)    │
+    │                                                    ▼
+    │                                              FILTER_TRASH
+    │                                                    │
+    │                                                    └──> MERGE_CLASSES ──┐
+    │                                                                         │
+    ├──> GET_METADATA ────────────────────────────────────────────────────────┤
+    │                                                                         │
+    ├──> optional --te_gff ──> PARSE_TES ──> FILTER_TES ──────────────────────┼──> SCORE_CENTROMERIC
+    │                                                                         │            │
+    ├──> optional --gene_gff ──> PARSE_GENES ──> FILTER_GENES ────────────────┘            ▼
+    │                                                                              PREDICT_CENTROMERIC
+    ├──> GC ─────────────────────────────────────────────────────────────────────────────┐  │
+    │                                                                                    │  │
+    └──> CTW ────────────────────────────────────────────────────────────────────────────┤  │
+                                                                                         ▼  ▼
                                                                                           CAP
-                                                                                           |
-                                                                                           +--> plots
-                                                                                           +--> repeat-family table
-                                                                                           +--> model summary
-                                                                                           +--> R data
+                                                                                           │
+                                                                                           ├──> plots
+                                                                                           ├──> repeat-family table
+                                                                                           ├──> model summary
+                                                                                           └──> R data
 ```
 
 When neither optional annotation is supplied, CAP sends an internal `NO_FILE`
