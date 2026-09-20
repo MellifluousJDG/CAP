@@ -202,12 +202,21 @@ Additional intermediate CSV files contain detected, filtered, and reclassified r
 
 ## Pipeline overview
 
-1. **Repeat identification:** run TRASH_2 to identify tandem repeats.
-2. **Filtering and merging:** filter repeats and merge related classes.
-3. **Feature extraction:** process optional TE and gene annotations.
-4. **Scoring:** calculate centromeric features from repeats and genomic context.
-5. **Prediction:** apply the bundled machine-learning model.
-6. **Visualization:** produce plots, summaries, and tabular results.
+```text
+assembly
+├── TRASH_2 or validated --trash2 files
+│   └── filter repeats and merge classes
+├── metadata
+├── optional TE and gene annotation branches
+├── GC
+└── CTW
+    └── centromeric scoring
+        └── model prediction
+            └── final plots, tables, model summary, and R data
+```
+
+Nextflow may run independent branches concurrently and waits automatically where one process consumes another process's output.
+See `docs/PIPELINE_FLOW.md` for the complete process graph, optional branches, filename rules, output inventory, precomputed TRASH_2 behavior, and troubleshooting guidance.
 
 ## Repository structure
 
@@ -223,6 +232,7 @@ CAP/
 ├── scripts/test-conda.sh          # One-core deterministic smoke test
 ├── scripts/test-slurm-wrapper.sh  # Scheduler-free launcher tests
 ├── test/expected-results.sha256   # Expected test-result checksums
+├── docs/PIPELINE_FLOW.md          # Process graph and output reference
 ├── bin/                           # Pipeline scripts and CTW source
 ├── modules/TRASH_2/               # Pinned Git submodule
 ├── model/                         # Pre-trained models
