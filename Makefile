@@ -1,7 +1,7 @@
 ENV_NAME ?= cap-pipeline
 ASSEMBLY ?=
 
-.PHONY: install compile run test-conda remove-env clean-build clean
+.PHONY: install compile run test-conda test-slurm-wrapper remove-env clean-build clean
 
 install:
 	@echo "Setting up Conda environment '$(ENV_NAME)'..."
@@ -19,6 +19,9 @@ run:
 
 test-conda:
 	CAP_ENV_NAME="$(ENV_NAME)" bash scripts/test-conda.sh
+
+test-slurm-wrapper:
+	bash scripts/test-slurm-wrapper.sh
 
 remove-env:
 	@echo "Removing Conda environment '$(ENV_NAME)'..."

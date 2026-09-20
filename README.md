@@ -219,7 +219,9 @@ CAP/
 ├── conda-linux-64.lock           # Exact tested Linux x86-64 packages
 ├── setup_conda.sh                # Conda setup and CTW compilation
 ├── Makefile                      # Convenience commands
-├── scripts/test-conda.sh         # One-core deterministic smoke test
+├── scripts/run-cap-slurm.sh       # Single-allocation SLURM launcher
+├── scripts/test-conda.sh          # One-core deterministic smoke test
+├── scripts/test-slurm-wrapper.sh  # Scheduler-free launcher tests
 ├── test/expected-results.sha256  # Expected test-result checksums
 ├── bin/                          # Pipeline scripts and CTW source
 ├── modules/TRASH_2/              # Pinned Git submodule
@@ -227,9 +229,67 @@ CAP/
 └── test/                         # Bundled test input
 ```
 
-## HPC and SLURM status
+## Single-node SLURM execution
 
-Local Conda execution is tested. A simple single-job SLURM wrapper and a Nextflow-managed SLURM profile are planned but have not yet been validated on a SLURM cluster. Cluster-specific documentation should not be treated as complete until those tests are performed.
+CAP includes `scripts/run-cap-slurm.sh` for clusters where one allocation should run the entire workflow. SLURM starts this script once, and Nextflow uses its local executor inside the allocated node. Nextflow does not submit additional scheduler jobs, so dependent stages do not return to the queue.
+
+Install CAP and its shared Conda environment on storage visible to the compute nodes, then submit:
+
+```bash
+sbatch scripts/run-cap-slurm.sh \
+  --assembly /shared/data/genome.fasta \
+  --outdir /shared/results/genome-cap
+```
+
+The script uses `SLURM_CPUS_PER_TASK` for `--cores`. Its generic defaults request one CPU and 36 GB of memory. Override resources with `sbatch` options when submitting, for example:
+
+```bash
+sbatch --cpus-per-task=4 --mem=36G --time=24:00:00 \
+  scripts/run-cap-slurm.sh \
+  --assembly /shared/data/genome.fasta \
+  --outdir /shared/results/genome-cap
+```
+
+Partition, account, excluded nodes, and site-specific paths are deliberately not hard-coded. Add them as `sbatch` options or adapt the `#SBATCH` header for the target cluster.
+
+The default Conda environment is `cap-pipeline`. Select another named environment or Conda executable with:
+
+```bash
+sbatch scripts/run-cap-slurm.sh \
+  --assembly /shared/data/genome.fasta \
+  --outdir /shared/results/genome-cap \
+  --env-name my-cap \
+  --conda /shared/tools/miniconda3/bin/conda
+```
+
+Optional annotations use `--te-gff`, `--gene-gff`, and `--metadata`. To reuse existing TRASH_2 output explicitly:
+
+```bash
+sbatch scripts/run-cap-slurm.sh \
+  --assembly /shared/data/genome.fasta \
+  --outdir /shared/results/genome-cap \
+  --trash2 /shared/results/precomputed-trash2
+```
+
+For an assembly named `genome.fasta`, that directory must contain both `genome.fasta_repeats_with_seq.csv` and `genome.fasta_arrays.csv`. A supplied but invalid `--trash2` directory causes an error instead of silently rerunning TRASH_2. Omit `--trash2` to run TRASH_2 normally.
+
+Nextflow work is placed in `${SLURM_TMPDIR:-${TMPDIR:-/tmp}}/cap-nextflow-${SLURM_JOB_ID}` to avoid shared-filesystem temporary-I/O problems. It is removed after success and retained with its path printed after failure. Final output must therefore use persistent/shared storage.
+
+The script refuses to run directly on a login node. Its explicit local-validation mode is:
+
+```bash
+CAP_SLURM_LOCAL_TEST=1 bash scripts/run-cap-slurm.sh \
+  --assembly test/ath_Chr1_extraction_trc.fasta \
+  --outdir results_slurm_local
+```
+
+Run the scheduler-free launcher tests with:
+
+```bash
+make test-slurm-wrapper
+```
+
+These tests validate argument handling, CPU propagation, optional TRASH_2 behavior, and temporary-work cleanup without calling `sbatch`. Execution on a real SLURM cluster remains required to validate site behavior.
 
 ## Other packaging methods
 
