@@ -1,0 +1,14 @@
+.git
+.nextflow
+.nextflow.log*
+work
+work_*
+results
+results_*
+
+# The image must compile this from tracked source.
+bin/ctw-calc
+
+# Local/editor files.
+*.swp
+*~

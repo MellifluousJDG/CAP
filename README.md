@@ -247,6 +247,7 @@ CAP/
 ├── scripts/test-slurm-wrapper.sh  # Scheduler-free launcher tests
 ├── test/expected-results.sha256   # Expected test-result checksums
 ├── docs/PIPELINE_FLOW.md          # Process graph and output reference
+├── docs/OCI_IMAGE.md              # OCI build, run, and release guidance
 ├── bin/                           # Pipeline scripts and CTW source
 ├── modules/TRASH_2/               # Pinned Git submodule
 ├── model/                         # Pre-trained models
@@ -315,9 +316,17 @@ make test-slurm-wrapper
 
 These tests validate argument handling, CPU propagation, optional TRASH_2 behavior, and temporary-work cleanup without calling `sbatch`.
 
+## OCI containers
+
+The OCI image build packages CAP and the complete exact lock-backed Conda
+environment into a Debian slim image. See `docs/OCI_IMAGE.md` for its
+reproducibility model, Docker and Podman build/run commands, and release
+validation requirements.
+
 ## Other packaging methods
 
-OCI containers and AppImage packaging are planned after the Conda workflow. Existing Docker-related files have not yet been adopted as the reproducibility reference. Conda is currently the validated installation path.
+AppImage packaging is planned after OCI validation. Conda remains the validated
+host installation path while the OCI image is being tested.
 
 ## License
 
