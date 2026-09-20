@@ -289,7 +289,7 @@ Run the scheduler-free launcher tests with:
 make test-slurm-wrapper
 ```
 
-These tests validate argument handling, CPU propagation, optional TRASH_2 behavior, and temporary-work cleanup without calling `sbatch`. Execution on a real SLURM cluster remains required to validate site behavior.
+These tests validate argument handling, CPU propagation, optional TRASH_2 behavior, and temporary-work cleanup without calling `sbatch`.
 
 ## Other packaging methods
 
