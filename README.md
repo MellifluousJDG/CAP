@@ -202,21 +202,29 @@ Additional intermediate CSV files contain detected, filtered, and reclassified r
 
 ## Pipeline overview
 
+CAP performs six main stages:
+
+1. **Repeat identification:** run TRASH_2 to identify tandem repeats, or reuse validated precomputed TRASH_2 results.
+2. **Filtering and merging:** filter detected repeats and merge related repeat classes.
+3. **Feature extraction:** calculate sequence features and process optional TE and gene annotations.
+4. **Scoring:** combine repeat, sequence, and annotation information to score candidate centromeric regions.
+5. **Prediction:** apply the bundled machine-learning model to the calculated scores.
+6. **Visualization and reporting:** produce plots, summaries, tables, and reusable R data.
+
+In summary:
+
 ```text
-assembly
-├── TRASH_2 or validated --trash2 files
-│   └── filter repeats and merge classes
-├── metadata
-├── optional TE and gene annotation branches
-├── GC
-└── CTW
-    └── centromeric scoring
-        └── model prediction
-            └── final plots, tables, model summary, and R data
+Genome assembly
+├── Identify, filter, and classify tandem repeats
+├── Calculate sequence features
+└── Process optional TE and gene annotations
+    └── Score candidate centromeric regions
+        └── Predict centromeres
+            └── Create plots and reports
 ```
 
-Nextflow may run independent branches concurrently and waits automatically where one process consumes another process's output.
-See `docs/PIPELINE_FLOW.md` for the complete process graph, optional branches, filename rules, output inventory, precomputed TRASH_2 behavior, and troubleshooting guidance.
+Nextflow may run independent stages at the same time and waits automatically when one stage needs another stage's output.
+See `docs/PIPELINE_FLOW.md` for the complete technical process graph, filename rules, output inventory, precomputed TRASH_2 behavior, and troubleshooting guidance.
 
 ## Repository structure
 
