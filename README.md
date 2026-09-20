@@ -202,12 +202,35 @@ Additional intermediate CSV files contain detected, filtered, and reclassified r
 
 ## Pipeline overview
 
-1. **Repeat identification:** run TRASH_2 to identify tandem repeats.
-2. **Filtering and merging:** filter repeats and merge related classes.
-3. **Feature extraction:** process optional TE and gene annotations.
-4. **Scoring:** calculate centromeric features from repeats and genomic context.
-5. **Prediction:** apply the bundled machine-learning model.
-6. **Visualization:** produce plots, summaries, and tabular results.
+CAP performs six main stages:
+
+1. **Repeat identification:** run TRASH_2 to identify tandem repeats, or reuse validated precomputed TRASH_2 results.
+2. **Filtering and merging:** filter detected repeats and merge related repeat classes.
+3. **Feature extraction:** calculate sequence features and process optional TE and gene annotations.
+4. **Scoring:** combine repeat, sequence, and annotation information to score candidate centromeric regions.
+5. **Prediction:** apply the bundled machine-learning model to the calculated scores.
+6. **Visualization and reporting:** produce plots, summaries, tables, and reusable R data.
+
+In the diagram below, `A ──> B` means that B waits for and uses output from A.
+Branches on separate lines may run at the same time, while joined arrows mean that the next stage waits for all required inputs.
+
+```text
+Genome assembly
+    |
+    +──> Identify, filter, and classify repeats ──+
+    |                                             |
+    +──> Prepare metadata ────────────────────────+──> Score candidates
+    |                                             |         |
+    +──> Process optional annotations ────────────+         v
+    |                                                   Predict
+    +──> Calculate GC and CTW ──────────────────────────+  |
+                                                        |  |
+                                                        v  v
+                                                  Plots and reports
+```
+
+Nextflow may run independent stages at the same time and waits automatically when one stage needs another stage's output.
+See `docs/PIPELINE_FLOW.md` for the complete technical process graph, filename rules, output inventory, precomputed TRASH_2 behavior, and troubleshooting guidance.
 
 ## Repository structure
 
@@ -223,6 +246,7 @@ CAP/
 ├── scripts/test-conda.sh          # One-core deterministic smoke test
 ├── scripts/test-slurm-wrapper.sh  # Scheduler-free launcher tests
 ├── test/expected-results.sha256   # Expected test-result checksums
+├── docs/PIPELINE_FLOW.md          # Process graph and output reference
 ├── bin/                           # Pipeline scripts and CTW source
 ├── modules/TRASH_2/               # Pinned Git submodule
 ├── model/                         # Pre-trained models
