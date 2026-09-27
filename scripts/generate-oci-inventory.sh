@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+IMAGE="${1:-cap:local}"
+OUTDIR="${2:-oci-inventory}"
+RUNTIME="${CONTAINER_RUNTIME:-podman}"
+
+command -v "$RUNTIME" >/dev/null || {
+    echo "Container runtime not found: $RUNTIME" >&2
+    exit 1
+}
+mkdir -p "$OUTDIR"
+
+"$RUNTIME" image inspect "$IMAGE" > "$OUTDIR/image-inspect.json"
+
+"$RUNTIME" run --rm --entrypoint /bin/bash "$IMAGE" -c '
+set -euo pipefail
+printf "name,version,build,channel,license\n"
+python3 - <<"PY"
+import csv
+import glob
+import json
+import sys
+
+writer = csv.writer(sys.stdout, lineterminator="\n")
+for path in sorted(glob.glob("/opt/cap-env/conda-meta/*.json")):
+    with open(path, encoding="utf-8") as handle:
+        item = json.load(handle)
+    writer.writerow([
+        item.get("name", ""),
+        item.get("version", ""),
+        item.get("build", ""),
+        item.get("channel", ""),
+        item.get("license", "UNKNOWN") or "UNKNOWN",
+    ])
+PY
+' > "$OUTDIR/conda-packages.csv"
+
+"$RUNTIME" run --rm --entrypoint /bin/bash "$IMAGE" -c '
+set -euo pipefail
+printf "package,version\n"
+dpkg-query -W -f="\${Package},\${Version}\\n" | LC_ALL=C sort
+' > "$OUTDIR/debian-packages.csv"
+
+"$RUNTIME" run --rm --entrypoint /bin/bash "$IMAGE" -c '
+set -euo pipefail
+printf "component,revision_or_hash,license_file\n"
+printf "CAP,%s,%s\n" \
+    "$(sha256sum /opt/CAP/main.nf | cut -d" " -f1)" \
+    "/opt/CAP/LICENSE"
+printf "TRASH_2,%s,%s\n" \
+    "$(sha256sum /opt/CAP/modules/TRASH_2/src/TRASH.R | cut -d" " -f1)" \
+    "/opt/CAP/modules/TRASH_2/license.txt"
+printf "model,%s,%s\n" \
+    "$(sha256sum /opt/CAP/model/centromeric_model_v2.pkl | cut -d" " -f1)" \
+    "UNCONFIRMED"
+' > "$OUTDIR/embedded-components.csv"
+
+(
+    cd "$OUTDIR"
+    sha256sum image-inspect.json conda-packages.csv debian-packages.csv \
+        embedded-components.csv > SHA256SUMS
+)
+
+echo "OCI inventory written to $OUTDIR"

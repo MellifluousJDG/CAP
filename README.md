@@ -247,7 +247,9 @@ CAP/
 ├── scripts/test-slurm-wrapper.sh  # Scheduler-free launcher tests
 ├── test/expected-results.sha256   # Expected test-result checksums
 ├── docs/PIPELINE_FLOW.md          # Process graph and output reference
-├── docs/OCI_IMAGE.md              # OCI build, run, and release guidance
+├── docs/OCI_IMAGE.md              # OCI build, run, and validation guidance
+├── docs/OCI_HPC.md                # Container execution on HPC systems
+├── docs/OCI_RELEASE.md            # GHCR and image release procedure
 ├── bin/                           # Pipeline scripts and CTW source
 ├── modules/TRASH_2/               # Pinned Git submodule
 ├── model/                         # Pre-trained models
@@ -320,8 +322,9 @@ These tests validate argument handling, CPU propagation, optional TRASH_2 behavi
 
 The OCI image build packages CAP and the complete exact lock-backed Conda
 environment into a Debian slim image. See `docs/OCI_IMAGE.md` for its
-reproducibility model, Docker and Podman build/run commands, and release
-validation requirements.
+reproducibility model and local Docker/Podman use, `docs/OCI_HPC.md` for
+single-allocation cluster templates, and `docs/OCI_RELEASE.md` for GHCR,
+inventory, archive, and release guidance.
 
 ## Other packaging methods
 

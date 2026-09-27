@@ -54,7 +54,7 @@ Nextflow work writable:
 
 ```bash
 mkdir -p results work
-podman run --rm \
+podman run --rm --userns=keep-id \
   -v "$PWD/data:/data:ro" \
   -v "$PWD/results:/results" \
   -v "$PWD/work:/work" \
@@ -64,10 +64,13 @@ podman run --rm \
   -work-dir /work/nextflow
 ```
 
-Replace `podman` with `docker` for Docker. The image runs as non-root user
-`cap` (UID/GID 1000), so mounted output directories must be writable by that
-user. Rootless Podman commonly maps this user automatically; site policies may
-require adjusting ownership or using an explicit runtime user.
+Replace `podman` with `docker` for Docker, omitting Podman's
+`--userns=keep-id`. The image runs as non-root user `cap` (UID/GID 1000).
+`--userns=keep-id` was validated with rootless Podman and keeps bind-mounted
+results and work files owned by the invoking host user. Without it, those files
+may appear under a subordinate UID and require `podman unshare` to manage.
+Docker users should normally add `--user "$(id -u):$(id -g)"` and provide a
+writable `HOME`/`NXF_HOME`; see `docs/OCI_HPC.md` for the command shape.
 
 Optional CAP parameters, including `--te_gff`, `--gene_gff`, `--metadata`,
 `--trash2`, and `--cores`, follow the normal workflow interface. Do not select
@@ -77,8 +80,26 @@ CAP image.
 For diagnostics, open a shell in the image with:
 
 ```bash
-podman run --rm -it cap:local --shell
+podman run --rm --userns=keep-id -it cap:local --shell
 ```
+
+For cluster execution, see `docs/OCI_HPC.md`. For image tags, GHCR publication,
+archives, inventories, and the release checklist, see `docs/OCI_RELEASE.md`.
+
+## Inventory
+
+Generate an image inventory with either Podman or Docker:
+
+```bash
+scripts/generate-oci-inventory.sh cap:local oci-inventory
+CONTAINER_RUNTIME=docker scripts/generate-oci-inventory.sh \
+  cap:local oci-inventory-docker
+```
+
+The script records image configuration, Conda packages and declared licenses,
+Debian packages, embedded component hashes, and checksums for the inventory.
+These files support review but are not a substitute for a standard SPDX or
+CycloneDX SBOM from a tool such as Syft.
 
 ## Validation and publication
 

@@ -41,7 +41,9 @@ for ignored in '.git' '.nextflow' 'work' 'work_*' 'results' 'results_*' \
 done
 
 grep -F 'exec nextflow run "$CAP_DIR" "$@"' "$ENTRYPOINT" >/dev/null
-bash -n "$ENTRYPOINT" "$PROJECT_DIR/scripts/test-container-image.sh"
+bash -n "$ENTRYPOINT" \
+    "$PROJECT_DIR/scripts/test-container-image.sh" \
+    "$PROJECT_DIR/scripts/generate-oci-inventory.sh"
 
 test -f "$PROJECT_DIR/modules/TRASH_2/src/TRASH.R" || {
     echo "TRASH_2 submodule is not initialized." >&2
