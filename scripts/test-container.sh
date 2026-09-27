@@ -48,6 +48,15 @@ bash -n "$ENTRYPOINT" \
     "$PROJECT_DIR/scripts/test-container-image.sh" \
     "$PROJECT_DIR/scripts/generate-oci-inventory.sh" \
     "$PROJECT_DIR/scripts/generate-oci-compliance-bundle.sh"
+python3 - <<PY
+from pathlib import Path
+compile(
+    Path("$PROJECT_DIR/scripts/classify-source-obligations.py").read_text(),
+    "classify-source-obligations.py",
+    "exec",
+)
+PY
+bash "$PROJECT_DIR/scripts/test-source-obligations.sh"
 
 runtime_lock="$PROJECT_DIR/conda-runtime-linux-64.lock"
 full_lock="$PROJECT_DIR/conda-linux-64.lock"
@@ -73,6 +82,7 @@ test -f "$PROJECT_DIR/modules/TRASH_2/src/TRASH.R" || {
 for license_file in \
     "$PROJECT_DIR/THIRD_PARTY_NOTICES.md" \
     "$PROJECT_DIR/TODO.md" \
+    "$PROJECT_DIR/docs/DEPENDENCY_SOURCE_REVIEW.md" \
     "$PROJECT_DIR/bin/src/BCT/NOTICE" \
     "$PROJECT_DIR/licenses/GPL-2.0.txt" \
     "$PROJECT_DIR/licenses/GPL-3.0.txt"; do

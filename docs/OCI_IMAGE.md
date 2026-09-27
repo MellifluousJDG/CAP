@@ -128,8 +128,9 @@ scripts/generate-oci-compliance-bundle.sh \
 ```
 
 The bundle adds repository and submodule revisions, exact Conda artifact URLs,
-tracked license material, BCT corresponding source, and whole-bundle checksums.
-Pass the documented revision build arguments so these values are also embedded
+tracked license material, BCT corresponding source, a GPL/LGPL-family
+source-obligation review manifest, and whole-bundle checksums. Pass the
+documented revision build arguments so these values are also embedded
 in the image labels; the generator uses local Git as a fallback when available.
 If Syft is installed it also generates an SPDX JSON SBOM. To include a
 Zstandard-compressed OCI archive, use:

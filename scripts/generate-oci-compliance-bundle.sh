@@ -60,6 +60,7 @@ fi
 cp "$PROJECT_DIR/LICENSE" "$OUTDIR/licenses/CAP-MIT.txt"
 cp "$PROJECT_DIR/THIRD_PARTY_NOTICES.md" "$OUTDIR/licenses/"
 cp "$PROJECT_DIR/TODO.md" "$OUTDIR/licenses/"
+cp "$PROJECT_DIR/docs/DEPENDENCY_SOURCE_REVIEW.md" "$OUTDIR/"
 cp "$PROJECT_DIR/licenses/GPL-2.0.txt" "$OUTDIR/licenses/"
 cp "$PROJECT_DIR/licenses/GPL-3.0.txt" "$OUTDIR/licenses/"
 cp "$PROJECT_DIR/modules/TRASH_2/license.txt" \
@@ -99,6 +100,9 @@ test -s "$OUTDIR/inventory/conda-source-urls.csv" || {
 }
 grep -q '^name,version,build,license,binary_url,sha256' \
     "$OUTDIR/inventory/conda-source-urls.csv"
+"$PROJECT_DIR/scripts/classify-source-obligations.py" \
+    "$OUTDIR/inventory/conda-source-urls.csv" \
+    "$OUTDIR/source-obligations.csv"
 
 if command -v syft >/dev/null; then
     syft "$IMAGE" -o spdx-json="$OUTDIR/sbom.spdx.json"
