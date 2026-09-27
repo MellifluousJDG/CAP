@@ -45,15 +45,22 @@ dpkg-query -W -f="\${Package},\${Version}\\n" | LC_ALL=C sort
 
 "$RUNTIME" run --rm --entrypoint /bin/bash "$IMAGE" -c '
 set -euo pipefail
-printf "component,revision_or_hash,license_file\n"
-printf "CAP,%s,%s\n" \
+printf "component,revision_or_hash,license_expression,license_or_notice_file\n"
+printf "CAP,%s,%s,%s\n" \
     "$(sha256sum /opt/CAP/main.nf | cut -d" " -f1)" \
+    "MIT" \
     "/opt/CAP/LICENSE"
-printf "TRASH_2,%s,%s\n" \
+printf "BCT_ctw-calc,%s,%s,%s\n" \
+    "$(sha256sum /opt/CAP/bin/ctw-calc | cut -d" " -f1)" \
+    "GPL-2.0-only OR GPL-3.0-only (provisional)" \
+    "/opt/CAP/bin/src/BCT/NOTICE"
+printf "TRASH_2,%s,%s,%s\n" \
     "$(sha256sum /opt/CAP/modules/TRASH_2/src/TRASH.R | cut -d" " -f1)" \
+    "See bundled license" \
     "/opt/CAP/modules/TRASH_2/license.txt"
-printf "model,%s,%s\n" \
+printf "model,%s,%s,%s\n" \
     "$(sha256sum /opt/CAP/model/centromeric_model_v2.pkl | cut -d" " -f1)" \
+    "Client-authorized distribution" \
     "UNCONFIRMED"
 ' > "$OUTDIR/embedded-components.csv"
 

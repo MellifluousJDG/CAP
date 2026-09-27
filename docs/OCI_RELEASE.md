@@ -90,7 +90,11 @@ enable automatic public pushes until all of these are true:
 
 Current findings are not legal advice:
 
-- CAP has an MIT license file.
+- CAP's original code has an MIT license file. The BCT-derived subtree and
+  compiled `ctw-calc` are provisionally treated as
+  `GPL-2.0-only OR GPL-3.0-only`; the corresponding source, provenance notice,
+  and GPL texts are tracked. Client/rightsholder confirmation remains required
+  before public distribution (see `TODO.md`).
 - TRASH_2 contains `license.txt`, but its coverage and any bundled third-party
   material still need review.
 - The trained model is tracked in CAP, but no model-specific license or

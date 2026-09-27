@@ -10,14 +10,25 @@ The build uses three pinned inputs:
 
 - the Debian Bookworm slim base image is selected by OCI digest;
 - the Miniconda installer has a fixed version and verified SHA-256 checksum;
-- `conda-linux-64.lock` lists the exact Conda package URLs.
+- `conda-runtime-linux-64.lock` is a tested subset of the exact development
+  lock containing only runtime packages.
+
+The bundled CTW/BCT source under `bin/src/BCT` identifies its upstream at
+https://github.com/IoannisPapageorgiou/Bayesian-Context-Trees. CAP
+provisionally treats that source and `ctw-calc` as
+`GPL-2.0-only OR GPL-3.0-only`; see `THIRD_PARTY_NOTICES.md`. Client
+confirmation from the upstream rightsholder remains a pre-publication TODO.
 
 Conda is used only while building the image to materialize `/opt/cap-env`.
-The runtime stage copies that complete environment and puts its `bin` directory
-on `PATH`. Nextflow therefore runs inside the already-created environment; it
-does not activate, solve, or manage a Conda environment at runtime. CTW/BCT is
-compiled in a separate stage with the pinned Debian base's native compiler so
-its glibc requirement cannot exceed the runtime base.
+The runtime lock retains exact package URLs from `conda-linux-64.lock` while
+omitting compilers, headers, build tools, Git, and their implementation
+packages. OpenMPI remains because the locked HMMER build links to
+`libmpi.so.40`. The runtime lock is not independently re-solved, which prevents
+validated runtime versions from drifting. The runtime stage puts
+`/opt/cap-env/bin` on `PATH`; Nextflow does not activate, solve, or manage an
+environment at runtime. CTW/BCT is compiled in a separate stage with the pinned
+Debian base's native compiler so its glibc requirement cannot exceed the
+runtime base.
 
 The Dockerfile requires Linux x86-64 because the lock contains `linux-64`
 packages. Build from a recursive Git clone so `modules/TRASH_2` is populated.
@@ -44,8 +55,8 @@ podman build --platform linux/amd64 -t cap:local .
 ```
 
 The build needs network access to download the verified Miniconda installer and
-the exact package URLs in the lock. Normal container execution does not install
-or download CAP dependencies.
+the exact package URLs in the runtime lock. Normal container execution does not
+install or download CAP dependencies.
 
 ## Run
 

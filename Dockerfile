@@ -23,14 +23,14 @@ RUN test "${TARGETARCH}" = "amd64" \
     && bash /tmp/miniconda.sh -b -p /opt/conda \
     && rm /tmp/miniconda.sh
 
-COPY conda-linux-64.lock /tmp/conda-linux-64.lock
+COPY conda-runtime-linux-64.lock /tmp/conda-runtime-linux-64.lock
 RUN conda create --yes --prefix /opt/cap-env \
         --override-channels \
         --channel conda-forge \
         --channel bioconda \
-        --file /tmp/conda-linux-64.lock \
+        --file /tmp/conda-runtime-linux-64.lock \
     && conda clean --all --yes \
-    && rm /tmp/conda-linux-64.lock
+    && rm /tmp/conda-runtime-linux-64.lock
 
 FROM ${DEBIAN_IMAGE} AS ctw-builder
 ENV DEBIAN_FRONTEND=noninteractive
@@ -46,7 +46,7 @@ FROM ${DEBIAN_IMAGE} AS runtime
 
 LABEL org.opencontainers.image.title="CAP" \
       org.opencontainers.image.description="Centromere Analysis Pipeline with its locked Conda environment" \
-      org.opencontainers.image.licenses="MIT" \
+      org.opencontainers.image.licenses="MIT AND (GPL-2.0-only OR GPL-3.0-only)" \
       org.opencontainers.image.source="https://github.com/MellifluousJDG/CAP"
 
 ENV LANG=C.UTF-8 \

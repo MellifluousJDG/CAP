@@ -18,6 +18,12 @@ if command -v conda >/dev/null; then
     echo "Conda package manager must not be present in the runtime image." >&2
     exit 1
 fi
+for build_command in gcc g++ gfortran make cmake git; do
+    if command -v "$build_command" >/dev/null; then
+        echo "Build command must not be present in runtime image: $build_command" >&2
+        exit 1
+    fi
+done
 
 test -x "$CAP_DIR/bin/ctw-calc"
 test -f "$CAP_DIR/modules/TRASH_2/src/TRASH.R"

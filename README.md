@@ -238,8 +238,10 @@ See `docs/PIPELINE_FLOW.md` for the complete technical process graph, filename r
 CAP/
 ├── main.nf                        # Nextflow workflow
 ├── nextflow.config                # Parameters and profiles
-├── environment.yml                # Human-maintained dependencies
-├── conda-linux-64.lock            # Exact tested Linux x86-64 packages
+├── environment.yml                # Human-maintained development dependencies
+├── conda-linux-64.lock            # Exact tested development packages
+├── environment-runtime.yml        # OCI runtime dependency specification
+├── conda-runtime-linux-64.lock    # Exact tested OCI runtime subset
 ├── setup_conda.sh                 # Conda setup and CTW compilation
 ├── Makefile                       # Convenience commands
 ├── scripts/run-cap-slurm.sh       # Single-allocation SLURM launcher
@@ -333,7 +335,11 @@ host installation path while the OCI image is being tested.
 
 ## License
 
-[MIT License](LICENSE)
+CAP's original code is distributed under the [MIT License](LICENSE). The
+BCT-derived source in `bin/src/BCT` and its compiled `bin/ctw-calc` executable
+are provisionally treated as `GPL-2.0-only OR GPL-3.0-only`. See
+`THIRD_PARTY_NOTICES.md` for component boundaries, provenance, license texts,
+and the pending rightsholder-confirmation TODO.
 
 ## Contact
 

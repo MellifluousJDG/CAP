@@ -10,7 +10,8 @@ ENTRYPOINT="$PROJECT_DIR/scripts/cap-container-entrypoint.sh"
 required_dockerfile_text=(
     'ARG DEBIAN_IMAGE=docker.io/library/debian@sha256:'
     'ARG MINICONDA_SHA256='
-    'COPY conda-linux-64.lock /tmp/conda-linux-64.lock'
+    'org.opencontainers.image.licenses="MIT AND (GPL-2.0-only OR GPL-3.0-only)"'
+    'COPY conda-runtime-linux-64.lock /tmp/conda-runtime-linux-64.lock'
     'conda create --yes --prefix /opt/cap-env'
     '--override-channels'
     'make -C bin/src/BCT'
@@ -45,9 +46,37 @@ bash -n "$ENTRYPOINT" \
     "$PROJECT_DIR/scripts/test-container-image.sh" \
     "$PROJECT_DIR/scripts/generate-oci-inventory.sh"
 
+runtime_lock="$PROJECT_DIR/conda-runtime-linux-64.lock"
+full_lock="$PROJECT_DIR/conda-linux-64.lock"
+test -s "$runtime_lock"
+while IFS= read -r package_url; do
+    grep -Fqx "$package_url" "$full_lock" || {
+        echo "Runtime lock URL is absent from the validated full lock: $package_url" >&2
+        exit 1
+    }
+done < <(grep '^https://' "$runtime_lock")
+for build_package in gcc_impl_linux-64 gxx_impl_linux-64 \
+    gfortran_impl_linux-64 binutils_impl_linux-64 cmake make git; do
+    if grep -Eq "/${build_package}-[0-9]" "$runtime_lock"; then
+        echo "Build package present in runtime lock: $build_package" >&2
+        exit 1
+    fi
+done
+
 test -f "$PROJECT_DIR/modules/TRASH_2/src/TRASH.R" || {
     echo "TRASH_2 submodule is not initialized." >&2
     exit 1
 }
+for license_file in \
+    "$PROJECT_DIR/THIRD_PARTY_NOTICES.md" \
+    "$PROJECT_DIR/TODO.md" \
+    "$PROJECT_DIR/bin/src/BCT/NOTICE" \
+    "$PROJECT_DIR/licenses/GPL-2.0.txt" \
+    "$PROJECT_DIR/licenses/GPL-3.0.txt"; do
+    test -s "$license_file" || {
+        echo "Required licensing file missing or empty: $license_file" >&2
+        exit 1
+    }
+done
 
 echo "OCI container static checks passed."
