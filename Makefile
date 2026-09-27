@@ -1,7 +1,7 @@
 ENV_NAME ?= cap-pipeline
 ASSEMBLY ?=
 
-.PHONY: install compile run test-conda test-container test-slurm-wrapper remove-env clean-build clean
+.PHONY: install compile run test-conda test-container test-slurm-wrapper oci-inventory oci-compliance remove-env clean-build clean
 
 install:
 	@echo "Setting up Conda environment '$(ENV_NAME)'..."
@@ -25,6 +25,14 @@ test-container:
 
 test-slurm-wrapper:
 	bash scripts/test-slurm-wrapper.sh
+
+oci-inventory:
+	@test -n "$(IMAGE)" || { echo "Usage: make oci-inventory IMAGE=cap:local [OUTDIR=oci-inventory]" >&2; exit 1; }
+	scripts/generate-oci-inventory.sh "$(IMAGE)" "$(or $(OUTDIR),oci-inventory)"
+
+oci-compliance:
+	@test -n "$(IMAGE)" || { echo "Usage: make oci-compliance IMAGE=cap:local [OUTDIR=../cap-compliance-bundle]" >&2; exit 1; }
+	scripts/generate-oci-compliance-bundle.sh "$(IMAGE)" "$(or $(OUTDIR),../cap-compliance-bundle)"
 
 remove-env:
 	@echo "Removing Conda environment '$(ENV_NAME)'..."

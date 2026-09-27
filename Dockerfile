@@ -44,10 +44,14 @@ RUN make -C bin/src/BCT \
 
 FROM ${DEBIAN_IMAGE} AS runtime
 
+ARG CAP_REVISION=UNSPECIFIED
+ARG TRASH_2_REVISION=UNSPECIFIED
 LABEL org.opencontainers.image.title="CAP" \
       org.opencontainers.image.description="Centromere Analysis Pipeline with its locked Conda environment" \
       org.opencontainers.image.licenses="MIT AND (GPL-2.0-only OR GPL-3.0-only)" \
-      org.opencontainers.image.source="https://github.com/MellifluousJDG/CAP"
+      org.opencontainers.image.source="https://github.com/MellifluousJDG/CAP" \
+      org.opencontainers.image.revision="${CAP_REVISION}" \
+      org.cap-project.trash-2.revision="${TRASH_2_REVISION}"
 
 ENV LANG=C.UTF-8 \
     LC_ALL=C.UTF-8 \

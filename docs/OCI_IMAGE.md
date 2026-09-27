@@ -45,18 +45,26 @@ make test-container
 Build with Docker:
 
 ```bash
-docker build --platform linux/amd64 -t cap:local .
+docker build --platform linux/amd64 \
+  --build-arg CAP_REVISION="$(git rev-parse HEAD)" \
+  --build-arg TRASH_2_REVISION="$(git rev-parse HEAD:modules/TRASH_2)" \
+  -t cap:local .
 ```
 
 Or with Podman:
 
 ```bash
-podman build --platform linux/amd64 -t cap:local .
+podman build --platform linux/amd64 \
+  --build-arg CAP_REVISION="$(git rev-parse HEAD)" \
+  --build-arg TRASH_2_REVISION="$(git rev-parse HEAD:modules/TRASH_2)" \
+  -t cap:local .
 ```
 
 The build needs network access to download the verified Miniconda installer and
-the exact package URLs in the runtime lock. Normal container execution does not
-install or download CAP dependencies.
+the exact package URLs in the runtime lock. Build release images only from a
+clean recursive checkout; otherwise the revision labels do not identify the
+copied source tree. Normal container execution does not install or download CAP
+dependencies.
 
 ## Run
 
@@ -111,6 +119,29 @@ The script records image configuration, Conda packages and declared licenses,
 Debian packages, embedded component hashes, and checksums for the inventory.
 These files support review but are not a substitute for a standard SPDX or
 CycloneDX SBOM from a tool such as Syft.
+
+Generate the external compliance bundle in a path outside the repository:
+
+```bash
+scripts/generate-oci-compliance-bundle.sh \
+  cap:local ../cap-compliance-bundle
+```
+
+The bundle adds repository and submodule revisions, exact Conda artifact URLs,
+tracked license material, BCT corresponding source, and whole-bundle checksums.
+Pass the documented revision build arguments so these values are also embedded
+in the image labels; the generator uses local Git as a fallback when available.
+If Syft is installed it also generates an SPDX JSON SBOM. To include a
+Zstandard-compressed OCI archive, use:
+
+```bash
+INCLUDE_OCI_ARCHIVE=1 scripts/generate-oci-compliance-bundle.sh \
+  cap:local ../cap-compliance-bundle-with-image
+```
+
+The bundle generator deliberately does not guess third-party source URLs or
+claim that binary package URLs satisfy corresponding-source obligations.
+Review and add exact source archives and mappings before public distribution.
 
 ## Validation and publication
 

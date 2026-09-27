@@ -10,6 +10,8 @@ ENTRYPOINT="$PROJECT_DIR/scripts/cap-container-entrypoint.sh"
 required_dockerfile_text=(
     'ARG DEBIAN_IMAGE=docker.io/library/debian@sha256:'
     'ARG MINICONDA_SHA256='
+    'ARG CAP_REVISION=UNSPECIFIED'
+    'ARG TRASH_2_REVISION=UNSPECIFIED'
     'org.opencontainers.image.licenses="MIT AND (GPL-2.0-only OR GPL-3.0-only)"'
     'COPY conda-runtime-linux-64.lock /tmp/conda-runtime-linux-64.lock'
     'conda create --yes --prefix /opt/cap-env'
@@ -44,7 +46,8 @@ done
 grep -F 'exec nextflow run "$CAP_DIR" "$@"' "$ENTRYPOINT" >/dev/null
 bash -n "$ENTRYPOINT" \
     "$PROJECT_DIR/scripts/test-container-image.sh" \
-    "$PROJECT_DIR/scripts/generate-oci-inventory.sh"
+    "$PROJECT_DIR/scripts/generate-oci-inventory.sh" \
+    "$PROJECT_DIR/scripts/generate-oci-compliance-bundle.sh"
 
 runtime_lock="$PROJECT_DIR/conda-runtime-linux-64.lock"
 full_lock="$PROJECT_DIR/conda-linux-64.lock"
