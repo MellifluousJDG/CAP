@@ -17,10 +17,22 @@ legal conclusion.
 
 3. Review each row and replace `REVIEW` in `collect_source` with `yes` or `no`.
    Record the basis in `review_note`.
-4. For every `yes`, preserve the exact upstream source archive and checksum,
+4. Collect rows marked `yes` with exact binary evidence and verified upstream
+   archives:
+
+   ```bash
+   scripts/collect-conda-sources.py \
+     BUNDLE/source-obligations.csv \
+     BUNDLE/source/conda
+   ```
+
+   During review, `--conservative` collects all candidates, including unresolved
+   `REVIEW` rows. This preserves source proactively but does not resolve their
+   legal classification.
+5. For every `yes`, preserve the exact upstream source archive and checksum,
    plus the exact package recipe, patches, and build scripts used for the
    distributed binary.
-5. Preserve required copyright and license notices for every package regardless
+6. Preserve required copyright and license notices for every package regardless
    of whether corresponding source is required.
 
 ## Review classes
@@ -35,6 +47,10 @@ legal conclusion.
   Library Exception or Classpath Exception. Preserve notices and verify that the
   distributed use satisfies the exception.
 
+A missing feedstock commit in older package metadata does not prevent
+collection: the extracted package evidence remains the authoritative exact
+recipe snapshot.
+
 ## Exact package evidence
 
 Conda packages commonly embed their rendered recipe, patches, build scripts,
@@ -44,5 +60,10 @@ branch as proof of how an older artifact was built.
 
 A Conda binary URL is not corresponding source. The final external compliance
 bundle must map each distributed copyleft binary to exact upstream source and
-its recipe/patch material. Debian packages require the analogous mapping to the
-matching Debian source package and version.
+its recipe/patch material. `collect-conda-sources.py --conservative` was
+validated against all 53 current runtime candidates: it produced 64 mappings to
+48 unique checksum-verified source archives. Fifty artifacts record an exact
+feedstock commit; the older `bioconductor-msa`, `glpk`, and `gsl` artifacts omit
+that commit metadata but still embed their exact rendered recipes, build
+scripts, patches, source URLs, and checksums. Debian packages require the
+analogous mapping to the matching Debian source package and version.

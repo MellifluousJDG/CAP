@@ -57,8 +57,14 @@ compile(
     "classify-source-obligations.py",
     "exec",
 )
+compile(
+    Path("$PROJECT_DIR/scripts/collect-conda-sources.py").read_text(),
+    "collect-conda-sources.py",
+    "exec",
+)
 PY
 bash "$PROJECT_DIR/scripts/test-source-obligations.sh"
+bash "$PROJECT_DIR/scripts/test-collect-conda-sources.sh"
 
 runtime_lock="$PROJECT_DIR/conda-runtime-linux-64.lock"
 full_lock="$PROJECT_DIR/conda-linux-64.lock"
