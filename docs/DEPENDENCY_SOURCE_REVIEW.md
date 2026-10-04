@@ -15,14 +15,23 @@ legal conclusion.
      BUNDLE/source-obligations.csv
    ```
 
-3. Review each row and replace `REVIEW` in `collect_source` with `yes` or `no`.
-   Record the basis in `review_note`.
-4. Collect rows marked `yes` with exact binary evidence and verified upstream
-   archives:
+3. Apply CAP's reviewed conservative policy. It fails if the candidate set has
+   changed, forcing explicit review of new or removed dependencies:
+
+   ```bash
+   scripts/apply-source-review-policy.py \
+     BUNDLE/source-obligations.csv \
+     BUNDLE/source-obligations-reviewed.csv
+   ```
+
+   The current policy marks all 53 candidates `yes`. This preserves evidence for
+   GPL/LGPL packages, permissive alternatives, and exception-bearing runtimes;
+   it does not claim that every package legally requires source distribution.
+4. Collect exact binary evidence and verified upstream archives:
 
    ```bash
    scripts/collect-conda-sources.py \
-     BUNDLE/source-obligations.csv \
+     BUNDLE/source-obligations-reviewed.csv \
      BUNDLE/source/conda
    ```
 

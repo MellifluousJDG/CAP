@@ -10,10 +10,11 @@
   pinned submodule code. The upstream revision also tracks Windows-only MAFFT
   and HMMER bundles plus historical `temp/` outputs; `.dockerignore` excludes
   those from Linux images, which use the exact locked Conda MAFFT/HMMER builds.
-- [ ] **Dependency corresponding source:** Review the exact Conda and Debian
-  package inventories, collect exact corresponding source where required, and
-  preserve source-to-binary mappings and license/notice files in the external
-  compliance bundle.
+- [ ] **Dependency corresponding source:** All 53 Conda GPL/LGPL-family
+  candidates are reviewed for conservative source collection, and all 64
+  source mappings have passed checksum validation. Preserve the generated
+  source corpus in the final bundle, collect license/notice files for all
+  runtime packages, and complete Debian source mappings and notices.
 - [ ] **SBOM:** Generate and review a standard SPDX or CycloneDX SBOM for the
   final digest-pinned image. The repository's CSV inventories are supplemental.
 - [ ] **Release identity and archive:** Record the CAP tag, recursive submodule

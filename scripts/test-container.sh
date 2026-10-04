@@ -62,8 +62,14 @@ compile(
     "collect-conda-sources.py",
     "exec",
 )
+compile(
+    Path("$PROJECT_DIR/scripts/apply-source-review-policy.py").read_text(),
+    "apply-source-review-policy.py",
+    "exec",
+)
 PY
 bash "$PROJECT_DIR/scripts/test-source-obligations.sh"
+python3 "$PROJECT_DIR/scripts/test-source-review-policy.py"
 bash "$PROJECT_DIR/scripts/test-collect-conda-sources.sh"
 
 runtime_lock="$PROJECT_DIR/conda-runtime-linux-64.lock"

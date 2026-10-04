@@ -131,11 +131,12 @@ This bundle records the image identity, package inventories, declared licenses,
 repository revisions, and complete corresponding source for CAP's BCT-derived
 ctw-calc executable. A revision ending in -DIRTY is not release-ready. Package
 binary URLs identify exact Conda artifacts and are a starting point for
-corresponding-source collection; they are not themselves source archives. After
-reviewing source-obligations.csv, run scripts/collect-conda-sources.py against
-it. The --conservative option preserves all candidates while review is pending;
-it does not replace legal review. Obtain and preserve exact corresponding
-source for packages whose licenses require it before public distribution.
+corresponding-source collection; they are not themselves source archives. Apply
+scripts/apply-source-review-policy.py to source-obligations.csv, then run
+scripts/collect-conda-sources.py against the reviewed CSV. The --conservative
+option preserves all candidates while review is pending; it does not replace
+legal review. Obtain and preserve exact corresponding source for packages whose
+licenses require it before public distribution.
 
 An OCI archive is included only when INCLUDE_OCI_ARCHIVE=1. A standard SPDX or
 CycloneDX SBOM is included only when Syft is installed. Resolve every item in
