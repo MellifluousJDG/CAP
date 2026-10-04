@@ -49,10 +49,38 @@ legal conclusion.
      BUNDLE/notices/conda
    ```
 
-   The current 186-package runtime has embedded license files in 113 exact
-   artifacts. The other 73 are flagged `SOURCE_REVIEW_REQUIRED`; review their
-   exact source archives and package payloads rather than treating a declared
-   license expression as a complete notice.
+   The current 186-package runtime has embedded license or notice files in 154
+   exact artifacts when both Conda metadata and payload archives are inspected.
+   The other 32 require source-level review; do not treat a declared license
+   expression as a complete notice. Collect the reviewed supplemental source,
+   extract source notice evidence, and apply the exact review policy:
+
+   ```bash
+   scripts/collect-conda-notice-sources.py \
+     licenses/conda-notice-supplemental-sources.csv \
+     BUNDLE/source/conda-notice-supplemental
+   scripts/collect-conda-source-notices.py \
+     BUNDLE/notices/conda/conda-notice-manifest.csv \
+     BUNDLE/source/conda-all/source-to-binary.csv \
+     BUNDLE/source/conda-all BUNDLE/notices/conda-source \
+     --shared-license-dir BUNDLE/notices/R-shared-licenses
+   scripts/finalize-conda-source-notices.py \
+     BUNDLE/notices/conda-source/source-notice-manifest.csv \
+     licenses/conda-source-notice-review.csv \
+     BUNDLE/notices/R-shared-licenses \
+     BUNDLE/notices/conda-source/final-review.csv
+   ```
+
+   Merge the primary and supplemental source mappings/corpora into
+   `BUNDLE/source/conda-all` before extraction. Export the canonical license
+   directory from the exact R runtime. Validation resolved the 32 gaps as 11
+   source license sets, 20 R `DESCRIPTION` declarations backed by those exact
+   canonical texts, and one packaging exception whose exact recipe declares MIT
+   but whose two-file helper payload omits the license text. Preserve that exact
+   recipe and payload as evidence; do not claim a bundled notice for it.
+   Nine Bioconductor recipes provide only MD5 for their exact source inputs;
+   the supplemental collector verifies those recipe digests and records
+   SHA-256 for preservation.
 7. Export the installed Debian binary-to-source map and copyright files, then
    collect exact Debian source:
 

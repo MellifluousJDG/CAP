@@ -134,7 +134,13 @@ binary URLs identify exact Conda artifacts and are a starting point for
 corresponding-source collection; they are not themselves source archives. Apply
 scripts/apply-source-review-policy.py to source-obligations.csv, then run
 scripts/collect-conda-sources.py against the reviewed CSV. Collect embedded
-package notices with scripts/collect-conda-notices.py. Export and collect Debian
+package notices with scripts/collect-conda-notices.py. For packages flagged for
+source review, collect the reviewed supplemental inputs in
+licenses/conda-notice-supplemental-sources.csv with
+scripts/collect-conda-notice-sources.py, extract source evidence with
+scripts/collect-conda-source-notices.py, and apply the exact reviewed policy in
+licenses/conda-source-notice-review.csv with
+scripts/finalize-conda-source-notices.py. Export and collect Debian
 copyright/source evidence with scripts/export-debian-compliance-inputs.sh and
 scripts/collect-debian-sources.py. These network-dependent collections are
 external bundle steps, not part of basic bundle generation. The --conservative

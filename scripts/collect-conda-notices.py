@@ -9,12 +9,18 @@ import csv
 import hashlib
 import json
 from pathlib import Path
+import re
 import shutil
 import subprocess
 import tarfile
 import tempfile
 import urllib.request
 import zipfile
+
+LICENSE_NAME = re.compile(
+    r"^(copying|copyright|licen[cs]e|notice|authors?)([._-].*)?$",
+    re.IGNORECASE,
+)
 
 
 def sha256(path: Path) -> str:
@@ -34,11 +40,20 @@ def download(url: str, destination: Path) -> None:
 
 def wanted(member: tarfile.TarInfo) -> bool:
     path = Path(member.name)
-    if path.is_absolute() or ".." in path.parts:
+    if path.is_absolute() or ".." in path.parts or not member.isfile():
         return False
     return (
         member.name in {"info/about.json", "info/index.json"}
-        or member.name.startswith("info/licenses/")
+        or member.name.startswith("info/recipe/")
+        or LICENSE_NAME.match(path.name) is not None
+    )
+
+
+def extract_tar(archive: tarfile.TarFile, destination: Path) -> None:
+    archive.extractall(
+        destination,
+        members=[member for member in archive if wanted(member)],
+        filter="data",
     )
 
 
@@ -46,33 +61,27 @@ def extract_evidence(artifact: Path, destination: Path) -> None:
     destination.mkdir(parents=True)
     if artifact.name.endswith(".tar.bz2"):
         with tarfile.open(artifact, "r:bz2") as archive:
-            archive.extractall(
-                destination,
-                members=[member for member in archive if wanted(member)],
-                filter="data",
-            )
+            extract_tar(archive, destination)
         return
     if not artifact.name.endswith(".conda"):
         raise ValueError(f"Unsupported Conda artifact: {artifact.name}")
     with zipfile.ZipFile(artifact) as archive:
         names = [
             name for name in archive.namelist()
-            if name.startswith("info-") and name.endswith(".tar.zst")
+            if (name.startswith("info-") or name.startswith("pkg-"))
+            and name.endswith(".tar.zst")
         ]
-        if len(names) != 1:
-            raise ValueError(f"Expected one info archive in {artifact.name}")
-        with tempfile.NamedTemporaryFile(suffix=".tar") as uncompressed:
-            subprocess.run(
-                ["zstd", "-dc"], input=archive.read(names[0]),
-                stdout=uncompressed, check=True,
-            )
-            uncompressed.flush()
-            with tarfile.open(uncompressed.name, "r:") as info_archive:
-                info_archive.extractall(
-                    destination,
-                    members=[m for m in info_archive if wanted(m)],
-                    filter="data",
+        if len(names) != 2:
+            raise ValueError(f"Expected info and payload archives in {artifact.name}")
+        for name in names:
+            with tempfile.NamedTemporaryFile(suffix=".tar") as uncompressed:
+                subprocess.run(
+                    ["zstd", "-dc"], input=archive.read(name),
+                    stdout=uncompressed, check=True,
                 )
+                uncompressed.flush()
+                with tarfile.open(uncompressed.name, "r:") as component:
+                    extract_tar(component, destination)
 
 
 def main() -> None:
@@ -101,11 +110,11 @@ def main() -> None:
         key = f"{row['name']}-{row['version']}-{row['build']}"
         package_evidence = evidence / key
         extract_evidence(artifact, package_evidence)
-        license_dir = package_evidence / "info" / "licenses"
         files = sorted(
             path.relative_to(package_evidence).as_posix()
-            for path in license_dir.rglob("*") if path.is_file()
-        ) if license_dir.is_dir() else []
+            for path in package_evidence.rglob("*")
+            if path.is_file() and LICENSE_NAME.match(path.name)
+        )
         about_path = package_evidence / "info" / "about.json"
         about = json.loads(about_path.read_text()) if about_path.is_file() else {}
         declared_files = about.get("license_file", "")

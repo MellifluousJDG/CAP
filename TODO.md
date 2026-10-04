@@ -13,9 +13,11 @@
 - [ ] **Dependency corresponding source:** All 53 Conda GPL/LGPL-family
   candidates are reviewed for conservative collection, and all 64 mappings
   passed checksum validation. All 91 Debian binaries map to 65 exact source
-  packages with 209 verified source files. Preserve both generated corpora in
-  the final bundle and finish source-level notice review for the 73 of 186
-  Conda artifacts without embedded license files.
+  packages with 209 verified source files. Notice review now covers all 186
+  Conda artifacts: 154 contain embedded evidence; the remaining 32 resolve to
+  11 source license sets, 20 exact R canonical-license references, and one
+  reviewed recipe-license packaging exception. Preserve all generated corpora
+  in the final bundle.
 - [ ] **SBOM:** Generate and review a standard SPDX or CycloneDX SBOM for the
   final digest-pinned image. The repository's CSV inventories are supplemental.
 - [ ] **Release identity and archive:** Record the CAP tag, recursive submodule
