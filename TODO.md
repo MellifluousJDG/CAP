@@ -11,10 +11,11 @@
   and HMMER bundles plus historical `temp/` outputs; `.dockerignore` excludes
   those from Linux images, which use the exact locked Conda MAFFT/HMMER builds.
 - [ ] **Dependency corresponding source:** All 53 Conda GPL/LGPL-family
-  candidates are reviewed for conservative source collection, and all 64
-  source mappings have passed checksum validation. Preserve the generated
-  source corpus in the final bundle, collect license/notice files for all
-  runtime packages, and complete Debian source mappings and notices.
+  candidates are reviewed for conservative collection, and all 64 mappings
+  passed checksum validation. All 91 Debian binaries map to 65 exact source
+  packages with 209 verified source files. Preserve both generated corpora in
+  the final bundle and finish source-level notice review for the 73 of 186
+  Conda artifacts without embedded license files.
 - [ ] **SBOM:** Generate and review a standard SPDX or CycloneDX SBOM for the
   final digest-pinned image. The repository's CSV inventories are supplemental.
 - [ ] **Release identity and archive:** Record the CAP tag, recursive submodule

@@ -67,10 +67,22 @@ compile(
     "apply-source-review-policy.py",
     "exec",
 )
+compile(
+    Path("$PROJECT_DIR/scripts/collect-conda-notices.py").read_text(),
+    "collect-conda-notices.py",
+    "exec",
+)
+compile(
+    Path("$PROJECT_DIR/scripts/collect-debian-sources.py").read_text(),
+    "collect-debian-sources.py",
+    "exec",
+)
 PY
 bash "$PROJECT_DIR/scripts/test-source-obligations.sh"
 python3 "$PROJECT_DIR/scripts/test-source-review-policy.py"
 bash "$PROJECT_DIR/scripts/test-collect-conda-sources.sh"
+bash "$PROJECT_DIR/scripts/test-collect-conda-notices.sh"
+python3 "$PROJECT_DIR/scripts/test-collect-debian-sources.py"
 
 runtime_lock="$PROJECT_DIR/conda-runtime-linux-64.lock"
 full_lock="$PROJECT_DIR/conda-linux-64.lock"

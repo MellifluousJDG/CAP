@@ -41,7 +41,33 @@ legal conclusion.
 5. For every `yes`, preserve the exact upstream source archive and checksum,
    plus the exact package recipe, patches, and build scripts used for the
    distributed binary.
-6. Preserve required copyright and license notices for every package regardless
+6. Collect exact embedded Conda notice evidence for all runtime packages:
+
+   ```bash
+   scripts/collect-conda-notices.py \
+     BUNDLE/inventory/conda-source-urls.csv \
+     BUNDLE/notices/conda
+   ```
+
+   The current 186-package runtime has embedded license files in 113 exact
+   artifacts. The other 73 are flagged `SOURCE_REVIEW_REQUIRED`; review their
+   exact source archives and package payloads rather than treating a declared
+   license expression as a complete notice.
+7. Export the installed Debian binary-to-source map and copyright files, then
+   collect exact Debian source:
+
+   ```bash
+   scripts/export-debian-compliance-inputs.sh IMAGE BUNDLE/debian-inputs
+   scripts/collect-debian-sources.py \
+     BUNDLE/debian-inputs/binary-to-source.csv \
+     BUNDLE/debian-inputs/installed-copyright.tar.gz \
+     BUNDLE/source/debian
+   ```
+
+   Validation mapped 91 binary packages to 65 exact source packages and
+   checksum-verified 209 source files. Current Bookworm indices supplied 64
+   versions; Debian Snapshot supplied the unavailable patched `pcre2` version.
+8. Preserve required copyright and license notices for every package regardless
    of whether corresponding source is required.
 
 ## Review classes
