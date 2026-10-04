@@ -56,12 +56,12 @@ printf "BCT_ctw-calc,%s,%s,%s\n" \
     "/opt/CAP/bin/src/BCT/NOTICE"
 printf "TRASH_2,%s,%s,%s\n" \
     "$(sha256sum /opt/CAP/modules/TRASH_2/src/TRASH.R | cut -d" " -f1)" \
-    "See bundled license" \
+    "MIT" \
     "/opt/CAP/modules/TRASH_2/license.txt"
 printf "model,%s,%s,%s\n" \
     "$(sha256sum /opt/CAP/model/centromeric_model_v2.pkl | cut -d" " -f1)" \
-    "Client-authorized distribution" \
-    "UNCONFIRMED"
+    "Client-owned; distribution authorized" \
+    "/opt/CAP/THIRD_PARTY_NOTICES.md"
 ' > "$OUTDIR/embedded-components.csv"
 
 (

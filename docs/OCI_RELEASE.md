@@ -99,8 +99,9 @@ Current findings are not legal advice:
   `GPL-2.0-only OR GPL-3.0-only`; the corresponding source, provenance notice,
   and GPL texts are tracked. Client/rightsholder confirmation remains required
   before public distribution (see `TODO.md`).
-- TRASH_2 contains `license.txt`, but its coverage and any bundled third-party
-  material still need review.
+- TRASH_2's pinned revision contains an MIT-style `license.txt`. Its tracked
+  Windows-only MAFFT/HMMER bundles and historical `temp/` outputs are excluded
+  from the Linux image; Linux uses the exact locked Conda MAFFT/HMMER packages.
 - The trained model is owned by the client, who has authorized its
   distribution. Record that authorization in the external release record; no
   separate model license file is currently tracked.

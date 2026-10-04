@@ -74,6 +74,11 @@ COPY --chown=cap:cap scripts/cap-container-entrypoint.sh /usr/local/bin/cap
 
 RUN test -x /opt/CAP/bin/ctw-calc \
     && test -f /opt/CAP/modules/TRASH_2/src/TRASH.R \
+    && test -f /opt/CAP/modules/TRASH_2/dep/HOR.V3.3 \
+    && test ! -e /opt/CAP/modules/TRASH_2/dep/hmmer \
+    && test ! -e /opt/CAP/modules/TRASH_2/dep/mafft-7.520-win64-signed \
+    && test ! -e /opt/CAP/modules/TRASH_2/dep/new.hor \
+    && test ! -e /opt/CAP/modules/TRASH_2/temp \
     && chmod 0555 /usr/local/bin/cap
 
 USER cap

@@ -36,7 +36,9 @@ if grep -Eq 'micromamba|environment\.yml|git clone|curl[^#]*get\.nextflow|conda 
 fi
 
 for ignored in '.git' '.nextflow' 'work' 'work_*' 'results' 'results_*' \
-    'bin/ctw-calc'; do
+    'bin/ctw-calc' 'modules/TRASH_2/dep/hmmer' \
+    'modules/TRASH_2/dep/mafft-7.520-win64-signed' \
+    'modules/TRASH_2/dep/new.hor' 'modules/TRASH_2/temp'; do
     grep -Fx -- "$ignored" "$IGNORE_FILE" >/dev/null || {
         echo ".dockerignore requirement missing: $ignored" >&2
         exit 1

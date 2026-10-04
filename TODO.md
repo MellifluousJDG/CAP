@@ -6,10 +6,10 @@
   `GPL-2.0-only OR GPL-3.0-only`. If the intended license is instead
   `GPL-2.0-or-later` (as suggested by current CRAN BCT metadata), update the
   subtree notice, SPDX expression, bundled license texts, and compliance bundle.
-- [ ] **TRASH_2 review:** Confirm the scope of its MIT-style `license.txt` and
-  inventory any third-party material that will actually be included in a Linux
-  release image. Its ignored Windows dependency bundle is not part of the
-  pinned TRASH_2 Git revision and must not be treated as reproducible source.
+- [x] **TRASH_2 Linux image review:** Its MIT-style `license.txt` covers the
+  pinned submodule code. The upstream revision also tracks Windows-only MAFFT
+  and HMMER bundles plus historical `temp/` outputs; `.dockerignore` excludes
+  those from Linux images, which use the exact locked Conda MAFFT/HMMER builds.
 - [ ] **Dependency corresponding source:** Review the exact Conda and Debian
   package inventories, collect exact corresponding source where required, and
   preserve source-to-binary mappings and license/notice files in the external

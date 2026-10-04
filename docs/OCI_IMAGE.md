@@ -19,6 +19,12 @@ provisionally treats that source and `ctw-calc` as
 `GPL-2.0-only OR GPL-3.0-only`; see `THIRD_PARTY_NOTICES.md`. Client
 confirmation from the upstream rightsholder remains a pre-publication TODO.
 
+The pinned TRASH_2 revision tracks Windows-only MAFFT/HMMER bundles and
+historical output under `temp/`. They are excluded from the Linux image by
+`.dockerignore`: Linux runs the exact locked Conda MAFFT/HMMER packages instead.
+The image retains TRASH_2's R source, MIT-style license, and Linux `HOR.V3.3`
+component.
+
 Conda is used only while building the image to materialize `/opt/cap-env`.
 The runtime lock retains exact package URLs from `conda-linux-64.lock` while
 omitting compilers, headers, build tools, Git, and their implementation

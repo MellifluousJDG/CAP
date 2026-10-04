@@ -27,6 +27,11 @@ done
 
 test -x "$CAP_DIR/bin/ctw-calc"
 test -f "$CAP_DIR/modules/TRASH_2/src/TRASH.R"
+test -f "$CAP_DIR/modules/TRASH_2/dep/HOR.V3.3"
+test ! -e "$CAP_DIR/modules/TRASH_2/dep/hmmer"
+test ! -e "$CAP_DIR/modules/TRASH_2/dep/mafft-7.520-win64-signed"
+test ! -e "$CAP_DIR/modules/TRASH_2/dep/new.hor"
+test ! -e "$CAP_DIR/modules/TRASH_2/temp"
 
 python3 - <<'PY'
 import sklearn
