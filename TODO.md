@@ -18,8 +18,10 @@
   11 source license sets, 20 exact R canonical-license references, and one
   reviewed recipe-license packaging exception. Preserve all generated corpora
   in the final bundle.
-- [ ] **SBOM:** Generate and review a standard SPDX or CycloneDX SBOM for the
-  final digest-pinned image. The repository's CSV inventories are supplemental.
+- [ ] **SBOM:** CycloneDX 1.6 generation and exact coverage review are
+  implemented and validated against 186 Conda packages, 91 Debian packages,
+  and four embedded components. Regenerate and preserve the primary SBOM plus
+  optional Syft SPDX/CycloneDX deep scans for the final digest-pinned image.
 - [ ] **Release identity and archive:** Record the CAP tag, recursive submodule
   revision, immutable registry digest, validation log, compliance-bundle
   checksum, and OCI archive checksum/location.

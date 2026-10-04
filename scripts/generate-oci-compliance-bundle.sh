@@ -24,7 +24,8 @@ test ! -e "$OUTDIR" || {
     echo "Output path already exists: $OUTDIR" >&2
     exit 1
 }
-mkdir -p "$OUTDIR/inventory" "$OUTDIR/licenses" "$OUTDIR/source"
+mkdir -p "$OUTDIR/inventory" "$OUTDIR/licenses" "$OUTDIR/source" \
+    "$OUTDIR/sbom"
 
 "$PROJECT_DIR/scripts/generate-oci-inventory.sh" \
     "$IMAGE" "$OUTDIR/inventory"
@@ -61,6 +62,7 @@ cp "$PROJECT_DIR/LICENSE" "$OUTDIR/licenses/CAP-MIT.txt"
 cp "$PROJECT_DIR/THIRD_PARTY_NOTICES.md" "$OUTDIR/licenses/"
 cp "$PROJECT_DIR/TODO.md" "$OUTDIR/licenses/"
 cp "$PROJECT_DIR/docs/DEPENDENCY_SOURCE_REVIEW.md" "$OUTDIR/"
+cp "$PROJECT_DIR/docs/SBOM_REVIEW.md" "$OUTDIR/"
 cp "$PROJECT_DIR/licenses/GPL-2.0.txt" "$OUTDIR/licenses/"
 cp "$PROJECT_DIR/licenses/GPL-3.0.txt" "$OUTDIR/licenses/"
 cp "$PROJECT_DIR/modules/TRASH_2/license.txt" \
@@ -104,13 +106,36 @@ grep -q '^name,version,build,license,binary_url,sha256' \
     "$OUTDIR/inventory/conda-source-urls.csv" \
     "$OUTDIR/source-obligations.csv"
 
+"$PROJECT_DIR/scripts/generate-cyclonedx-sbom.py" \
+    "$OUTDIR/inventory" "$OUTDIR/sbom/cap-primary.cdx.json"
+
+review_arguments=()
 if command -v syft >/dev/null; then
-    syft "$IMAGE" -o spdx-json="$OUTDIR/sbom.spdx.json"
+    syft_archive="$OUTDIR/sbom/.syft-image.tar"
+    if [[ "$(basename "$RUNTIME")" == "podman" ]]; then
+        "$RUNTIME" save --format oci-archive -o "$syft_archive" "$IMAGE"
+        syft_source="oci-archive:$syft_archive"
+    else
+        "$RUNTIME" save -o "$syft_archive" "$IMAGE"
+        syft_source="docker-archive:$syft_archive"
+    fi
+    syft scan "$syft_source" \
+        -o spdx-json="$OUTDIR/sbom/syft-deep-scan.spdx.json" \
+        -o cyclonedx-json="$OUTDIR/sbom/syft-deep-scan.cdx.json"
+    rm -f "$syft_archive"
+    review_arguments+=(
+        --syft-spdx "$OUTDIR/sbom/syft-deep-scan.spdx.json"
+        --syft-cyclonedx "$OUTDIR/sbom/syft-deep-scan.cdx.json"
+    )
 else
     printf '%s\n' \
-        'Syft was unavailable; generate an SPDX or CycloneDX SBOM before release.' \
-        > "$OUTDIR/SBOM-NOT-GENERATED.txt"
+        'Syft was unavailable; primary CycloneDX coverage is still complete.' \
+        'Generate the optional deep file/ecosystem scan before release.' \
+        > "$OUTDIR/sbom/SYFT-DEEP-SCAN-NOT-GENERATED.txt"
 fi
+"$PROJECT_DIR/scripts/review-sbom-coverage.py" \
+    "$OUTDIR/inventory" "$OUTDIR/sbom/cap-primary.cdx.json" \
+    "$OUTDIR/sbom/coverage-review.json" "${review_arguments[@]}"
 
 if [[ "$INCLUDE_OCI_ARCHIVE" == "1" ]]; then
     command -v zstd >/dev/null || {
@@ -148,9 +173,10 @@ option preserves all Conda candidates while review is pending; it does not
 replace legal review. Obtain and preserve exact corresponding source for
 packages whose licenses require it before public distribution.
 
-An OCI archive is included only when INCLUDE_OCI_ARCHIVE=1. A standard SPDX or
-CycloneDX SBOM is included only when Syft is installed. Resolve every item in
-licenses/TODO.md before public release.
+An OCI archive is included only when INCLUDE_OCI_ARCHIVE=1. The primary
+CycloneDX SBOM is always generated from exact inventories and must pass coverage
+review. When Syft is installed, supplemental SPDX and CycloneDX deep scans are
+also included. Resolve every item in licenses/TODO.md before public release.
 EOF
 
 (

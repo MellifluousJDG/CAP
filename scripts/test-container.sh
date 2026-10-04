@@ -92,6 +92,16 @@ compile(
     "finalize-conda-source-notices.py",
     "exec",
 )
+compile(
+    Path("$PROJECT_DIR/scripts/generate-cyclonedx-sbom.py").read_text(),
+    "generate-cyclonedx-sbom.py",
+    "exec",
+)
+compile(
+    Path("$PROJECT_DIR/scripts/review-sbom-coverage.py").read_text(),
+    "review-sbom-coverage.py",
+    "exec",
+)
 PY
 bash "$PROJECT_DIR/scripts/test-source-obligations.sh"
 python3 "$PROJECT_DIR/scripts/test-source-review-policy.py"
@@ -99,6 +109,7 @@ bash "$PROJECT_DIR/scripts/test-collect-conda-sources.sh"
 bash "$PROJECT_DIR/scripts/test-collect-conda-notices.sh"
 python3 "$PROJECT_DIR/scripts/test-collect-debian-sources.py"
 bash "$PROJECT_DIR/scripts/test-conda-source-notices.sh"
+bash "$PROJECT_DIR/scripts/test-sbom.sh"
 
 runtime_lock="$PROJECT_DIR/conda-runtime-linux-64.lock"
 full_lock="$PROJECT_DIR/conda-linux-64.lock"

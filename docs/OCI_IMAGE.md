@@ -110,6 +110,8 @@ podman run --rm --userns=keep-id -it cap:local --shell
 
 For cluster execution, see `docs/OCI_HPC.md`. For image tags, GHCR publication,
 archives, inventories, and the release checklist, see `docs/OCI_RELEASE.md`.
+SBOM coverage, scanner limitations, and validation evidence are documented in
+`docs/SBOM_REVIEW.md`.
 
 ## Inventory
 
@@ -135,11 +137,16 @@ scripts/generate-oci-compliance-bundle.sh \
 
 The bundle adds repository and submodule revisions, exact Conda artifact URLs,
 tracked license material, BCT corresponding source, a GPL/LGPL-family
-source-obligation review manifest, and whole-bundle checksums. Pass the
-documented revision build arguments so these values are also embedded
-in the image labels; the generator uses local Git as a fallback when available.
-If Syft is installed it also generates an SPDX JSON SBOM. To include a
-Zstandard-compressed OCI archive, use:
+source-obligation review manifest, and whole-bundle checksums. It always
+produces a CycloneDX 1.6 primary SBOM from the exact Conda, Debian, and embedded
+component inventories, then fails if any expected identity is missing. If Syft
+is installed, it additionally produces SPDX JSON and CycloneDX JSON deep scans.
+Syft discovers file-level and language-ecosystem components but does not
+represent the Conda environment as 186 exact Conda package identities, so those
+outputs supplement rather than replace the primary inventory SBOM. Pass the
+documented revision build arguments so image labels contain the intended
+revisions; the generator uses local Git as a fallback when available. To
+include a Zstandard-compressed OCI archive, use:
 
 ```bash
 INCLUDE_OCI_ARCHIVE=1 scripts/generate-oci-compliance-bundle.sh \
