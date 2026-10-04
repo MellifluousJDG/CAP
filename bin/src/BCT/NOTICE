@@ -1,0 +1,20 @@
+Bayesian Context Trees source notice
+====================================
+
+This directory contains an adaptation of the Bayesian Context Trees C++
+implementation by Ioannis Papageorgiou:
+
+  https://github.com/IoannisPapageorgiou/Bayesian-Context-Trees
+
+The related BCT R package is available from:
+
+  https://cran.r-project.org/package=BCT
+
+Pending explicit rightsholder confirmation, CAP treats every source file in this
+directory and the resulting `bin/ctw-calc` executable as licensed under:
+
+  GPL-2.0-only OR GPL-3.0-only
+
+The complete license texts are at `licenses/GPL-2.0.txt` and
+`licenses/GPL-3.0.txt` in the CAP repository. See `THIRD_PARTY_NOTICES.md` for
+provenance, modification, distribution, and confirmation details.

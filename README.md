@@ -238,8 +238,10 @@ See `docs/PIPELINE_FLOW.md` for the complete technical process graph, filename r
 CAP/
 ├── main.nf                        # Nextflow workflow
 ├── nextflow.config                # Parameters and profiles
-├── environment.yml                # Human-maintained dependencies
-├── conda-linux-64.lock            # Exact tested Linux x86-64 packages
+├── environment.yml                # Human-maintained development dependencies
+├── conda-linux-64.lock            # Exact tested development packages
+├── environment-runtime.yml        # OCI runtime dependency specification
+├── conda-runtime-linux-64.lock    # Exact tested OCI runtime subset
 ├── setup_conda.sh                 # Conda setup and CTW compilation
 ├── Makefile                       # Convenience commands
 ├── scripts/run-cap-slurm.sh       # Single-allocation SLURM launcher
@@ -247,6 +249,9 @@ CAP/
 ├── scripts/test-slurm-wrapper.sh  # Scheduler-free launcher tests
 ├── test/expected-results.sha256   # Expected test-result checksums
 ├── docs/PIPELINE_FLOW.md          # Process graph and output reference
+├── docs/OCI_IMAGE.md              # OCI build, run, and validation guidance
+├── docs/OCI_HPC.md                # Container execution on HPC systems
+├── docs/OCI_RELEASE.md            # GHCR and image release procedure
 ├── bin/                           # Pipeline scripts and CTW source
 ├── modules/TRASH_2/               # Pinned Git submodule
 ├── model/                         # Pre-trained models
@@ -315,13 +320,26 @@ make test-slurm-wrapper
 
 These tests validate argument handling, CPU propagation, optional TRASH_2 behavior, and temporary-work cleanup without calling `sbatch`.
 
+## OCI containers
+
+The OCI image build packages CAP and the complete exact lock-backed Conda
+environment into a Debian slim image. See `docs/OCI_IMAGE.md` for its
+reproducibility model and local Docker/Podman use, `docs/OCI_HPC.md` for
+single-allocation cluster templates, and `docs/OCI_RELEASE.md` for GHCR,
+inventory, archive, and release guidance.
+
 ## Other packaging methods
 
-OCI containers and AppImage packaging are planned after the Conda workflow. Existing Docker-related files have not yet been adopted as the reproducibility reference. Conda is currently the validated installation path.
+AppImage packaging is planned after OCI validation. Conda remains the validated
+host installation path while the OCI image is being tested.
 
 ## License
 
-[MIT License](LICENSE)
+CAP's original code is distributed under the [MIT License](LICENSE). The
+BCT-derived source in `bin/src/BCT` and its compiled `bin/ctw-calc` executable
+are provisionally treated as `GPL-2.0-only OR GPL-3.0-only`. See
+`THIRD_PARTY_NOTICES.md` for component boundaries, provenance, license texts,
+and the pending rightsholder-confirmation TODO.
 
 ## Contact
 

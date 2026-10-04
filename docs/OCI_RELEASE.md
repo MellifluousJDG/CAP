@@ -1,0 +1,117 @@
+# OCI image release and GHCR publication
+
+GitHub Container Registry (GHCR) is an OCI registry. CAP images do not need to
+be published to Docker Hub. The planned image name is:
+
+```text
+ghcr.io/mellifluousjdg/cap
+```
+
+Registry repository names are lowercase. Public publication must wait for the
+redistribution review described below.
+
+## Tag and digest policy
+
+For a release such as `1.0.0`, publish:
+
+```text
+ghcr.io/mellifluousjdg/cap:1.0.0
+ghcr.io/mellifluousjdg/cap:1.0
+ghcr.io/mellifluousjdg/cap:1
+ghcr.io/mellifluousjdg/cap:latest
+```
+
+Tags are convenient but mutable. Documentation, release notes, and archived
+validation records must also record the immutable manifest digest:
+
+```text
+ghcr.io/mellifluousjdg/cap@sha256:...
+```
+
+## Manual publication
+
+Create a GitHub personal access token with package write permission, then avoid
+putting it on the command line or in shell history:
+
+```bash
+printf '%s' "$GHCR_TOKEN" | podman login ghcr.io \
+  --username MellifluousJDG --password-stdin
+```
+
+Tag and push the already-tested image:
+
+```bash
+podman tag cap:local ghcr.io/mellifluousjdg/cap:1.0.0
+podman push ghcr.io/mellifluousjdg/cap:1.0.0
+```
+
+After pushing, obtain and record the registry manifest digest. Do not confuse a
+local image ID with the registry digest. Log out when finished:
+
+```bash
+podman logout ghcr.io
+```
+
+Set the GHCR package visibility deliberately in GitHub's package settings and
+link the package to the CAP repository. Pull the digest-pinned image into a
+clean image store and rerun `scripts/test-container-image.sh` before announcing
+the release.
+
+## Release artifacts
+
+In addition to the registry image, preserve:
+
+- the CAP Git tag and recursive submodule revision;
+- the immutable GHCR digest;
+- an immutable external compliance bundle from
+  `scripts/generate-oci-compliance-bundle.sh`, including inventory files,
+  revision records, BCT corresponding source, notices, and checksums;
+- a schema-valid CycloneDX 1.6 primary SBOM and passing coverage report for all
+  exact Conda, Debian, and embedded component identities;
+- supplemental Syft SPDX/CycloneDX deep scans, when Syft is available;
+- exact corresponding-source archives and source-to-binary mappings required
+  by bundled dependencies, following `docs/DEPENDENCY_SOURCE_REVIEW.md`;
+- the validation log;
+- optionally, a compressed OCI archive and SHA-256 checksum.
+
+An OCI archive protects against registry loss but may be too large for GitHub's
+normal release-asset limits. If so, store it in institutional archival storage
+and publish its checksum and location in the release notes.
+
+## Automated publication
+
+A future GitHub Actions workflow can authenticate to GHCR with
+`GITHUB_TOKEN`, build on release tags, run static checks, and publish. Do not
+enable automatic public pushes until all of these are true:
+
+1. redistribution review is complete;
+2. the model's redistribution terms are confirmed;
+3. the image passes the full one-core container test;
+4. required license/notice material is included;
+5. tag and rollback policies are agreed;
+6. the external compliance bundle is complete and checksum-verified;
+7. the workflow pins third-party Actions by immutable commit.
+
+## Preliminary redistribution review
+
+Current findings are not legal advice:
+
+- CAP's original code has an MIT license file. The BCT-derived subtree and
+  compiled `ctw-calc` are provisionally treated as
+  `GPL-2.0-only OR GPL-3.0-only`; the corresponding source, provenance notice,
+  and GPL texts are tracked. Client/rightsholder confirmation remains required
+  before public distribution (see `TODO.md`).
+- TRASH_2's pinned revision contains an MIT-style `license.txt`. Its tracked
+  Windows-only MAFFT/HMMER bundles and historical `temp/` outputs are excluded
+  from the Linux image; Linux uses the exact locked Conda MAFFT/HMMER packages.
+- The trained model is owned by the client, who has authorized its
+  distribution. Record that authorization in the external release record; no
+  separate model license file is currently tracked.
+- Conda package metadata provides a starting license inventory, but each
+  dependency's license obligations and notice/source requirements must be
+  reviewed before publication.
+- Debian packages and the Debian base image also carry package-specific
+  copyright and license obligations.
+
+Until those points are resolved, local builds and private testing are suitable;
+a public GHCR push is not.
