@@ -61,7 +61,6 @@ fi
 cp "$PROJECT_DIR/LICENSE" "$OUTDIR/licenses/CAP-MIT.txt"
 cp "$PROJECT_DIR/THIRD_PARTY_NOTICES.md" "$OUTDIR/licenses/"
 cp "$PROJECT_DIR/docs/DEPENDENCY_SOURCE_REVIEW.md" "$OUTDIR/"
-cp "$PROJECT_DIR/docs/SBOM_REVIEW.md" "$OUTDIR/"
 cp "$PROJECT_DIR/licenses/GPL-2.0.txt" "$OUTDIR/licenses/"
 cp "$PROJECT_DIR/licenses/GPL-3.0.txt" "$OUTDIR/licenses/"
 cp "$PROJECT_DIR/modules/TRASH_2/license.txt" \

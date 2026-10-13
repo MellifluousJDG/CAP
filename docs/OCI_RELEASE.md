@@ -66,8 +66,8 @@ In addition to the registry image, preserve:
 - an immutable external compliance bundle from
   `scripts/generate-oci-compliance-bundle.sh`, including inventory files,
   revision records, BCT corresponding source, notices, and checksums;
-- a schema-valid CycloneDX 1.6 primary SBOM generated from the exact Conda,
-  Debian, and embedded-component image inventories;
+- a CycloneDX 1.6 SBOM generated from the exact Conda, Debian, and
+  embedded-component image inventories;
 - exact corresponding-source archives and source-to-binary mappings required
   by bundled dependencies, following `docs/DEPENDENCY_SOURCE_REVIEW.md`;
 - the validation log;

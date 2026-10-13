@@ -114,8 +114,6 @@ podman run --rm --userns=keep-id -it cap:local --shell
 
 For cluster execution, see `docs/OCI_HPC.md`. For image tags, GHCR publication,
 archives, inventories, and the release checklist, see `docs/OCI_RELEASE.md`.
-SBOM coverage, scanner limitations, and validation evidence are documented in
-`docs/SBOM_REVIEW.md`.
 
 ## Inventory
 
