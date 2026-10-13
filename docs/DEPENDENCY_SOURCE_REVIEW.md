@@ -10,7 +10,7 @@ legal conclusion.
 2. Classify GPL/LGPL-family candidates:
 
    ```bash
-   scripts/classify-source-obligations.py \
+   scripts/compliance/classify-source-obligations.py \
      BUNDLE/inventory/conda-source-urls.csv \
      BUNDLE/source-obligations.csv
    ```
@@ -19,7 +19,7 @@ legal conclusion.
    changed, forcing explicit review of new or removed dependencies:
 
    ```bash
-   scripts/apply-source-review-policy.py \
+   scripts/compliance/apply-source-review-policy.py \
      BUNDLE/source-obligations.csv \
      BUNDLE/source-obligations-reviewed.csv
    ```
@@ -30,7 +30,7 @@ legal conclusion.
 4. Collect exact binary evidence and verified upstream archives:
 
    ```bash
-   scripts/collect-conda-sources.py \
+   scripts/compliance/collect-conda-sources.py \
      BUNDLE/source-obligations-reviewed.csv \
      BUNDLE/source/conda
    ```
@@ -44,7 +44,7 @@ legal conclusion.
 6. Collect exact embedded Conda notice evidence for all runtime packages:
 
    ```bash
-   scripts/collect-conda-notices.py \
+   scripts/compliance/collect-conda-notices.py \
      BUNDLE/inventory/conda-source-urls.csv \
      BUNDLE/notices/conda
    ```
@@ -56,15 +56,15 @@ legal conclusion.
    extract source notice evidence, and apply the exact review policy:
 
    ```bash
-   scripts/collect-conda-notice-sources.py \
+   scripts/compliance/collect-conda-notice-sources.py \
      licenses/conda-notice-supplemental-sources.csv \
      BUNDLE/source/conda-notice-supplemental
-   scripts/collect-conda-source-notices.py \
+   scripts/compliance/collect-conda-source-notices.py \
      BUNDLE/notices/conda/conda-notice-manifest.csv \
      BUNDLE/source/conda-all/source-to-binary.csv \
      BUNDLE/source/conda-all BUNDLE/notices/conda-source \
      --shared-license-dir BUNDLE/notices/R-shared-licenses
-   scripts/finalize-conda-source-notices.py \
+   scripts/compliance/finalize-conda-source-notices.py \
      BUNDLE/notices/conda-source/source-notice-manifest.csv \
      licenses/conda-source-notice-review.csv \
      BUNDLE/notices/R-shared-licenses \
@@ -85,8 +85,8 @@ legal conclusion.
    collect exact Debian source:
 
    ```bash
-   scripts/export-debian-compliance-inputs.sh IMAGE BUNDLE/debian-inputs
-   scripts/collect-debian-sources.py \
+   scripts/compliance/export-debian-compliance-inputs.sh IMAGE BUNDLE/debian-inputs
+   scripts/compliance/collect-debian-sources.py \
      BUNDLE/debian-inputs/binary-to-source.csv \
      BUNDLE/debian-inputs/installed-copyright.tar.gz \
      BUNDLE/source/debian

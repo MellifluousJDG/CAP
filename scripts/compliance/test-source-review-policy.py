@@ -10,8 +10,8 @@ from pathlib import Path
 import subprocess
 import tempfile
 
-PROJECT = Path(__file__).resolve().parent.parent
-SCRIPT = PROJECT / "scripts" / "apply-source-review-policy.py"
+PROJECT = Path(__file__).resolve().parents[2]
+SCRIPT = PROJECT / "scripts" / "compliance" / "apply-source-review-policy.py"
 spec = importlib.util.spec_from_file_location("source_policy", SCRIPT)
 assert spec and spec.loader
 module = importlib.util.module_from_spec(spec)

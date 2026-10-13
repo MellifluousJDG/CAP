@@ -64,7 +64,7 @@ In addition to the registry image, preserve:
 - the CAP Git tag and recursive submodule revision;
 - the immutable GHCR digest;
 - an immutable external compliance bundle from
-  `scripts/generate-oci-compliance-bundle.sh`, including inventory files,
+  `scripts/compliance/generate-oci-compliance-bundle.sh`, including inventory files,
   revision records, BCT corresponding source, notices, and checksums;
 - a CycloneDX 1.6 SBOM generated from the exact Conda, Debian, and
   embedded-component image inventories;

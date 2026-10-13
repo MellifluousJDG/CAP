@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 set -euo pipefail
-PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 tmpdir="$(mktemp -d)"
 trap 'rm -rf "$tmpdir"' EXIT
 mkdir -p "$tmpdir/inventory"
@@ -33,7 +33,7 @@ cat > "$tmpdir/inventory/image-inspect.json" <<EOF
   "Architecture": "amd64", "Os": "linux"
 }]
 EOF
-"$PROJECT_DIR/scripts/generate-cyclonedx-sbom.py" \
+"$PROJECT_DIR/scripts/compliance/generate-cyclonedx-sbom.py" \
     "$tmpdir/inventory" "$tmpdir/sbom.json"
 python3 - "$tmpdir/sbom.json" <<'PY'
 import json

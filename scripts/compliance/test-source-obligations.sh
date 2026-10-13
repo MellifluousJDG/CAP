@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 tmpdir="$(mktemp -d)"
 trap 'rm -rf "$tmpdir"' EXIT
 
@@ -15,7 +15,7 @@ exception,1,0,GPL-2.0 WITH Classpath-exception-2.0,https://example.invalid/exc,d
 permissive,1,0,MIT,https://example.invalid/mit,eee
 CSV
 
-"$PROJECT_DIR/scripts/classify-source-obligations.py" \
+"$PROJECT_DIR/scripts/compliance/classify-source-obligations.py" \
     "$tmpdir/inventory.csv" "$tmpdir/output.csv"
 
 grep -F 'gpl-source-review,REVIEW' "$tmpdir/output.csv" >/dev/null

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 set -euo pipefail
-PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 tmpdir="$(mktemp -d)"
 trap 'rm -rf "$tmpdir"' EXIT
 mkdir -p "$tmpdir/http" "$tmpdir/package/info/recipe" \
@@ -22,7 +22,7 @@ python3 -m http.server 8766 --directory "$tmpdir/http" \
 server_pid=$!
 trap 'kill "$server_pid" 2>/dev/null || true; rm -rf "$tmpdir"' EXIT
 sleep 1
-"$PROJECT_DIR/scripts/collect-conda-notices.py" \
+"$PROJECT_DIR/scripts/compliance/collect-conda-notices.py" \
     "$tmpdir/inventory.csv" "$tmpdir/output"
 grep -F 'info/recipe/LICENSE.txt | share/example/NOTICE.md' \
     "$tmpdir/output/conda-notice-manifest.csv" >/dev/null

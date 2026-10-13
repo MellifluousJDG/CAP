@@ -120,8 +120,8 @@ archives, inventories, and the release checklist, see `docs/OCI_RELEASE.md`.
 Generate an image inventory with either Podman or Docker:
 
 ```bash
-scripts/generate-oci-inventory.sh cap:local oci-inventory
-CONTAINER_RUNTIME=docker scripts/generate-oci-inventory.sh \
+scripts/compliance/generate-oci-inventory.sh cap:local oci-inventory
+CONTAINER_RUNTIME=docker scripts/compliance/generate-oci-inventory.sh \
   cap:local oci-inventory-docker
 ```
 
@@ -134,7 +134,7 @@ command below.
 Generate the external compliance bundle in a path outside the repository:
 
 ```bash
-scripts/generate-oci-compliance-bundle.sh \
+scripts/compliance/generate-oci-compliance-bundle.sh \
   cap:local ../cap-compliance-bundle
 ```
 
@@ -149,7 +149,7 @@ revisions; the generator uses local Git as a fallback when available. To
 include a Zstandard-compressed OCI archive, use:
 
 ```bash
-INCLUDE_OCI_ARCHIVE=1 scripts/generate-oci-compliance-bundle.sh \
+INCLUDE_OCI_ARCHIVE=1 scripts/compliance/generate-oci-compliance-bundle.sh \
   cap:local ../cap-compliance-bundle-with-image
 ```
 

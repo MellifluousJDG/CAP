@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 set -euo pipefail
-PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 tmpdir="$(mktemp -d)"
 trap 'rm -rf "$tmpdir"' EXIT
 mkdir -p "$tmpdir/http" "$tmpdir/package/info/recipe"
@@ -40,7 +40,7 @@ python3 -m http.server 8765 --directory "$tmpdir/http" \
 server_pid=$!
 trap 'kill "$server_pid" 2>/dev/null || true; rm -rf "$tmpdir"' EXIT
 sleep 1
-"$PROJECT_DIR/scripts/collect-conda-sources.py" \
+"$PROJECT_DIR/scripts/compliance/collect-conda-sources.py" \
     "$tmpdir/review.csv" "$tmpdir/output"
 grep -F 'https://example.invalid/feedstock,abc123' \
     "$tmpdir/output/source-to-binary.csv" >/dev/null

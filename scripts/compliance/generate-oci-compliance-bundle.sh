@@ -7,7 +7,7 @@ OUTDIR="${2:-oci-compliance-bundle}"
 RUNTIME="${CONTAINER_RUNTIME:-podman}"
 GIT_COMMAND="${GIT_COMMAND:-git}"
 INCLUDE_OCI_ARCHIVE="${INCLUDE_OCI_ARCHIVE:-0}"
-PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
 command -v "$RUNTIME" >/dev/null || {
     echo "Container runtime not found: $RUNTIME" >&2
@@ -27,7 +27,7 @@ test ! -e "$OUTDIR" || {
 mkdir -p "$OUTDIR/inventory" "$OUTDIR/licenses" "$OUTDIR/source" \
     "$OUTDIR/sbom"
 
-"$PROJECT_DIR/scripts/generate-oci-inventory.sh" \
+"$PROJECT_DIR/scripts/compliance/generate-oci-inventory.sh" \
     "$IMAGE" "$OUTDIR/inventory"
 
 image_id="$($RUNTIME image inspect --format '{{.Id}}' "$IMAGE")"
@@ -100,11 +100,11 @@ test -s "$OUTDIR/inventory/conda-source-urls.csv" || {
 }
 grep -q '^name,version,build,license,binary_url,sha256' \
     "$OUTDIR/inventory/conda-source-urls.csv"
-"$PROJECT_DIR/scripts/classify-source-obligations.py" \
+"$PROJECT_DIR/scripts/compliance/classify-source-obligations.py" \
     "$OUTDIR/inventory/conda-source-urls.csv" \
     "$OUTDIR/source-obligations.csv"
 
-"$PROJECT_DIR/scripts/generate-cyclonedx-sbom.py" \
+"$PROJECT_DIR/scripts/compliance/generate-cyclonedx-sbom.py" \
     "$OUTDIR/inventory" "$OUTDIR/sbom/cap-primary.cdx.json"
 
 if [[ "$INCLUDE_OCI_ARCHIVE" == "1" ]]; then
@@ -127,21 +127,23 @@ repository revisions, and complete corresponding source for CAP's BCT-derived
 ctw-calc executable. A revision ending in -DIRTY is not release-ready. Package
 binary URLs identify exact Conda artifacts and are a starting point for
 corresponding-source collection; they are not themselves source archives. Apply
-scripts/apply-source-review-policy.py to source-obligations.csv, then run
-scripts/collect-conda-sources.py against the reviewed CSV. Collect embedded
-package notices with scripts/collect-conda-notices.py. For packages flagged for
-source review, collect the reviewed supplemental inputs in
+scripts/compliance/apply-source-review-policy.py to source-obligations.csv,
+then run scripts/compliance/collect-conda-sources.py against the reviewed CSV.
+Collect embedded package notices with
+scripts/compliance/collect-conda-notices.py. For packages flagged for source
+review, collect the reviewed supplemental inputs in
 licenses/conda-notice-supplemental-sources.csv with
-scripts/collect-conda-notice-sources.py, extract source evidence with
-scripts/collect-conda-source-notices.py, and apply the exact reviewed policy in
-licenses/conda-source-notice-review.csv with
-scripts/finalize-conda-source-notices.py. Export and collect Debian
-copyright/source evidence with scripts/export-debian-compliance-inputs.sh and
-scripts/collect-debian-sources.py. These network-dependent collections are
-external bundle steps, not part of basic bundle generation. The --conservative
-option preserves all Conda candidates while review is pending; it does not
-replace legal review. Obtain and preserve exact corresponding source for
-packages whose licenses require it before public distribution.
+scripts/compliance/collect-conda-notice-sources.py, extract source evidence with
+scripts/compliance/collect-conda-source-notices.py, and apply the exact reviewed
+policy in licenses/conda-source-notice-review.csv with
+scripts/compliance/finalize-conda-source-notices.py. Export and collect Debian
+copyright/source evidence with
+scripts/compliance/export-debian-compliance-inputs.sh and
+scripts/compliance/collect-debian-sources.py. These network-dependent
+collections are external bundle steps, not part of basic bundle generation. The
+--conservative option preserves all Conda candidates while review is pending;
+it does not replace legal review. Obtain and preserve exact corresponding
+source for packages whose licenses require it before public distribution.
 
 An OCI archive is included only when INCLUDE_OCI_ARCHIVE=1. The primary
 CycloneDX SBOM is generated directly from the exact image inventories. Before
