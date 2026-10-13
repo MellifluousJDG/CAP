@@ -16,8 +16,9 @@ The build uses three pinned inputs:
 The bundled CTW/BCT source under `bin/src/BCT` identifies its upstream at
 https://github.com/IoannisPapageorgiou/Bayesian-Context-Trees. CAP
 provisionally treats that source and `ctw-calc` as
-`GPL-2.0-only OR GPL-3.0-only`; see `THIRD_PARTY_NOTICES.md`. Client
-confirmation from the upstream rightsholder remains a pre-publication TODO.
+`GPL-2.0-only OR GPL-3.0-only`; see `THIRD_PARTY_NOTICES.md`. Confirmation
+from the client and upstream rightsholder is required before public
+redistribution.
 
 The pinned TRASH_2 revision tracks Windows-only MAFFT/HMMER bundles and
 historical output under `temp/`. They are excluded from the Linux image by
@@ -32,9 +33,10 @@ packages. OpenMPI remains because the locked HMMER build links to
 `libmpi.so.40`. The runtime lock is not independently re-solved, which prevents
 validated runtime versions from drifting. The runtime stage puts
 `/opt/cap-env/bin` on `PATH`; Nextflow does not activate, solve, or manage an
-environment at runtime. CTW/BCT is compiled in a separate stage with the pinned
-Debian base's native compiler so its glibc requirement cannot exceed the
-runtime base.
+environment at runtime. CTW/BCT is compiled in a separate build stage that uses
+the same pinned Debian base as the final runtime image. This prevents the
+executable from being built against a newer glibc version that would be missing
+when the executable runs in the final image.
 
 The Dockerfile requires Linux x86-64 because the lock contains `linux-64`
 packages. Build from a recursive Git clone so `modules/TRASH_2` is populated.
@@ -68,9 +70,11 @@ podman build --platform linux/amd64 \
 
 The build needs network access to download the verified Miniconda installer and
 the exact package URLs in the runtime lock. Build release images only from a
-clean recursive checkout; otherwise the revision labels do not identify the
-copied source tree. Normal container execution does not install or download CAP
-dependencies.
+clean recursive checkout. The Dockerfile copies that checkout into `/opt/CAP`
+in the image, while the build arguments record Git revisions in the image
+labels. Local modifications or untracked files could therefore make the copied
+source differ from the commits named by those labels. Normal container
+execution does not install or download CAP dependencies.
 
 ## Run
 
