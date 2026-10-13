@@ -28,7 +28,8 @@ cluster. CAP's real-cluster container validation remains outstanding.
 
 ## Rootless Podman
 
-Prepare persistent output and use node-local storage for Nextflow work:
+Create a final-results directory on durable shared storage, and use node-local
+storage for temporary Nextflow work:
 
 ```bash
 #!/usr/bin/env bash
