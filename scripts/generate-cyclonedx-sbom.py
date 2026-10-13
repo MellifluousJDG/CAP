@@ -80,9 +80,9 @@ def main() -> None:
         (args.inventory / "image-inspect.json").read_text(encoding="utf-8")
     )[0]
     if len(conda) != len({(r["name"], r["version"], r["build"]) for r in conda}):
-        raise SystemExit("Duplicate exact Conda package identity")
+        raise SystemExit("Duplicate exact Conda package record")
     if len(debian) != len({(r["package"], r["version"]) for r in debian}):
-        raise SystemExit("Duplicate exact Debian package identity")
+        raise SystemExit("Duplicate exact Debian package record")
 
     root_row = next((row for row in embedded if row["component"] == "CAP"), None)
     if root_row is None:
@@ -154,7 +154,7 @@ def main() -> None:
             }],
         })
 
-    identity = image_data.get("Digest") or image_data.get("Id") or root_ref
+    image_key = image_data.get("Digest") or image_data.get("Id") or root_ref
     timestamp = image_data.get("Created")
     try:
         datetime.fromisoformat(timestamp.replace("Z", "+00:00"))
@@ -162,7 +162,7 @@ def main() -> None:
         timestamp = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
     document = {
         "bomFormat": "CycloneDX", "specVersion": "1.6", "version": 1,
-        "serialNumber": f"urn:uuid:{uuid.uuid5(NAMESPACE, identity)}",
+        "serialNumber": f"urn:uuid:{uuid.uuid5(NAMESPACE, image_key)}",
         "metadata": {
             "timestamp": timestamp,
             "tools": {"components": [{

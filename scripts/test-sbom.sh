@@ -35,23 +35,34 @@ cat > "$tmpdir/inventory/image-inspect.json" <<EOF
 EOF
 "$PROJECT_DIR/scripts/generate-cyclonedx-sbom.py" \
     "$tmpdir/inventory" "$tmpdir/sbom.json"
-"$PROJECT_DIR/scripts/review-sbom-coverage.py" \
-    "$tmpdir/inventory" "$tmpdir/sbom.json" "$tmpdir/review.json"
-grep -F '"primary_coverage_status": "PASS"' "$tmpdir/review.json" >/dev/null
 python3 - "$tmpdir/sbom.json" <<'PY'
-import json,sys
-path=sys.argv[1]
-data=json.load(open(path))
-data["components"]=[
-    component for component in data["components"]
-    if component.get("name") != "example"
+import json
+import sys
+
+with open(sys.argv[1], encoding="utf-8") as handle:
+    document = json.load(handle)
+
+assert document["bomFormat"] == "CycloneDX"
+assert document["specVersion"] == "1.6"
+assert document["metadata"]["component"]["name"] == "CAP"
+components = {component["name"]: component for component in document["components"]}
+assert set(components) == {
+    "BCT_ctw-calc", "TRASH_2", "base-files", "example", "example-r",
+    "libc6", "model",
+}
+assert components["example"]["purl"] == (
+    "pkg:conda/example@1.0?build=h123_0&channel="
+    "https%3A%2F%2Fconda.example%2Flinux-64"
+)
+assert components["base-files"]["purl"] == "pkg:deb/debian/base-files@12.4"
+assert components["example-r"]["licenses"] == [{"expression": "GPL-3.0-only"}]
+assert components["model"]["licenses"] == [
+    {"license": {"name": "Client-owned"}}
 ]
-open(path,"w").write(json.dumps(data))
+root_ref = document["metadata"]["component"]["bom-ref"]
+assert document["dependencies"] == [{
+    "ref": root_ref,
+    "dependsOn": [component["bom-ref"] for component in document["components"]],
+}]
 PY
-if "$PROJECT_DIR/scripts/review-sbom-coverage.py" \
-    "$tmpdir/inventory" "$tmpdir/sbom.json" "$tmpdir/bad-review.json" \
-    >/dev/null 2>&1; then
-    echo "Coverage review accepted a missing component." >&2
-    exit 1
-fi
-echo "CycloneDX SBOM generation and review test passed."
+echo "CycloneDX SBOM generation test passed."

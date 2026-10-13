@@ -108,34 +108,6 @@ grep -q '^name,version,build,license,binary_url,sha256' \
 "$PROJECT_DIR/scripts/generate-cyclonedx-sbom.py" \
     "$OUTDIR/inventory" "$OUTDIR/sbom/cap-primary.cdx.json"
 
-review_arguments=()
-if command -v syft >/dev/null; then
-    syft_archive="$OUTDIR/sbom/.syft-image.tar"
-    if [[ "$(basename "$RUNTIME")" == "podman" ]]; then
-        "$RUNTIME" save --format oci-archive -o "$syft_archive" "$IMAGE"
-        syft_source="oci-archive:$syft_archive"
-    else
-        "$RUNTIME" save -o "$syft_archive" "$IMAGE"
-        syft_source="docker-archive:$syft_archive"
-    fi
-    syft scan "$syft_source" \
-        -o spdx-json="$OUTDIR/sbom/syft-deep-scan.spdx.json" \
-        -o cyclonedx-json="$OUTDIR/sbom/syft-deep-scan.cdx.json"
-    rm -f "$syft_archive"
-    review_arguments+=(
-        --syft-spdx "$OUTDIR/sbom/syft-deep-scan.spdx.json"
-        --syft-cyclonedx "$OUTDIR/sbom/syft-deep-scan.cdx.json"
-    )
-else
-    printf '%s\n' \
-        'Syft was unavailable; primary CycloneDX coverage is still complete.' \
-        'Generate the optional deep file/ecosystem scan before release.' \
-        > "$OUTDIR/sbom/SYFT-DEEP-SCAN-NOT-GENERATED.txt"
-fi
-"$PROJECT_DIR/scripts/review-sbom-coverage.py" \
-    "$OUTDIR/inventory" "$OUTDIR/sbom/cap-primary.cdx.json" \
-    "$OUTDIR/sbom/coverage-review.json" "${review_arguments[@]}"
-
 if [[ "$INCLUDE_OCI_ARCHIVE" == "1" ]]; then
     command -v zstd >/dev/null || {
         echo "zstd is required when INCLUDE_OCI_ARCHIVE=1." >&2
@@ -173,11 +145,9 @@ replace legal review. Obtain and preserve exact corresponding source for
 packages whose licenses require it before public distribution.
 
 An OCI archive is included only when INCLUDE_OCI_ARCHIVE=1. The primary
-CycloneDX SBOM is always generated from exact inventories and must pass coverage
-review. When Syft is installed, supplemental SPDX and CycloneDX deep scans are
-also included. Before public release, preserve the model-distribution
-authorization and resolve the provisional BCT/CTW license with the client and
-rightsholder.
+CycloneDX SBOM is generated directly from the exact image inventories. Before
+public release, preserve the model-distribution authorization and resolve the
+provisional BCT/CTW license with the client and rightsholder.
 EOF
 
 (

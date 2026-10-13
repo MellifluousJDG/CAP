@@ -143,21 +143,12 @@ scripts/generate-oci-compliance-bundle.sh \
 The bundle adds repository and submodule revisions, exact Conda artifact URLs,
 tracked license material, BCT corresponding source, a GPL/LGPL-family
 source-obligation review manifest, and whole-bundle checksums. It always
-produces a CycloneDX 1.6 primary SBOM from the exact Conda, Debian, and embedded
-component inventories. CAP's `scripts/review-sbom-coverage.py` then compares the
-SBOM with those inventories. Bundle generation stops with an error if the SBOM
-omits a Conda package's exact name, version, or build; a Debian package's exact
-name or version; or an embedded component. The check also rejects unexpected
-package records, duplicate component references, and references to missing
-components.
-
-If Syft is installed, the bundle additionally includes SPDX JSON and CycloneDX
-JSON deep scans. Syft discovers file-level and language-ecosystem components but
-does not represent the Conda environment as the same 186 exact package records
-listed in the Conda inventory, so those outputs supplement rather than replace
-the primary inventory SBOM. Pass the documented revision build arguments so
-image labels contain the intended revisions; the generator uses local Git as a
-fallback when available. To include a Zstandard-compressed OCI archive, use:
+produces a CycloneDX 1.6 primary SBOM directly from the exact Conda, Debian,
+and embedded-component inventories. Conda records include package name, version,
+and build string; Debian records include package name and version. Pass the
+documented revision build arguments so image labels contain the intended
+revisions; the generator uses local Git as a fallback when available. To
+include a Zstandard-compressed OCI archive, use:
 
 ```bash
 INCLUDE_OCI_ARCHIVE=1 scripts/generate-oci-compliance-bundle.sh \

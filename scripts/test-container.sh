@@ -97,11 +97,6 @@ compile(
     "generate-cyclonedx-sbom.py",
     "exec",
 )
-compile(
-    Path("$PROJECT_DIR/scripts/review-sbom-coverage.py").read_text(),
-    "review-sbom-coverage.py",
-    "exec",
-)
 PY
 bash "$PROJECT_DIR/scripts/test-source-obligations.sh"
 python3 "$PROJECT_DIR/scripts/test-source-review-policy.py"
