@@ -100,7 +100,7 @@ Current findings are not legal advice:
   compiled `ctw-calc` are provisionally treated as
   `GPL-2.0-only OR GPL-3.0-only`; the corresponding source, provenance notice,
   and GPL texts are tracked. Client/rightsholder confirmation remains required
-  before public distribution (see `TODO.md`).
+  before public distribution.
 - TRASH_2's pinned revision contains an MIT-style `license.txt`. Its tracked
   Windows-only MAFFT/HMMER bundles and historical `temp/` outputs are excluded
   from the Linux image; Linux uses the exact locked Conda MAFFT/HMMER packages.

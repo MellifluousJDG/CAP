@@ -73,6 +73,6 @@ the published SHA-256:
 - The SBOM records components and direct containment relationships; it does not
   infer a complete runtime call graph among all packages.
 - The model's authorization record and the provisional BCT/CTW license still
-  require the release records described in `TODO.md`.
+  require explicit external release records before public distribution.
 - Generate fresh documents after building the clean final image, validate the
   CycloneDX schema again, and archive the bundle checksum with the image digest.

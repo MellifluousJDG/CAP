@@ -60,7 +60,6 @@ fi
 
 cp "$PROJECT_DIR/LICENSE" "$OUTDIR/licenses/CAP-MIT.txt"
 cp "$PROJECT_DIR/THIRD_PARTY_NOTICES.md" "$OUTDIR/licenses/"
-cp "$PROJECT_DIR/TODO.md" "$OUTDIR/licenses/"
 cp "$PROJECT_DIR/docs/DEPENDENCY_SOURCE_REVIEW.md" "$OUTDIR/"
 cp "$PROJECT_DIR/docs/SBOM_REVIEW.md" "$OUTDIR/"
 cp "$PROJECT_DIR/licenses/GPL-2.0.txt" "$OUTDIR/licenses/"
@@ -176,7 +175,9 @@ packages whose licenses require it before public distribution.
 An OCI archive is included only when INCLUDE_OCI_ARCHIVE=1. The primary
 CycloneDX SBOM is always generated from exact inventories and must pass coverage
 review. When Syft is installed, supplemental SPDX and CycloneDX deep scans are
-also included. Resolve every item in licenses/TODO.md before public release.
+also included. Before public release, preserve the model-distribution
+authorization and resolve the provisional BCT/CTW license with the client and
+rightsholder.
 EOF
 
 (

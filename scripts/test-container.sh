@@ -134,7 +134,6 @@ test -f "$PROJECT_DIR/modules/TRASH_2/src/TRASH.R" || {
 }
 for license_file in \
     "$PROJECT_DIR/THIRD_PARTY_NOTICES.md" \
-    "$PROJECT_DIR/TODO.md" \
     "$PROJECT_DIR/docs/DEPENDENCY_SOURCE_REVIEW.md" \
     "$PROJECT_DIR/bin/src/BCT/NOTICE" \
     "$PROJECT_DIR/licenses/GPL-2.0.txt" \
