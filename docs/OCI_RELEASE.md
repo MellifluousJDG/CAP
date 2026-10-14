@@ -91,27 +91,26 @@ enable automatic public pushes until all of these are true:
 6. the external compliance bundle is complete and checksum-verified;
 7. the workflow pins third-party Actions by immutable commit.
 
-## Preliminary redistribution review
+## Redistribution requirements
 
-Current findings are not legal advice:
+- Include CAP's root MIT license.
+- Include the `bin/src/BCT` corresponding source, provenance notice, and GPL
+  texts with the compiled `ctw-calc`. The standalone BCT C++ repository has no
+  separate explicit license notice; the related BCT R package published by the
+  same author declares `GPL (>= 2)` in its CRAN metadata. On that basis, CAP
+  applies `GPL-2.0-or-later` to the BCT-derived source and executable.
+- Include TRASH_2's MIT-style `license.txt`. Its tracked Windows-only
+  MAFFT/HMMER bundles and historical `temp/` outputs are excluded from the Linux
+  image, which uses the locked Conda MAFFT/HMMER packages instead.
+- Preserve the client's authorization to distribute the trained model in the
+  external release record. No separate model license file is currently tracked.
+- Generate dependency inventories from the final image. If they differ from the
+  reviewed candidate inventories, review the changed Conda and Debian packages
+  and collect any additional notices or corresponding source before publication.
+- Preserve the reviewed Conda notices and source mappings, plus the Debian
+  copyright files, binary-to-source mappings, and corresponding source, in the
+  external compliance bundle.
 
-- CAP's original code has an MIT license file. The standalone BCT C++
-  repository has no separate explicit license notice; the related BCT R package
-  published by the same author declares `GPL (>= 2)` in its CRAN metadata. On
-  that basis, the BCT-derived subtree and compiled `ctw-calc` use
-  `GPL-2.0-or-later`; corresponding source, provenance notices, and GPL texts
-  are tracked.
-- TRASH_2's pinned revision contains an MIT-style `license.txt`. Its tracked
-  Windows-only MAFFT/HMMER bundles and historical `temp/` outputs are excluded
-  from the Linux image; Linux uses the exact locked Conda MAFFT/HMMER packages.
-- The trained model is owned by the client, who has authorized its
-  distribution. Record that authorization in the external release record; no
-  separate model license file is currently tracked.
-- Conda package metadata provides a starting license inventory, but each
-  dependency's license obligations and notice/source requirements must be
-  reviewed before publication.
-- Debian packages and the Debian base image also carry package-specific
-  copyright and license obligations.
-
-Until those points are resolved, local builds and private testing are suitable;
-a public GHCR push is not.
+Do not publish the image until the model authorization is in the external
+release record and the final compliance bundle is complete and
+checksum-verified.
