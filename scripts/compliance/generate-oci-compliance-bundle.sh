@@ -19,6 +19,10 @@ if [[ "$GIT_COMMAND" == */* ]]; then
 elif command -v "$GIT_COMMAND" >/dev/null; then
     git_available=1
 fi
+if [[ "$git_available" != "1" ]]; then
+    echo "Git is required to validate the compliance source checkout." >&2
+    exit 1
+fi
 
 test ! -e "$OUTDIR" || {
     echo "Output path already exists: $OUTDIR" >&2
@@ -33,20 +37,34 @@ mkdir -p "$OUTDIR/inventory" "$OUTDIR/licenses" "$OUTDIR/source" \
 image_id="$($RUNTIME image inspect --format '{{.Id}}' "$IMAGE")"
 image_digest="$($RUNTIME image inspect --format '{{index .RepoDigests 0}}' \
     "$IMAGE" 2>/dev/null || true)"
-cap_revision="$($RUNTIME image inspect --format \
+image_cap_revision="$($RUNTIME image inspect --format \
     '{{index .Config.Labels "org.opencontainers.image.revision"}}' \
     "$IMAGE" 2>/dev/null || true)"
-trash_revision="$($RUNTIME image inspect --format \
+image_trash_revision="$($RUNTIME image inspect --format \
     '{{index .Config.Labels "org.cap-project.trash-2.revision"}}' \
     "$IMAGE" 2>/dev/null || true)"
+cap_revision="$image_cap_revision"
+trash_revision="$image_trash_revision"
 if [[ "$git_available" == "1" ]]; then
-    cap_revision="$($GIT_COMMAND -C "$PROJECT_DIR" rev-parse HEAD)"
-    trash_revision="$($GIT_COMMAND -C "$PROJECT_DIR" \
+    checkout_cap_revision="$($GIT_COMMAND -C "$PROJECT_DIR" rev-parse HEAD)"
+    checkout_trash_revision="$($GIT_COMMAND -C "$PROJECT_DIR" \
         rev-parse HEAD:modules/TRASH_2)"
-    if ! "$GIT_COMMAND" -C "$PROJECT_DIR" diff --quiet --ignore-submodules=none \
-        || ! "$GIT_COMMAND" -C "$PROJECT_DIR" diff --cached --quiet \
-            --ignore-submodules=none; then
-        cap_revision="${cap_revision}-DIRTY"
+    if [[ -z "$image_cap_revision" || "$image_cap_revision" == "UNSPECIFIED" ]]; then
+        echo "Image has no specific CAP revision label." >&2
+        exit 1
+    fi
+    if [[ -z "$image_trash_revision" || \
+          "$image_trash_revision" == "UNSPECIFIED" ]]; then
+        echo "Image has no specific TRASH_2 revision label." >&2
+        exit 1
+    fi
+    if [[ "$checkout_cap_revision" != "$image_cap_revision" ]]; then
+        echo "Checkout revision does not match image CAP revision." >&2
+        exit 1
+    fi
+    if [[ "$checkout_trash_revision" != "$image_trash_revision" ]]; then
+        echo "Checkout TRASH_2 revision does not match image revision." >&2
+        exit 1
     fi
 fi
 {
