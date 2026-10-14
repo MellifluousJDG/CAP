@@ -53,7 +53,7 @@ printf "CAP,%s,%s,%s\n" \
 printf "BCT_ctw-calc,%s,%s,%s\n" \
     "$(sha256sum /opt/CAP/bin/ctw-calc | cut -d" " -f1)" \
     "GPL-2.0-or-later" \
-    "/opt/CAP/bin/src/BCT/NOTICE"
+    "/opt/CAP/bin/src/BCT/README.md"
 printf "TRASH_2,%s,%s,%s\n" \
     "$(sha256sum /opt/CAP/modules/TRASH_2/src/TRASH.R | cut -d" " -f1)" \
     "MIT" \

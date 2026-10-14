@@ -94,8 +94,8 @@ enable automatic public pushes until all of these are true:
 ## Redistribution requirements
 
 - Include CAP's root MIT license.
-- Include the `bin/src/BCT` corresponding source, provenance notice, and GPL
-  texts with the compiled `ctw-calc`. The standalone BCT C++ repository has no
+- Include the `bin/src/BCT` corresponding source and README, plus the GPL
+  texts, with the compiled `ctw-calc`. The standalone BCT C++ repository has no
   separate explicit license notice; the related BCT R package published by the
   same author declares `GPL (>= 2)` in its CRAN metadata. On that basis, CAP
   applies `GPL-2.0-or-later` to the BCT-derived source and executable.

@@ -130,7 +130,7 @@ test -f "$PROJECT_DIR/modules/TRASH_2/src/TRASH.R" || {
 for license_file in \
     "$PROJECT_DIR/THIRD_PARTY_NOTICES.md" \
     "$PROJECT_DIR/docs/DEPENDENCY_SOURCE_REVIEW.md" \
-    "$PROJECT_DIR/bin/src/BCT/NOTICE" \
+    "$PROJECT_DIR/bin/src/BCT/README.md" \
     "$PROJECT_DIR/licenses/GPL-2.0.txt" \
     "$PROJECT_DIR/licenses/GPL-3.0.txt"; do
     test -s "$license_file" || {

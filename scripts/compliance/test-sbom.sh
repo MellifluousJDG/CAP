@@ -22,7 +22,7 @@ d_hash="$(printf 'd%.0s' {1..64})"
 cat > "$tmpdir/inventory/embedded-components.csv" <<EOF
 component,revision_or_hash,license_expression,license_or_notice_file
 CAP,$a_hash,MIT,/opt/CAP/LICENSE
-BCT_ctw-calc,$b_hash,GPL-2.0-or-later,/opt/CAP/bin/src/BCT/NOTICE
+BCT_ctw-calc,$b_hash,GPL-2.0-or-later,/opt/CAP/bin/src/BCT/README.md
 TRASH_2,$c_hash,MIT,/opt/CAP/modules/TRASH_2/license.txt
 model,$d_hash,Client-owned,/opt/CAP/THIRD_PARTY_NOTICES.md
 EOF

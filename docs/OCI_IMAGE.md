@@ -18,7 +18,7 @@ https://github.com/IoannisPapageorgiou/Bayesian-Context-Trees. The standalone
 C++ repository has no separate explicit license notice, but the related BCT R
 package published by the same author declares `GPL (>= 2)` in its CRAN metadata.
 On that basis, CAP applies `GPL-2.0-or-later` to the adapted source and
-`ctw-calc`; see `THIRD_PARTY_NOTICES.md`.
+`ctw-calc`; see `bin/src/BCT/README.md`.
 
 The pinned TRASH_2 revision tracks Windows-only MAFFT/HMMER bundles and
 historical output under `temp/`. They are excluded from the Linux image by

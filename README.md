@@ -338,8 +338,8 @@ host installation path while the OCI image is being tested.
 CAP's original code is distributed under the [MIT License](LICENSE). The
 BCT-derived source in `bin/src/BCT` and its compiled `bin/ctw-calc` executable
 use `GPL-2.0-or-later`, based on the `GPL (>= 2)` CRAN metadata for the related
-BCT package published by the same author. See `THIRD_PARTY_NOTICES.md` for the
-license basis, component boundaries, provenance, and corresponding-source
+BCT package published by the same author. See `bin/src/BCT/README.md` for the
+license basis, provenance, build instructions, and corresponding-source
 requirements.
 
 ## Contact
