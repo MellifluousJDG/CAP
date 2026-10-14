@@ -131,6 +131,12 @@ grep -q '^name,version,build,license,binary_url,sha256' \
     "$OUTDIR/inventory" "$OUTDIR/sbom/cap-primary.cdx.json"
 
 if [[ "$INCLUDE_OCI_ARCHIVE" == "1" ]]; then
+    runtime_name="${RUNTIME##*/}"
+    if [[ "$runtime_name" != "podman" ]]; then
+        echo "INCLUDE_OCI_ARCHIVE=1 requires Podman; Docker save creates a" \
+            "Docker archive, not an OCI archive." >&2
+        exit 1
+    fi
     command -v zstd >/dev/null || {
         echo "zstd is required when INCLUDE_OCI_ARCHIVE=1." >&2
         exit 1
@@ -168,8 +174,10 @@ collections are external bundle steps, not part of basic bundle generation. The
 it does not replace legal review. Obtain and preserve exact corresponding
 source for packages whose licenses require it before public distribution.
 
-An OCI archive is included only when INCLUDE_OCI_ARCHIVE=1. The primary
-CycloneDX SBOM is generated directly from the exact image inventories.
+An OCI archive is included only when INCLUDE_OCI_ARCHIVE=1 and the container
+runtime is Podman. Docker users can create a separate Docker archive with
+`docker image save` or convert the daemon image to OCI format with Skopeo. The
+primary CycloneDX SBOM is generated directly from the exact image inventories.
 EOF
 
 (

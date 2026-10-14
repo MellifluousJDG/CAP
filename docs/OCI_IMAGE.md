@@ -145,13 +145,36 @@ produces a CycloneDX 1.6 primary SBOM directly from the exact Conda, Debian,
 and embedded-component inventories. Conda records include package name, version,
 and build string; Debian records include package name and version. Pass the
 documented revision build arguments so image labels contain the intended
-revisions; the generator uses local Git as a fallback when available. To
-include a Zstandard-compressed OCI archive, use:
+revisions; the generator compares those labels with the clean local checkout
+and refuses to create a bundle if they differ. To include a Zstandard-compressed
+OCI archive, use Podman and run:
 
 ```bash
-INCLUDE_OCI_ARCHIVE=1 scripts/compliance/generate-oci-compliance-bundle.sh \
+CONTAINER_RUNTIME=podman INCLUDE_OCI_ARCHIVE=1 \
+  scripts/compliance/generate-oci-compliance-bundle.sh \
   cap:local ../cap-compliance-bundle-with-image
 ```
+
+Docker's `save` command creates a Docker archive rather than an OCI archive. If
+a Docker archive is acceptable, create one separately:
+
+```bash
+docker image save -o cap.docker.tar cap:local
+sha256sum cap.docker.tar > cap.docker.tar.sha256
+```
+
+To convert an image in the Docker daemon directly to an OCI archive, use a tool
+such as Skopeo:
+
+```bash
+skopeo copy docker-daemon:cap:local \
+  oci-archive:cap.oci.tar:cap:local
+sha256sum cap.oci.tar > cap.oci.tar.sha256
+```
+
+The compliance-bundle script deliberately requires Podman when
+`INCLUDE_OCI_ARCHIVE=1`; it does not silently substitute Docker's different
+archive format.
 
 The bundle generator deliberately does not guess third-party source URLs or
 claim that binary package URLs satisfy corresponding-source obligations.
