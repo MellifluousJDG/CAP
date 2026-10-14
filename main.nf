@@ -295,7 +295,9 @@ Optional:
    podman run --rm -v \$PWD/data:/data:ro -v \$PWD/results:/results \\
      cap:local --assembly /data/genome.fasta --outdir /results
 
-2. CONDA (Local Linux x86-64)
+2. CONDA
+   # Linux x86-64 is the validated platform.
+   # macOS and Windows setup scripts are also provided but are not validated.
    # Setup
    make install  # or ./setup_conda.sh (Linux/Mac) or .\\setup_conda.ps1 (Windows)
    
