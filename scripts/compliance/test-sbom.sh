@@ -24,7 +24,7 @@ component,revision_or_hash,license_expression,license_or_notice_file
 CAP,$a_hash,MIT,/opt/CAP/LICENSE
 BCT_ctw-calc,$b_hash,GPL-2.0-or-later,/opt/CAP/bin/src/BCT/README.md
 TRASH_2,$c_hash,MIT,/opt/CAP/modules/TRASH_2/license.txt
-model,$d_hash,Client-owned,/opt/CAP/THIRD_PARTY_NOTICES.md
+model,$d_hash,NOASSERTION,/opt/CAP/model/centromeric_model_v2.pkl
 EOF
 cat > "$tmpdir/inventory/image-inspect.json" <<EOF
 [{
@@ -60,7 +60,7 @@ assert components["BCT_ctw-calc"]["licenses"] == [
 ]
 assert components["example-r"]["licenses"] == [{"expression": "GPL-3.0-only"}]
 assert components["model"]["licenses"] == [
-    {"license": {"name": "Client-owned"}}
+    {"license": {"name": "NOASSERTION"}}
 ]
 root_ref = document["metadata"]["component"]["bom-ref"]
 assert document["dependencies"] == [{

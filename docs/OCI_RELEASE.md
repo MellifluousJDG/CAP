@@ -84,12 +84,11 @@ A future GitHub Actions workflow can authenticate to GHCR with
 enable automatic public pushes until all of these are true:
 
 1. redistribution review is complete;
-2. the model's redistribution terms are confirmed;
-3. the image passes the full one-core container test;
-4. required license/notice material is included;
-5. tag and rollback policies are agreed;
-6. the external compliance bundle is complete and checksum-verified;
-7. the workflow pins third-party Actions by immutable commit.
+2. the image passes the full one-core container test;
+3. required license/notice material is included;
+4. tag and rollback policies are agreed;
+5. the external compliance bundle is complete and checksum-verified;
+6. the workflow pins third-party Actions by immutable commit.
 
 ## Redistribution requirements
 
@@ -102,8 +101,6 @@ enable automatic public pushes until all of these are true:
 - Include TRASH_2's MIT-style `license.txt`. Its tracked Windows-only
   MAFFT/HMMER bundles and historical `temp/` outputs are excluded from the Linux
   image, which uses the locked Conda MAFFT/HMMER packages instead.
-- Preserve the client's authorization to distribute the trained model in the
-  external release record. No separate model license file is currently tracked.
 - Generate dependency inventories from the final image. If they differ from the
   reviewed candidate inventories, review the changed Conda and Debian packages
   and collect any additional notices or corresponding source before publication.
@@ -111,6 +108,5 @@ enable automatic public pushes until all of these are true:
   copyright files, binary-to-source mappings, and corresponding source, in the
   external compliance bundle.
 
-Do not publish the image until the model authorization is in the external
-release record and the final compliance bundle is complete and
+Do not publish the image until the final compliance bundle is complete and
 checksum-verified.

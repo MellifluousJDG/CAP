@@ -146,8 +146,7 @@ it does not replace legal review. Obtain and preserve exact corresponding
 source for packages whose licenses require it before public distribution.
 
 An OCI archive is included only when INCLUDE_OCI_ARCHIVE=1. The primary
-CycloneDX SBOM is generated directly from the exact image inventories. Before
-public release, preserve the model-distribution authorization.
+CycloneDX SBOM is generated directly from the exact image inventories.
 EOF
 
 (

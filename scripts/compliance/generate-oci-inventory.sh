@@ -60,8 +60,8 @@ printf "TRASH_2,%s,%s,%s\n" \
     "/opt/CAP/modules/TRASH_2/license.txt"
 printf "model,%s,%s,%s\n" \
     "$(sha256sum /opt/CAP/model/centromeric_model_v2.pkl | cut -d" " -f1)" \
-    "Client-owned; distribution authorized" \
-    "/opt/CAP/THIRD_PARTY_NOTICES.md"
+    "NOASSERTION" \
+    "/opt/CAP/model/centromeric_model_v2.pkl"
 ' > "$OUTDIR/embedded-components.csv"
 
 (

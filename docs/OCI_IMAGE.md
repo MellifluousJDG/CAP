@@ -166,4 +166,4 @@ because font discovery and rasterization can vary with the base OS even when R
 packages are locked; it must still be present and nonempty. Record the image's
 immutable OCI digest and generate an SBOM and license inventory. Public registry
 publication and release archives must wait until redistribution terms for all
-bundled dependencies and the model have been reviewed.
+bundled dependencies have been reviewed.
