@@ -46,6 +46,11 @@ image_trash_revision="$($RUNTIME image inspect --format \
 cap_revision="$image_cap_revision"
 trash_revision="$image_trash_revision"
 if [[ "$git_available" == "1" ]]; then
+    if [[ -n "$($GIT_COMMAND -C "$PROJECT_DIR" status --porcelain \
+        --untracked-files=normal --ignore-submodules=none)" ]]; then
+        echo "Compliance bundles require a clean checkout with no untracked files." >&2
+        exit 1
+    fi
     checkout_cap_revision="$($GIT_COMMAND -C "$PROJECT_DIR" rev-parse HEAD)"
     checkout_trash_revision="$($GIT_COMMAND -C "$PROJECT_DIR" \
         rev-parse HEAD:modules/TRASH_2)"
@@ -142,9 +147,9 @@ CAP OCI compliance bundle
 
 This bundle records the image identity, package inventories, declared licenses,
 repository revisions, and complete corresponding source for CAP's BCT-derived
-ctw-calc executable. A revision ending in -DIRTY is not release-ready. Package
-binary URLs identify exact Conda artifacts and are a starting point for
-corresponding-source collection; they are not themselves source archives. Apply
+ctw-calc executable. Package binary URLs identify exact Conda artifacts and are
+a starting point for corresponding-source collection; they are not themselves
+source archives. Apply
 scripts/compliance/apply-source-review-policy.py to source-obligations.csv,
 then run scripts/compliance/collect-conda-sources.py against the reviewed CSV.
 Collect embedded package notices with
