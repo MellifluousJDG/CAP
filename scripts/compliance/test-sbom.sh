@@ -22,7 +22,7 @@ d_hash="$(printf 'd%.0s' {1..64})"
 cat > "$tmpdir/inventory/embedded-components.csv" <<EOF
 component,revision_or_hash,license_expression,license_or_notice_file
 CAP,$a_hash,MIT,/opt/CAP/LICENSE
-BCT_ctw-calc,$b_hash,GPL-3.0-only,/opt/CAP/bin/src/BCT/NOTICE
+BCT_ctw-calc,$b_hash,GPL-2.0-or-later,/opt/CAP/bin/src/BCT/NOTICE
 TRASH_2,$c_hash,MIT,/opt/CAP/modules/TRASH_2/license.txt
 model,$d_hash,Client-owned,/opt/CAP/THIRD_PARTY_NOTICES.md
 EOF
@@ -55,6 +55,9 @@ assert components["example"]["purl"] == (
     "https%3A%2F%2Fconda.example%2Flinux-64"
 )
 assert components["base-files"]["purl"] == "pkg:deb/debian/base-files@12.4"
+assert components["BCT_ctw-calc"]["licenses"] == [
+    {"expression": "GPL-2.0-or-later"}
+]
 assert components["example-r"]["licenses"] == [{"expression": "GPL-3.0-only"}]
 assert components["model"]["licenses"] == [
     {"license": {"name": "Client-owned"}}

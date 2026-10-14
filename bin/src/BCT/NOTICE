@@ -6,15 +6,18 @@ implementation by Ioannis Papageorgiou:
 
   https://github.com/IoannisPapageorgiou/Bayesian-Context-Trees
 
-The related BCT R package is available from:
+The related BCT R package by the same author is available from:
 
   https://cran.r-project.org/package=BCT
 
-Pending explicit rightsholder confirmation, CAP treats every source file in this
-directory and the resulting `bin/ctw-calc` executable as licensed under:
+The standalone C++ repository does not contain a separate explicit license
+notice. Its related CRAN BCT distribution declares `GPL (>= 2)`. On that basis,
+CAP applies the following license to the adapted source in this directory and
+the resulting `bin/ctw-calc` executable:
 
-  GPL-2.0-only OR GPL-3.0-only
+  GPL-2.0-or-later
 
-The complete license texts are at `licenses/GPL-2.0.txt` and
-`licenses/GPL-3.0.txt` in the CAP repository. See `THIRD_PARTY_NOTICES.md` for
-provenance, modification, distribution, and confirmation details.
+The complete GPL version 2 and version 3 texts are at
+`licenses/GPL-2.0.txt` and `licenses/GPL-3.0.txt` in the CAP repository. See
+`THIRD_PARTY_NOTICES.md` for provenance, modification, and distribution
+details.

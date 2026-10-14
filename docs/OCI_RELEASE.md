@@ -95,11 +95,12 @@ enable automatic public pushes until all of these are true:
 
 Current findings are not legal advice:
 
-- CAP's original code has an MIT license file. The BCT-derived subtree and
-  compiled `ctw-calc` are provisionally treated as
-  `GPL-2.0-only OR GPL-3.0-only`; the corresponding source, provenance notice,
-  and GPL texts are tracked. Client/rightsholder confirmation remains required
-  before public distribution.
+- CAP's original code has an MIT license file. The standalone BCT C++
+  repository has no separate explicit license notice; the related BCT R package
+  published by the same author declares `GPL (>= 2)` in its CRAN metadata. On
+  that basis, the BCT-derived subtree and compiled `ctw-calc` use
+  `GPL-2.0-or-later`; corresponding source, provenance notices, and GPL texts
+  are tracked.
 - TRASH_2's pinned revision contains an MIT-style `license.txt`. Its tracked
   Windows-only MAFFT/HMMER bundles and historical `temp/` outputs are excluded
   from the Linux image; Linux uses the exact locked Conda MAFFT/HMMER packages.

@@ -12,7 +12,7 @@ required_dockerfile_text=(
     'ARG MINICONDA_SHA256='
     'ARG CAP_REVISION=UNSPECIFIED'
     'ARG TRASH_2_REVISION=UNSPECIFIED'
-    'org.opencontainers.image.licenses="MIT AND (GPL-2.0-only OR GPL-3.0-only)"'
+    'org.opencontainers.image.licenses="MIT AND GPL-2.0-or-later"'
     'COPY conda-runtime-linux-64.lock /tmp/conda-runtime-linux-64.lock'
     'conda create --yes --prefix /opt/cap-env'
     '--override-channels'

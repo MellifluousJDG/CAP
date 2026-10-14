@@ -147,8 +147,7 @@ source for packages whose licenses require it before public distribution.
 
 An OCI archive is included only when INCLUDE_OCI_ARCHIVE=1. The primary
 CycloneDX SBOM is generated directly from the exact image inventories. Before
-public release, preserve the model-distribution authorization and resolve the
-provisional BCT/CTW license with the client and rightsholder.
+public release, preserve the model-distribution authorization.
 EOF
 
 (

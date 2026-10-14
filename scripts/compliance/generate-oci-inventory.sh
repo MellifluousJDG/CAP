@@ -52,7 +52,7 @@ printf "CAP,%s,%s,%s\n" \
     "/opt/CAP/LICENSE"
 printf "BCT_ctw-calc,%s,%s,%s\n" \
     "$(sha256sum /opt/CAP/bin/ctw-calc | cut -d" " -f1)" \
-    "GPL-2.0-only OR GPL-3.0-only (provisional)" \
+    "GPL-2.0-or-later" \
     "/opt/CAP/bin/src/BCT/NOTICE"
 printf "TRASH_2,%s,%s,%s\n" \
     "$(sha256sum /opt/CAP/modules/TRASH_2/src/TRASH.R | cut -d" " -f1)" \

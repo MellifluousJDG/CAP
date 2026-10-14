@@ -14,11 +14,11 @@ The build uses three pinned inputs:
   lock containing only runtime packages.
 
 The bundled CTW/BCT source under `bin/src/BCT` identifies its upstream at
-https://github.com/IoannisPapageorgiou/Bayesian-Context-Trees. CAP
-provisionally treats that source and `ctw-calc` as
-`GPL-2.0-only OR GPL-3.0-only`; see `THIRD_PARTY_NOTICES.md`. Confirmation
-from the client and upstream rightsholder is required before public
-redistribution.
+https://github.com/IoannisPapageorgiou/Bayesian-Context-Trees. The standalone
+C++ repository has no separate explicit license notice, but the related BCT R
+package published by the same author declares `GPL (>= 2)` in its CRAN metadata.
+On that basis, CAP applies `GPL-2.0-or-later` to the adapted source and
+`ctw-calc`; see `THIRD_PARTY_NOTICES.md`.
 
 The pinned TRASH_2 revision tracks Windows-only MAFFT/HMMER bundles and
 historical output under `temp/`. They are excluded from the Linux image by
