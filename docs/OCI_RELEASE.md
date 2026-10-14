@@ -30,6 +30,7 @@ ghcr.io/mellifluousjdg/cap@sha256:...
 
 ## Manual publication
 
+Publish release images manually; do not configure automated registry pushes.
 Create a GitHub personal access token with package write permission, then avoid
 putting it on the command line or in shell history:
 
@@ -76,19 +77,6 @@ In addition to the registry image, preserve:
 An OCI archive protects against registry loss but may be too large for GitHub's
 normal release-asset limits. If so, store it in institutional archival storage
 and publish its checksum and location in the release notes.
-
-## Automated publication
-
-A future GitHub Actions workflow can authenticate to GHCR with
-`GITHUB_TOKEN`, build on release tags, run static checks, and publish. Do not
-enable automatic public pushes until all of these are true:
-
-1. redistribution review is complete;
-2. the image passes the full one-core container test;
-3. required license/notice material is included;
-4. tag and rollback policies are agreed;
-5. the external compliance bundle is complete and checksum-verified;
-6. the workflow pins third-party Actions by immutable commit.
 
 ## Redistribution requirements
 
