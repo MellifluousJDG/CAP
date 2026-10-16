@@ -168,6 +168,29 @@ Common problems:
 For cluster execution, see `docs/OCI_HPC.md`. For build details, inventories,
 archives, and release procedure, see `docs/OCI_RELEASE.md`.
 
+## Corresponding source
+
+The complete CAP 1.0.0 source and compliance bundle is published as a public OCI
+artifact:
+
+```text
+ghcr.io/mellifluousjdg/cap-source:1.0.0
+ghcr.io/mellifluousjdg/cap-source@sha256:88a7b8597be7bb15580423a404b2213f848ce6a91897b72a4cea28c660ad9d04
+```
+
+Download the immutable artifact with ORAS:
+
+```bash
+oras pull \
+  ghcr.io/mellifluousjdg/cap-source@sha256:88a7b8597be7bb15580423a404b2213f848ce6a91897b72a4cea28c660ad9d04
+```
+
+The downloaded file is `cap-1.0.0-compliance-bundle.tar.zst`. Its SHA-256 is:
+
+```text
+770ef6f5ed34594e1629ff40cdd1b642fe72a28e59c073a5e5f921df18ad760c
+```
+
 ## Inventory
 
 Generate an image inventory with either Podman or Docker:

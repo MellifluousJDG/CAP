@@ -356,8 +356,8 @@ image=ghcr.io/mellifluousjdg/cap@sha256:c6ec1c840e0a4184a249019b3ea317330754e569
 ```
 
 See `docs/OCI_IMAGE.md` for Docker, permissions, SELinux, troubleshooting,
-cleanup, and image details; see `docs/OCI_HPC.md` for single-allocation cluster
-templates.
+cleanup, image details, and the published corresponding-source artifact; see
+`docs/OCI_HPC.md` for single-allocation cluster templates.
 
 ## License
 
