@@ -85,9 +85,8 @@ ghcr.io/mellifluousjdg/cap:1.0.0
 ghcr.io/mellifluousjdg/cap@sha256:c6ec1c840e0a4184a249019b3ea317330754e5699f2550e009fe28b0729e889b
 ```
 
-The tag is convenient and the digest selects the exact validated image. The
-following rootless Podman example keeps input read-only and results/work
-writable:
+The tag is convenient and the digest selects one exact image. The following
+rootless Podman example keeps input read-only and results/work writable:
 
 ```bash
 assembly=/path/to/genome.fasta
@@ -118,10 +117,10 @@ podman image rm ghcr.io/mellifluousjdg/cap:1.0.0
 ```
 
 The image runs as non-root user `cap` (UID/GID 1000). With rootless Podman,
-`--userns=keep-id` was validated to keep bind-mounted output owned by the
-invoking host user. On SELinux systems, add `:Z` to private mounts if policy
-requires relabeling, for example `-v "$PWD/results:/results:Z"`. Do not add
-`:Z` to shared directories without understanding the site's labeling policy.
+`--userns=keep-id` keeps bind-mounted output owned by the invoking host user.
+On SELinux systems, private bind mounts may need the `:Z` suffix so the
+container can access them, for example `-v "$PWD/results:/results:Z"`. Consult
+your operating system or cluster documentation before relabeling shared paths.
 
 For Docker, map the process to the host user and give Nextflow a writable home:
 
@@ -141,11 +140,9 @@ docker run --rm \
   -work-dir /work/nextflow
 ```
 
-Docker was not available in the release environment, so this equivalent command
-shape is documented but not release-tested. Optional CAP parameters, including
-`--te_gff`, `--gene_gff`, `--metadata`, `--trash2`, and `--cores`, follow the
-normal workflow interface. Do not select Nextflow's `docker` profile: the whole
-workflow is already inside the CAP image.
+Optional CAP parameters, including `--te_gff`, `--gene_gff`, `--metadata`,
+`--trash2`, and `--cores`, follow the normal workflow interface. Do not select
+Nextflow's `docker` profile: the whole workflow is already inside the CAP image.
 
 ### Diagnostics and troubleshooting
 
@@ -167,11 +164,6 @@ Common problems:
   `work/nextflow` for diagnosis; remove work only after success.
 - A Nextflow version-check warning when offline is harmless; the bundled
   workflow and dependencies run without downloading packages.
-
-The public digest was anonymously pulled with an empty credential file into an
-empty Podman store. A one-core consumer run produced 16 files and matched all 15
-deterministic non-PNG hashes; the PNG must be nonempty but its raster bytes may
-vary with font/rendering details.
 
 For cluster execution, see `docs/OCI_HPC.md`. For build details, inventories,
 archives, and release procedure, see `docs/OCI_RELEASE.md`.

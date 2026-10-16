@@ -355,16 +355,9 @@ For an immutable pull, replace the image assignment with:
 image=ghcr.io/mellifluousjdg/cap@sha256:c6ec1c840e0a4184a249019b3ea317330754e5699f2550e009fe28b0729e889b
 ```
 
-The public digest was anonymously pulled into an empty container store and
-validated with a one-core, read-only-input consumer run. All 16 expected output
-files were produced and all 15 deterministic non-PNG hashes matched. See
-`docs/OCI_IMAGE.md` for Docker, permissions, SELinux, troubleshooting, cleanup,
-and image details; see `docs/OCI_HPC.md` for single-allocation cluster templates.
-
-## Other packaging methods
-
-Conda and the published OCI image are validated Linux installation paths.
-AppImage packaging remains exploratory.
+See `docs/OCI_IMAGE.md` for Docker, permissions, SELinux, troubleshooting,
+cleanup, and image details; see `docs/OCI_HPC.md` for single-allocation cluster
+templates.
 
 ## License
 

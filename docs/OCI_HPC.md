@@ -23,11 +23,6 @@ Podman may be available, while Apptainer/Singularity is the most common HPC
 choice. Also determine whether compute nodes can reach GHCR; if not, pull or
 convert the image in advance on a connected system.
 
-These examples are templates, not proof of compatibility with a particular
-cluster. The public image has been validated with rootless Podman on Linux; CAP
-has not yet been exercised on a real scheduler or with Apptainer at a target
-site.
-
 The convenient release reference is
 `ghcr.io/mellifluousjdg/cap:1.0.0`. For an exact immutable image, use
 `ghcr.io/mellifluousjdg/cap@sha256:c6ec1c840e0a4184a249019b3ea317330754e5699f2550e009fe28b0729e889b`.
@@ -66,8 +61,8 @@ podman run --rm --userns=keep-id \
 
 `--userns=keep-id` is important for rootless Podman: it makes bind-mounted
 outputs belong to the submitting host user instead of a subordinate UID.
-SELinux-enabled hosts may require `:Z` on private bind mounts; follow site
-policy before adding it.
+SELinux-enabled hosts may require `:Z` on private bind mounts; consult the
+cluster's container-runtime policy before relabeling shared paths.
 
 ## Docker
 
@@ -90,9 +85,8 @@ docker run --rm \
   -work-dir /work/nextflow
 ```
 
-Create `/work/home` before launching if the site runtime does not create it.
-This Docker HPC template is not yet tested because Docker is unavailable in the
-current development environment.
+Create `/work/home` before launching if the container runtime does not create
+it.
 
 ## Apptainer or Singularity
 
@@ -120,12 +114,12 @@ apptainer exec \
 ```
 
 Apptainer does not necessarily honor an OCI image's entrypoint, so invoke
-`/usr/local/bin/cap` explicitly. This path remains untested until Apptainer and
-a target cluster are available.
+`/usr/local/bin/cap` explicitly.
 
 ## Offline transfer
 
-For sites without registry access, export an OCI archive on a connected host:
+For clusters without registry access, export an OCI archive on a connected
+host:
 
 ```bash
 podman save --format oci-archive \
@@ -134,6 +128,6 @@ podman save --format oci-archive \
 sha256sum cap-1.0.0.oci.tar > cap-1.0.0.oci.tar.sha256
 ```
 
-Transfer both files, verify the checksum, and import with the site's supported
-runtime. An OCI archive is not a substitute for a tested Apptainer SIF when the
-cluster only supports Apptainer.
+Transfer both files, verify the checksum, and import with the cluster's
+supported runtime. An OCI archive is not a substitute for an Apptainer SIF when
+the cluster only supports Apptainer.
