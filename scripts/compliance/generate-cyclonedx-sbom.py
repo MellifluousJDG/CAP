@@ -77,8 +77,8 @@ def main() -> None:
     debian = read_csv(args.inventory / "debian-packages.csv")
     embedded = read_csv(args.inventory / "embedded-components.csv")
     image_data = json.loads(
-        (args.inventory / "image-inspect.json").read_text(encoding="utf-8")
-    )[0]
+        (args.inventory / "image-metadata.json").read_text(encoding="utf-8")
+    )
     if len(conda) != len({(r["name"], r["version"], r["build"]) for r in conda}):
         raise SystemExit("Duplicate exact Conda package record")
     if len(debian) != len({(r["package"], r["version"]) for r in debian}):

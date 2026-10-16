@@ -46,10 +46,21 @@ for ignored in '.git' '.nextflow' 'work' 'work_*' 'results' 'results_*' \
 done
 
 grep -F 'exec nextflow run "$CAP_DIR" "$@"' "$ENTRYPOINT" >/dev/null
+if grep -F 'image inspect "$IMAGE" >' \
+    "$PROJECT_DIR/scripts/compliance/generate-oci-inventory.sh" >/dev/null; then
+    echo "OCI inventory records the complete runtime-specific inspect output." >&2
+    exit 1
+fi
+if grep -Eq 'sha256sum .* > .*\.sha256' \
+    "$PROJECT_DIR/scripts/compliance/generate-oci-compliance-bundle.sh"; then
+    echo "Compliance bundle generator creates a redundant checksum sidecar." >&2
+    exit 1
+fi
 bash -n "$ENTRYPOINT" \
     "$PROJECT_DIR/scripts/test-container-image.sh" \
     "$PROJECT_DIR/scripts/compliance/generate-oci-inventory.sh" \
-    "$PROJECT_DIR/scripts/compliance/generate-oci-compliance-bundle.sh"
+    "$PROJECT_DIR/scripts/compliance/generate-oci-compliance-bundle.sh" \
+    "$PROJECT_DIR/scripts/compliance/finalize-compliance-checksums.sh"
 python3 - <<PY
 from pathlib import Path
 compile(
@@ -104,6 +115,7 @@ bash "$PROJECT_DIR/scripts/compliance/test-collect-conda-sources.sh"
 bash "$PROJECT_DIR/scripts/compliance/test-collect-conda-notices.sh"
 python3 "$PROJECT_DIR/scripts/compliance/test-collect-debian-sources.py"
 bash "$PROJECT_DIR/scripts/compliance/test-conda-source-notices.sh"
+bash "$PROJECT_DIR/scripts/compliance/test-finalize-compliance-checksums.sh"
 bash "$PROJECT_DIR/scripts/compliance/test-sbom.sh"
 
 runtime_lock="$PROJECT_DIR/conda-runtime-linux-64.lock"

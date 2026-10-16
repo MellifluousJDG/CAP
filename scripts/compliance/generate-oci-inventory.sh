@@ -12,7 +12,19 @@ command -v "$RUNTIME" >/dev/null || {
 }
 mkdir -p "$OUTDIR"
 
-"$RUNTIME" image inspect "$IMAGE" > "$OUTDIR/image-inspect.json"
+image_id="$($RUNTIME image inspect --format '{{.Id}}' "$IMAGE")"
+image_digest="$($RUNTIME image inspect --format '{{.Digest}}' "$IMAGE")"
+image_architecture="$($RUNTIME image inspect --format '{{.Architecture}}' "$IMAGE")"
+image_os="$($RUNTIME image inspect --format '{{.Os}}' "$IMAGE")"
+python3 - "$image_id" "$image_digest" "$image_architecture" "$image_os" \
+    > "$OUTDIR/image-metadata.json" <<'PY'
+import json
+import sys
+
+keys = ("Id", "Digest", "Architecture", "Os")
+json.dump(dict(zip(keys, sys.argv[1:])), sys.stdout, indent=2)
+print()
+PY
 
 "$RUNTIME" run --rm --entrypoint /bin/bash "$IMAGE" -c '
 set -euo pipefail
@@ -66,7 +78,7 @@ printf "model,%s,%s,%s\n" \
 
 (
     cd "$OUTDIR"
-    sha256sum image-inspect.json conda-packages.csv debian-packages.csv \
+    sha256sum image-metadata.json conda-packages.csv debian-packages.csv \
         embedded-components.csv > SHA256SUMS
 )
 

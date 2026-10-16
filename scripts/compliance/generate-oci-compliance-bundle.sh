@@ -92,8 +92,6 @@ cp "$PROJECT_DIR/modules/TRASH_2/license.txt" \
 tar --sort=name --mtime='UTC 1970-01-01' --owner=0 --group=0 \
     --numeric-owner -C "$PROJECT_DIR" -cJf \
     "$OUTDIR/source/BCT-corresponding-source.tar.xz" bin/src/BCT
-sha256sum "$OUTDIR/source/BCT-corresponding-source.tar.xz" \
-    > "$OUTDIR/source/BCT-corresponding-source.tar.xz.sha256"
 
 "$RUNTIME" run --rm --interactive --entrypoint python3 "$IMAGE" - <<'PY' \
     > "$OUTDIR/inventory/conda-source-urls.csv"
@@ -144,7 +142,6 @@ if [[ "$INCLUDE_OCI_ARCHIVE" == "1" ]]; then
     archive="$OUTDIR/image.oci.tar.zst"
     "$RUNTIME" save --format oci-archive "$IMAGE" | \
         zstd -T0 -19 -o "$archive"
-    sha256sum "$archive" > "$archive.sha256"
 fi
 
 cat > "$OUTDIR/README.txt" <<'EOF'
@@ -180,10 +177,6 @@ runtime is Podman. Docker users can create a separate Docker archive with
 primary CycloneDX SBOM is generated directly from the exact image inventories.
 EOF
 
-(
-    cd "$OUTDIR"
-    find . -type f ! -name SHA256SUMS -print0 | LC_ALL=C sort -z | \
-        xargs -0 sha256sum > SHA256SUMS
-)
+"$PROJECT_DIR/scripts/compliance/finalize-compliance-checksums.sh" "$OUTDIR"
 
 echo "OCI compliance bundle written to $OUTDIR"

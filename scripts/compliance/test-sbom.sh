@@ -26,12 +26,11 @@ BCT_ctw-calc,$b_hash,GPL-2.0-or-later,/opt/CAP/bin/src/BCT/README.md
 TRASH_2,$c_hash,MIT,/opt/CAP/modules/TRASH_2/license.txt
 model,$d_hash,NOASSERTION,/opt/CAP/model/centromeric_model_v2.pkl
 EOF
-cat > "$tmpdir/inventory/image-inspect.json" <<EOF
-[{
+cat > "$tmpdir/inventory/image-metadata.json" <<EOF
+{
   "Id": "0123", "Digest": "sha256:4567",
-  "Created": "2026-01-01T00:00:00Z",
   "Architecture": "amd64", "Os": "linux"
-}]
+}
 EOF
 "$PROJECT_DIR/scripts/compliance/generate-cyclonedx-sbom.py" \
     "$tmpdir/inventory" "$tmpdir/sbom.json"
