@@ -291,10 +291,13 @@ Optional:
 ────────────────────────────────────────────────────────────────────────────────
                              INSTALLATION & RUN OPTIONS
 ────────────────────────────────────────────────────────────────────────────────
-1. DOCKER (not available yet)
-   nextflow run vlothec/CAP -profile docker --assembly data/genome.fasta
+1. OCI CONTAINER (Docker or Podman)
+   podman run --rm -v \$PWD/data:/data:ro -v \$PWD/results:/results \\
+     cap:local --assembly /data/genome.fasta --outdir /results
 
-2. CONDA (Local Linux/macOS/Windows)
+2. CONDA
+   # Linux x86-64 is the validated platform.
+   # macOS and Windows setup scripts are also provided but are not validated.
    # Setup
    make install  # or ./setup_conda.sh (Linux/Mac) or .\\setup_conda.ps1 (Windows)
    
@@ -334,7 +337,7 @@ nextflow run . \\
 - *_GC.csv
 - *_CTW.csv
 
-See README.md for full details: https://github.com/vlothec/CAP
+See README.md for full details: https://github.com/MellifluousJDG/CAP
 """
     println help
     System.exit(0)
