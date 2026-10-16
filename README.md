@@ -320,18 +320,51 @@ make test-slurm-wrapper
 
 These tests validate argument handling, CPU propagation, optional TRASH_2 behavior, and temporary-work cleanup without calling `sbatch`.
 
-## OCI containers
+## OCI container quick start
 
-The OCI image build packages CAP and the complete exact lock-backed Conda
-environment into a Debian slim image. See `docs/OCI_IMAGE.md` for its
-reproducibility model and local Docker/Podman use, `docs/OCI_HPC.md` for
-single-allocation cluster templates, and `docs/OCI_RELEASE.md` for GHCR,
-inventory, archive, and release guidance.
+The public Linux x86-64 image contains CAP and all runtime dependencies. With
+rootless Podman installed, put a FASTA file in a new working directory:
+
+```bash
+assembly=/path/to/genome.fasta
+mkdir -p cap-run/data cap-run/results cap-run/work
+cp "$assembly" cap-run/data/
+assembly_name=$(basename "$assembly")
+cd cap-run
+
+image=ghcr.io/mellifluousjdg/cap:1.0.0
+podman run --rm --userns=keep-id \
+  -v "$PWD/data:/data:ro" \
+  -v "$PWD/results:/results" \
+  -v "$PWD/work:/work" \
+  "$image" \
+  --assembly "/data/$assembly_name" \
+  --cores 1 \
+  --outdir /results \
+  -work-dir /work/nextflow
+```
+
+CAP writes final
+CSV, RDS, model, and PNG files to `results/`; `work/nextflow` contains disposable
+Nextflow intermediates. Successful rootless Podman runs leave both directories
+owned by the invoking user. Remove `work/` after success to reclaim space.
+
+For an immutable pull, replace the image assignment with:
+
+```bash
+image=ghcr.io/mellifluousjdg/cap@sha256:c6ec1c840e0a4184a249019b3ea317330754e5699f2550e009fe28b0729e889b
+```
+
+The public digest was anonymously pulled into an empty container store and
+validated with a one-core, read-only-input consumer run. All 16 expected output
+files were produced and all 15 deterministic non-PNG hashes matched. See
+`docs/OCI_IMAGE.md` for Docker, permissions, SELinux, troubleshooting, cleanup,
+and image details; see `docs/OCI_HPC.md` for single-allocation cluster templates.
 
 ## Other packaging methods
 
-AppImage packaging is planned after OCI validation. Conda remains the validated
-host installation path while the OCI image is being tested.
+Conda and the published OCI image are validated Linux installation paths.
+AppImage packaging remains exploratory.
 
 ## License
 

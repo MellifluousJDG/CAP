@@ -76,44 +76,105 @@ labels. Local modifications or untracked files could therefore make the copied
 source differ from the commits named by those labels. Normal container
 execution does not install or download CAP dependencies.
 
-## Run
+## Run the published image
 
-Create host directories and mount input read-only while keeping results and
-Nextflow work writable:
+CAP 1.0.0 is public at:
+
+```text
+ghcr.io/mellifluousjdg/cap:1.0.0
+ghcr.io/mellifluousjdg/cap@sha256:c6ec1c840e0a4184a249019b3ea317330754e5699f2550e009fe28b0729e889b
+```
+
+The tag is convenient and the digest selects the exact validated image. The
+following rootless Podman example keeps input read-only and results/work
+writable:
 
 ```bash
-mkdir -p results work
+assembly=/path/to/genome.fasta
+mkdir -p cap-run/data cap-run/results cap-run/work
+cp "$assembly" cap-run/data/
+assembly_name=$(basename "$assembly")
+cd cap-run
+
+image=ghcr.io/mellifluousjdg/cap:1.0.0
 podman run --rm --userns=keep-id \
   -v "$PWD/data:/data:ro" \
   -v "$PWD/results:/results" \
   -v "$PWD/work:/work" \
-  cap:local \
-  --assembly /data/genome.fasta \
+  "$image" \
+  --assembly "/data/$assembly_name" \
+  --cores 1 \
   --outdir /results \
   -work-dir /work/nextflow
 ```
 
-Replace `podman` with `docker` for Docker, omitting Podman's
-`--userns=keep-id`. The image runs as non-root user `cap` (UID/GID 1000).
-`--userns=keep-id` was validated with rootless Podman and keeps bind-mounted
-results and work files owned by the invoking host user. Without it, those files
-may appear under a subordinate UID and require `podman unshare` to manage.
-Docker users should normally add `--user "$(id -u):$(id -g)"` and provide a
-writable `HOME`/`NXF_HOME`; see `docs/OCI_HPC.md` for the command shape.
-
-Optional CAP parameters, including `--te_gff`, `--gene_gff`, `--metadata`,
-`--trash2`, and `--cores`, follow the normal workflow interface. Do not select
-the Nextflow `docker` profile: the whole workflow is already running inside the
-CAP image.
-
-For diagnostics, open a shell in the image with:
+Final CSV, RDS, model, and
+PNG files appear directly under `results/`. Nextflow intermediates are under
+`work/nextflow` and may be removed after a successful run:
 
 ```bash
-podman run --rm --userns=keep-id -it cap:local --shell
+rm -rf work
+podman image rm ghcr.io/mellifluousjdg/cap:1.0.0
 ```
 
-For cluster execution, see `docs/OCI_HPC.md`. For image tags, GHCR publication,
-archives, inventories, and the release checklist, see `docs/OCI_RELEASE.md`.
+The image runs as non-root user `cap` (UID/GID 1000). With rootless Podman,
+`--userns=keep-id` was validated to keep bind-mounted output owned by the
+invoking host user. On SELinux systems, add `:Z` to private mounts if policy
+requires relabeling, for example `-v "$PWD/results:/results:Z"`. Do not add
+`:Z` to shared directories without understanding the site's labeling policy.
+
+For Docker, map the process to the host user and give Nextflow a writable home:
+
+```bash
+mkdir -p work/home results
+docker run --rm \
+  --user "$(id -u):$(id -g)" \
+  -e HOME=/work/home \
+  -e NXF_HOME=/work/home/.nextflow \
+  -v "$PWD/data:/data:ro" \
+  -v "$PWD/results:/results" \
+  -v "$PWD/work:/work" \
+  ghcr.io/mellifluousjdg/cap:1.0.0 \
+  --assembly /data/genome.fasta \
+  --cores 1 \
+  --outdir /results \
+  -work-dir /work/nextflow
+```
+
+Docker was not available in the release environment, so this equivalent command
+shape is documented but not release-tested. Optional CAP parameters, including
+`--te_gff`, `--gene_gff`, `--metadata`, `--trash2`, and `--cores`, follow the
+normal workflow interface. Do not select Nextflow's `docker` profile: the whole
+workflow is already inside the CAP image.
+
+### Diagnostics and troubleshooting
+
+Display help or open an interactive shell:
+
+```bash
+podman run --rm ghcr.io/mellifluousjdg/cap:1.0.0 --help
+podman run --rm --userns=keep-id -it \
+  ghcr.io/mellifluousjdg/cap:1.0.0 --shell
+```
+
+Common problems:
+
+- `No such file` for the assembly: ensure the host file is inside `data/` and
+  use its exact basename as `/data/<basename>`.
+- Permission denied under `results/` or `work/`: create both host directories
+  before running, retain `--userns=keep-id`, and check SELinux labeling.
+- Interrupted or failed execution: inspect `.nextflow.log` and retain
+  `work/nextflow` for diagnosis; remove work only after success.
+- A Nextflow version-check warning when offline is harmless; the bundled
+  workflow and dependencies run without downloading packages.
+
+The public digest was anonymously pulled with an empty credential file into an
+empty Podman store. A one-core consumer run produced 16 files and matched all 15
+deterministic non-PNG hashes; the PNG must be nonempty but its raster bytes may
+vary with font/rendering details.
+
+For cluster execution, see `docs/OCI_HPC.md`. For build details, inventories,
+archives, and release procedure, see `docs/OCI_RELEASE.md`.
 
 ## Inventory
 

@@ -24,7 +24,13 @@ choice. Also determine whether compute nodes can reach GHCR; if not, pull or
 convert the image in advance on a connected system.
 
 These examples are templates, not proof of compatibility with a particular
-cluster. CAP's real-cluster container validation remains outstanding.
+cluster. The public image has been validated with rootless Podman on Linux; CAP
+has not yet been exercised on a real scheduler or with Apptainer at a target
+site.
+
+The convenient release reference is
+`ghcr.io/mellifluousjdg/cap:1.0.0`. For an exact immutable image, use
+`ghcr.io/mellifluousjdg/cap@sha256:c6ec1c840e0a4184a249019b3ea317330754e5699f2550e009fe28b0729e889b`.
 
 ## Rootless Podman
 
@@ -38,7 +44,7 @@ storage for temporary Nextflow work:
 
 set -euo pipefail
 
-image=ghcr.io/mellifluousjdg/cap:VERSION
+image=ghcr.io/mellifluousjdg/cap:1.0.0
 assembly=/shared/data/genome.fasta
 outdir=/shared/results/genome-cap
 work_root="${SLURM_TMPDIR:-${TMPDIR:-/tmp}}/cap-${SLURM_JOB_ID}"
@@ -77,7 +83,7 @@ docker run --rm \
   -v /shared/data:/data:ro \
   -v /shared/results/genome-cap:/results \
   -v "${SLURM_TMPDIR}/cap-work:/work" \
-  ghcr.io/mellifluousjdg/cap:VERSION \
+  ghcr.io/mellifluousjdg/cap:1.0.0 \
   --assembly /data/genome.fasta \
   --outdir /results \
   --cores "${SLURM_CPUS_PER_TASK:-1}" \
@@ -90,12 +96,12 @@ current development environment.
 
 ## Apptainer or Singularity
 
-After a public image is available, a connected login or transfer node can
-normally convert it to a SIF file:
+Because the image is public, a connected login or transfer node can normally
+convert it to a SIF file:
 
 ```bash
-apptainer pull cap-VERSION.sif \
-  docker://ghcr.io/mellifluousjdg/cap:VERSION
+apptainer pull cap-1.0.0.sif \
+  docker://ghcr.io/mellifluousjdg/cap:1.0.0
 ```
 
 Then copy the immutable SIF to shared storage and execute it in one allocation:
@@ -105,7 +111,7 @@ apptainer exec \
   --bind /shared/data:/data:ro \
   --bind /shared/results/genome-cap:/results \
   --bind "${SLURM_TMPDIR}/cap-work:/work" \
-  cap-VERSION.sif \
+  cap-1.0.0.sif \
   /usr/local/bin/cap \
   --assembly /data/genome.fasta \
   --outdir /results \
@@ -123,9 +129,9 @@ For sites without registry access, export an OCI archive on a connected host:
 
 ```bash
 podman save --format oci-archive \
-  -o cap-VERSION.oci.tar \
-  ghcr.io/mellifluousjdg/cap:VERSION
-sha256sum cap-VERSION.oci.tar > cap-VERSION.oci.tar.sha256
+  -o cap-1.0.0.oci.tar \
+  ghcr.io/mellifluousjdg/cap:1.0.0
+sha256sum cap-1.0.0.oci.tar > cap-1.0.0.oci.tar.sha256
 ```
 
 Transfer both files, verify the checksum, and import with the site's supported
