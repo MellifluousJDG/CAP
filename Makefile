@@ -30,12 +30,8 @@ appimage:
 	bash scripts/appimage/build-appimage.sh
 
 test-appimage:
-	bash scripts/appimage/test-appimage.sh
-	@if [ -n "$(APPIMAGE)" ]; then \
-		bash scripts/appimage/test-built-appimage.sh "$(APPIMAGE)"; \
-	else \
-		echo "Set APPIMAGE=dist/CAP-...-x86_64.AppImage to test a built artifact."; \
-	fi
+	@test -n "$(APPIMAGE)" || { echo "Usage: make test-appimage APPIMAGE=dist/CAP-...-x86_64.AppImage" >&2; exit 1; }
+	bash scripts/appimage/test-built-appimage.sh "$(APPIMAGE)"
 
 clean-appimage:
 	rm -rf build/appimage dist/*.AppImage dist/*.AppImage.sha256
