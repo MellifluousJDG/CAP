@@ -2,6 +2,32 @@
 
 **CAP** is a Nextflow pipeline for centromere prediction and repeat analysis in genomic assemblies. It integrates **TRASH_2** for tandem-repeat detection, processes optional transposon and gene annotations, and produces plots and tables.
 
+## AppImage quick start
+
+For Linux x86-64, download the AppImage and its `.sha256` file from the CAP
+GitHub Release page. The AppImage contains CAP and all runtime dependencies, so
+Conda and a container runtime are not required.
+
+```bash
+sha256sum --check CAP-<version>-x86_64.AppImage.sha256
+chmod +x CAP-<version>-x86_64.AppImage
+mkdir -p /path/to/cap-results /path/to/cap-work
+
+./CAP-<version>-x86_64.AppImage \
+  --assembly /path/to/genome.fasta \
+  --cores 1 \
+  --outdir /path/to/cap-results \
+  -work-dir /path/to/cap-work
+```
+
+Replace `<version>` with the version shown in the release. If the system does
+not support FUSE, extract the AppImage with `--appimage-extract` and run
+`./squashfs-root/AppRun` instead.
+
+See `docs/APPIMAGE.md` for download verification, normal and extracted
+execution, optional inputs, offline use, building from source, testing, cleanup,
+and troubleshooting.
+
 ## Conda quick start
 
 The tested packaging path is Conda on Linux x86-64. Conda must already be installed; Nextflow, Java, R, Python, Git, and scientific dependencies are installed in one CAP environment.
@@ -249,6 +275,7 @@ CAP/
 ├── scripts/test-slurm-wrapper.sh  # Scheduler-free launcher tests
 ├── test/expected-results.sha256   # Expected test-result checksums
 ├── docs/PIPELINE_FLOW.md          # Process graph and output reference
+├── docs/APPIMAGE.md               # AppImage download, run, and build guide
 ├── docs/OCI_IMAGE.md              # OCI build, run, and validation guidance
 ├── docs/OCI_HPC.md                # Container execution on HPC systems
 ├── docs/OCI_RELEASE.md            # GHCR and image release procedure
