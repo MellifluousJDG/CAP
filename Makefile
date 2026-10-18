@@ -1,7 +1,7 @@
 ENV_NAME ?= cap-pipeline
 ASSEMBLY ?=
 
-.PHONY: install compile run test-conda test-container test-slurm-wrapper oci-inventory oci-compliance remove-env clean-build clean
+.PHONY: install compile run test-conda test-container test-slurm-wrapper appimage test-appimage clean-appimage oci-inventory oci-compliance remove-env clean-build clean
 
 install:
 	@echo "Setting up Conda environment '$(ENV_NAME)'..."
@@ -25,6 +25,20 @@ test-container:
 
 test-slurm-wrapper:
 	bash scripts/test-slurm-wrapper.sh
+
+appimage:
+	bash scripts/appimage/build-appimage.sh
+
+test-appimage:
+	bash scripts/appimage/test-appimage.sh
+	@if [ -n "$(APPIMAGE)" ]; then \
+		bash scripts/appimage/test-built-appimage.sh "$(APPIMAGE)"; \
+	else \
+		echo "Set APPIMAGE=dist/CAP-...-x86_64.AppImage to test a built artifact."; \
+	fi
+
+clean-appimage:
+	rm -rf build/appimage dist/*.AppImage dist/*.AppImage.sha256
 
 oci-inventory:
 	@test -n "$(IMAGE)" || { echo "Usage: make oci-inventory IMAGE=cap:local [OUTDIR=oci-inventory]" >&2; exit 1; }

@@ -39,3 +39,6 @@ rsconnect/
 cache/
 *.utf8.md
 *.knit.md
+/build/appimage/
+/dist/*.AppImage
+/dist/*.AppImage.sha256
