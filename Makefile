@@ -1,7 +1,13 @@
 ENV_NAME ?= cap-pipeline
+CONDA ?= conda
 ASSEMBLY ?=
+OUTDIR ?=
+CORES ?= 1
+MAX_REP_SIZE ?= 1000
+MIN_REP_SIZE ?= 7
+TEMPLATES ?=
 
-.PHONY: install compile run test-conda test-container test-slurm-wrapper appimage test-appimage clean-appimage oci-inventory oci-compliance remove-env clean-build clean
+.PHONY: install compile run run-trash2 test-conda test-trash2-standalone test-container test-slurm-wrapper appimage test-appimage clean-appimage oci-inventory oci-compliance remove-env clean-build clean
 
 install:
 	@echo "Setting up Conda environment '$(ENV_NAME)'..."
@@ -17,8 +23,24 @@ run:
 	}
 	conda run -n "$(ENV_NAME)" nextflow run . --assembly "$(ASSEMBLY)"
 
+run-trash2:
+	@test -n "$(ASSEMBLY)" && test -n "$(OUTDIR)" || { \
+		echo "Usage: make run-trash2 ASSEMBLY=path/to/genome.fasta OUTDIR=path/to/output [ENV_NAME=cap-pipeline]" >&2; \
+		exit 1; \
+	}
+	CAP_ENV_NAME="$(ENV_NAME)" CAP_CONDA_EXE="$(CONDA)" scripts/run-trash2.sh \
+		--assembly "$(ASSEMBLY)" \
+		--outdir "$(OUTDIR)" \
+		--cores "$(CORES)" \
+		--max-rep-size "$(MAX_REP_SIZE)" \
+		--min-rep-size "$(MIN_REP_SIZE)" \
+		$(if $(TEMPLATES),--templates "$(TEMPLATES)")
+
 test-conda:
 	CAP_ENV_NAME="$(ENV_NAME)" bash scripts/test-conda.sh
+
+test-trash2-standalone:
+	bash scripts/test-trash2-standalone.sh
 
 test-container:
 	bash scripts/test-container.sh
