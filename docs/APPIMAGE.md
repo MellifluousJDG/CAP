@@ -91,8 +91,8 @@ Run `"$appimage" --help` for Nextflow and pipeline help. See
 ## Run on a system without FUSE
 
 Normal execution may require FUSE support from the operating system. If direct
-execution reports a FUSE, mount, or AppImage runtime error, explicitly extract
-the AppImage and run the extracted application:
+execution reports a FUSE, mount, or AppImage runtime error, extract the AppImage
+and run the extracted application:
 
 ```bash
 mkdir cap-appimage
@@ -116,9 +116,6 @@ cd ..
 rm -rf cap-appimage
 ```
 
-Extraction is a user-selected execution mode. CAP does not silently switch
-between normal and extracted execution.
-
 ## Offline use
 
 The AppImage contains CAP and all required runtime dependencies. The pipeline
@@ -127,7 +124,7 @@ check warning when network access is unavailable.
 
 For offline systems, download the AppImage and checksum on a connected machine,
 verify them, and transfer both files. If the destination does not provide FUSE,
-use the explicit extraction procedure above.
+use the extraction procedure above.
 
 ## Build from source
 
@@ -154,9 +151,12 @@ Test a built artifact with:
 make test-appimage APPIMAGE=dist/CAP-<revision>-x86_64.AppImage
 ```
 
-This verifies the checksum, extracts the artifact to a separate location,
-checks the bundled runtimes, and runs CAP's complete regression test. The test
-expects 16 outputs and verifies all deterministic output hashes.
+This first checks the AppImage against its adjacent `.AppImage.sha256` file.
+It then runs the complete one-core CAP regression in both normal FUSE-mounted
+execution and from a separately extracted directory. Each run must produce 16
+outputs, all 15 deterministic non-PNG files must match their expected SHA-256
+values, and the PNG must be nonempty. Normal execution therefore requires FUSE
+2 support, including `libfuse.so.2`, on the test host.
 
 Remove generated AppImage build directories and artifacts with:
 
@@ -169,7 +169,7 @@ make clean-appimage
 - `Permission denied`: run `chmod +x` on the AppImage. If the filesystem is
   mounted with `noexec`, move it to a user-writable executable filesystem or use
   extraction mode.
-- FUSE or mount errors: use the explicit extraction procedure above.
+- FUSE or mount errors: use the extraction procedure above.
 - Assembly not found: use an absolute path and check that the file is readable.
 - Output or work directory is not writable: create it in a location owned by
   your user and pass its absolute path.

@@ -21,8 +21,8 @@ mkdir -p /path/to/cap-results /path/to/cap-work
 ```
 
 Replace `<version>` with the version shown in the release. If the system does
-not support FUSE, explicitly extract the AppImage with `--appimage-extract` and
-run `./squashfs-root/AppRun` instead.
+not support FUSE, extract the AppImage with `--appimage-extract` and run
+`./squashfs-root/AppRun` instead.
 
 See `docs/APPIMAGE.md` for download verification, normal and extracted
 execution, optional inputs, offline use, building from source, testing, cleanup,
