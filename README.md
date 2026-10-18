@@ -98,7 +98,9 @@ CAP_ENV_NAME=my-cap bash setup_conda.sh
 - `make install` creates or reuses the environment, initializes TRASH_2 when necessary, and compiles CTW/BCT.
 - `make compile` recompiles CTW/BCT in the selected environment.
 - `make run ASSEMBLY=...` runs CAP on the supplied FASTA assembly.
+- `make run-trash2 ASSEMBLY=... OUTDIR=...` runs only the pinned TRASH_2 module.
 - `make test-conda` performs the bundled deterministic one-core regression test.
+- `make test-trash2-standalone` validates the standalone launcher without running a full analysis.
 - `make remove-env` removes the selected Conda environment.
 - `make clean-build` removes the generated `bin/ctw-calc` binary without removing the environment.
 - `make clean` is deprecated because its name is ambiguous; it currently explains the replacement and delegates to `make remove-env`.
@@ -127,6 +129,44 @@ Or activate the environment and invoke Nextflow directly:
 conda activate cap-pipeline
 nextflow run . --assembly /path/to/genome.fasta
 ```
+
+### Standalone TRASH_2
+
+After `make install`, you can run only CAP's pinned TRASH_2 module with the same locked
+Conda environment:
+
+```bash
+make run-trash2 \
+  ASSEMBLY=/path/to/genome.fasta \
+  OUTDIR=/path/to/trash2-results
+```
+
+The output directory is created when its parent exists. Common options are:
+
+```bash
+make run-trash2 \
+  ASSEMBLY=/path/to/genome.fasta \
+  OUTDIR=/path/to/trash2-results \
+  ENV_NAME=cap-pipeline \
+  CORES=1 \
+  MAX_REP_SIZE=1000 \
+  MIN_REP_SIZE=7 \
+  TEMPLATES=/path/to/repeat-templates.fasta
+```
+
+`TEMPLATES` is optional. `ENV_NAME` must identify an existing environment made
+by `make install`; this command never creates or updates an environment. It
+checks the locked R packages, MAFFT, and HMMER before starting and fails if a
+dependency is absent instead of installing packages at runtime.
+
+For an assembly named `genome.fasta`, principal outputs include:
+
+- `genome.fasta_repeats_with_seq.csv`;
+- `genome.fasta_repeats.csv` and `genome.fasta_repeats.gff`;
+- `genome.fasta_arrays.csv` and `genome.fasta_arrays.gff`;
+- `genome.fasta_run_time.csv`.
+
+Run `scripts/run-trash2.sh --help` for the equivalent direct launcher options.
 
 ### Required argument
 
@@ -271,7 +311,9 @@ CAP/
 ├── setup_conda.sh                 # Conda setup and CTW compilation
 ├── Makefile                       # Convenience commands
 ├── scripts/run-cap-slurm.sh       # Single-allocation SLURM launcher
+├── scripts/run-trash2.sh          # Locked standalone TRASH_2 launcher
 ├── scripts/test-conda.sh          # One-core deterministic smoke test
+├── scripts/test-trash2-standalone.sh # Standalone launcher tests
 ├── scripts/test-slurm-wrapper.sh  # Scheduler-free launcher tests
 ├── test/expected-results.sha256   # Expected test-result checksums
 ├── docs/PIPELINE_FLOW.md          # Process graph and output reference
