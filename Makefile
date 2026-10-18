@@ -7,7 +7,7 @@ MAX_REP_SIZE ?= 1000
 MIN_REP_SIZE ?= 7
 TEMPLATES ?=
 
-.PHONY: install compile run run-trash2 test-conda test-trash2-standalone test-container test-slurm-wrapper appimage test-appimage clean-appimage oci-inventory oci-compliance remove-env clean-build clean
+.PHONY: install compile run run-trash2 lint test-conda test-trash2-standalone test-container test-slurm-wrapper appimage test-appimage clean-appimage oci-inventory oci-compliance remove-env clean-build clean
 
 install:
 	@echo "Setting up Conda environment '$(ENV_NAME)'..."
@@ -35,6 +35,9 @@ run-trash2:
 		--max-rep-size "$(MAX_REP_SIZE)" \
 		--min-rep-size "$(MIN_REP_SIZE)" \
 		$(if $(TEMPLATES),--templates "$(TEMPLATES)")
+
+lint:
+	bash scripts/lint.sh
 
 test-conda:
 	CAP_ENV_NAME="$(ENV_NAME)" bash scripts/test-conda.sh

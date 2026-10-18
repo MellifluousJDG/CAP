@@ -99,6 +99,7 @@ CAP_ENV_NAME=my-cap bash setup_conda.sh
 - `make compile` recompiles CTW/BCT in the selected environment.
 - `make run ASSEMBLY=...` runs CAP on the supplied FASTA assembly.
 - `make run-trash2 ASSEMBLY=... OUTDIR=...` runs only the pinned TRASH_2 module.
+- `make lint` checks every tracked shell and Python script for syntax errors.
 - `make test-conda` performs the bundled deterministic one-core regression test.
 - `make test-trash2-standalone` validates the standalone launcher without running a full analysis.
 - `make remove-env` removes the selected Conda environment.
@@ -302,30 +303,51 @@ See `docs/PIPELINE_FLOW.md` for the complete technical process graph, filename r
 
 ```text
 CAP/
-├── main.nf                        # Nextflow workflow
-├── nextflow.config                # Parameters and profiles
-├── environment.yml                # Human-maintained development dependencies
-├── conda-linux-64.lock            # Exact tested development packages
-├── environment-runtime.yml        # OCI runtime dependency specification
-├── conda-runtime-linux-64.lock    # Exact tested OCI runtime subset
-├── setup_conda.sh                 # Conda setup and CTW compilation
-├── Makefile                       # Convenience commands
-├── scripts/run-cap-slurm.sh       # Single-allocation SLURM launcher
-├── scripts/run-trash2.sh          # Locked standalone TRASH_2 launcher
-├── scripts/test-conda.sh          # One-core deterministic smoke test
-├── scripts/test-trash2-standalone.sh # Standalone launcher tests
-├── scripts/test-slurm-wrapper.sh  # Scheduler-free launcher tests
-├── test/expected-results.sha256   # Expected test-result checksums
-├── docs/PIPELINE_FLOW.md          # Process graph and output reference
-├── docs/APPIMAGE.md               # AppImage download, run, and build guide
-├── docs/OCI_IMAGE.md              # OCI build, run, and validation guidance
-├── docs/OCI_HPC.md                # Container execution on HPC systems
-├── docs/OCI_RELEASE.md            # GHCR and image release procedure
-├── bin/                           # Pipeline scripts and CTW source
-├── modules/TRASH_2/               # Pinned Git submodule
-├── model/                         # Pre-trained models
-└── test/                          # Bundled test input
+├── main.nf                         # Nextflow workflow
+├── nextflow.config                 # Parameters and execution profiles
+├── Makefile                        # Local commands, tests, and packaging entry points
+├── setup_conda.sh                  # Locked Conda setup and CTW/BCT compilation
+├── environment.yml                 # Human-maintained development dependencies
+├── conda-linux-64.lock             # Exact tested development packages
+├── environment-runtime.yml         # Human-maintained OCI runtime dependencies
+├── conda-runtime-linux-64.lock     # Exact tested OCI runtime packages
+├── Dockerfile                      # Reproducible OCI image definition
+├── scripts/
+│   ├── lint.sh                     # Shell and Python syntax checks
+│   ├── cap-container-entrypoint.sh # OCI runtime entry point
+│   ├── run-cap-slurm.sh            # Single-allocation SLURM launcher
+│   ├── run-trash2.sh               # Locked standalone TRASH_2 launcher
+│   ├── test-conda.sh               # One-core CAP regression test
+│   ├── test-container.sh           # OCI source, lock, and compliance checks
+│   ├── test-container-image.sh     # Built OCI image integration test
+│   ├── test-slurm-wrapper.sh       # Scheduler-free SLURM launcher tests
+│   ├── test-trash2-standalone.sh   # Standalone TRASH_2 launcher tests
+│   ├── appimage/
+│   │   ├── AppRun                  # AppImage entry point
+│   │   ├── Rscript                 # AppImage Rscript path wrapper
+│   │   ├── build-appimage.sh       # AppImage build script
+│   │   └── test-built-appimage.sh  # Built AppImage regression test
+│   └── compliance/
+│       ├── export-debian-compliance-inputs.sh # Export Debian package metadata
+│       ├── finalize-compliance-checksums.sh   # Write bundle checksums
+│       ├── generate-oci-compliance-bundle.sh # Build OCI compliance bundle
+│       ├── generate-oci-inventory.sh         # Export OCI package inventory
+│       ├── test-collect-conda-notices.sh     # Conda notice collector fixtures
+│       ├── test-collect-conda-sources.sh     # Conda source collector fixtures
+│       ├── test-conda-source-notices.sh      # Source-notice review fixtures
+│       ├── test-finalize-compliance-checksums.sh # Bundle checksum fixtures
+│       ├── test-sbom.sh                      # CycloneDX SBOM fixtures
+│       └── test-source-obligations.sh        # License-obligation fixtures
+├── docs/                           # Usage, architecture, and release guides
+├── bin/                            # Pipeline scripts and CTW source
+├── modules/TRASH_2/                # Pinned TRASH_2 Git submodule
+├── model/                          # Pre-trained prediction models
+└── test/                           # Bundled inputs and expected checksums
 ```
+
+Run `make lint` before committing changes to shell or Python scripts. It checks
+all tracked scripts, including extensionless AppImage entry points, without
+writing bytecode into the repository.
 
 ## Single-node SLURM execution
 

@@ -3,6 +3,9 @@
 set -euo pipefail
 
 PROJECT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+PYTHON_CACHE=$(mktemp -d)
+trap 'rm -rf "$PYTHON_CACHE"' EXIT
+export PYTHONPYCACHEPREFIX="$PYTHON_CACHE"
 DOCKERFILE="$PROJECT_DIR/Dockerfile"
 IGNORE_FILE="$PROJECT_DIR/.dockerignore"
 ENTRYPOINT="$PROJECT_DIR/scripts/cap-container-entrypoint.sh"
@@ -56,59 +59,6 @@ if grep -Eq 'sha256sum .* > .*\.sha256' \
     echo "Compliance bundle generator creates a redundant checksum sidecar." >&2
     exit 1
 fi
-bash -n "$ENTRYPOINT" \
-    "$PROJECT_DIR/scripts/test-container-image.sh" \
-    "$PROJECT_DIR/scripts/compliance/generate-oci-inventory.sh" \
-    "$PROJECT_DIR/scripts/compliance/generate-oci-compliance-bundle.sh" \
-    "$PROJECT_DIR/scripts/compliance/finalize-compliance-checksums.sh"
-python3 - <<PY
-from pathlib import Path
-compile(
-    Path("$PROJECT_DIR/scripts/compliance/classify-source-obligations.py").read_text(),
-    "classify-source-obligations.py",
-    "exec",
-)
-compile(
-    Path("$PROJECT_DIR/scripts/compliance/collect-conda-sources.py").read_text(),
-    "collect-conda-sources.py",
-    "exec",
-)
-compile(
-    Path("$PROJECT_DIR/scripts/compliance/apply-source-review-policy.py").read_text(),
-    "apply-source-review-policy.py",
-    "exec",
-)
-compile(
-    Path("$PROJECT_DIR/scripts/compliance/collect-conda-notices.py").read_text(),
-    "collect-conda-notices.py",
-    "exec",
-)
-compile(
-    Path("$PROJECT_DIR/scripts/compliance/collect-debian-sources.py").read_text(),
-    "collect-debian-sources.py",
-    "exec",
-)
-compile(
-    Path("$PROJECT_DIR/scripts/compliance/collect-conda-notice-sources.py").read_text(),
-    "collect-conda-notice-sources.py",
-    "exec",
-)
-compile(
-    Path("$PROJECT_DIR/scripts/compliance/collect-conda-source-notices.py").read_text(),
-    "collect-conda-source-notices.py",
-    "exec",
-)
-compile(
-    Path("$PROJECT_DIR/scripts/compliance/finalize-conda-source-notices.py").read_text(),
-    "finalize-conda-source-notices.py",
-    "exec",
-)
-compile(
-    Path("$PROJECT_DIR/scripts/compliance/generate-cyclonedx-sbom.py").read_text(),
-    "generate-cyclonedx-sbom.py",
-    "exec",
-)
-PY
 bash "$PROJECT_DIR/scripts/compliance/test-source-obligations.sh"
 python3 "$PROJECT_DIR/scripts/compliance/test-source-review-policy.py"
 bash "$PROJECT_DIR/scripts/compliance/test-collect-conda-sources.sh"
