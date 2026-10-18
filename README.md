@@ -132,7 +132,7 @@ nextflow run . --assembly /path/to/genome.fasta
 
 ### Standalone TRASH_2
 
-After `make install`, run only CAP's pinned TRASH_2 module with the same locked
+After `make install`, you can run only CAP's pinned TRASH_2 module with the same locked
 Conda environment:
 
 ```bash
