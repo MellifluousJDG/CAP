@@ -149,8 +149,8 @@ hard-coded. Supply them as `sbatch` options or adapt the header for the site.
 Optional inputs use `--te-gff`, `--gene-gff`, `--metadata`, `--templates`, and
 `--trash2`. Repeat limits use `--max-rep-size` and `--min-rep-size`.
 
-If compute nodes do not support FUSE, extract the AppImage once on shared
-storage and pass the extracted entry point instead:
+If compute nodes do not support FUSE, use the extraction procedure above on
+shared storage and pass the extracted entry point instead:
 
 ```bash
 sbatch scripts/run-cap-appimage-slurm.sh \
@@ -173,9 +173,9 @@ make test-appimage-slurm-wrapper
 
 These tests use a fake AppImage to validate arguments, CPU propagation,
 optional inputs, paths containing spaces, and cleanup without calling `sbatch`.
-They do not validate a real scheduler, compute-node FUSE, shared filesystems, or
-site policy. A run on the target cluster is still required before treating the
-wrapper as cluster-validated.
+They cannot check your scheduler, compute-node FUSE support, shared filesystems,
+or site policy. Ask your cluster administrators about those requirements before
+submitting CAP.
 
 ## Offline use
 
