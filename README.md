@@ -238,8 +238,10 @@ See `docs/PIPELINE_FLOW.md` for the complete technical process graph, filename r
 CAP/
 ├── main.nf                        # Nextflow workflow
 ├── nextflow.config                # Parameters and profiles
-├── environment.yml                # Human-maintained dependencies
-├── conda-linux-64.lock            # Exact tested Linux x86-64 packages
+├── environment.yml                # Human-maintained development dependencies
+├── conda-linux-64.lock            # Exact tested development packages
+├── environment-runtime.yml        # OCI runtime dependency specification
+├── conda-runtime-linux-64.lock    # Exact tested OCI runtime subset
 ├── setup_conda.sh                 # Conda setup and CTW compilation
 ├── Makefile                       # Convenience commands
 ├── scripts/run-cap-slurm.sh       # Single-allocation SLURM launcher
@@ -247,6 +249,9 @@ CAP/
 ├── scripts/test-slurm-wrapper.sh  # Scheduler-free launcher tests
 ├── test/expected-results.sha256   # Expected test-result checksums
 ├── docs/PIPELINE_FLOW.md          # Process graph and output reference
+├── docs/OCI_IMAGE.md              # OCI build, run, and validation guidance
+├── docs/OCI_HPC.md                # Container execution on HPC systems
+├── docs/OCI_RELEASE.md            # GHCR and image release procedure
 ├── bin/                           # Pipeline scripts and CTW source
 ├── modules/TRASH_2/               # Pinned Git submodule
 ├── model/                         # Pre-trained models
@@ -315,13 +320,53 @@ make test-slurm-wrapper
 
 These tests validate argument handling, CPU propagation, optional TRASH_2 behavior, and temporary-work cleanup without calling `sbatch`.
 
-## Other packaging methods
+## OCI container quick start
 
-OCI containers and AppImage packaging are planned after the Conda workflow. Existing Docker-related files have not yet been adopted as the reproducibility reference. Conda is currently the validated installation path.
+The public Linux x86-64 image contains CAP and all runtime dependencies. With
+rootless Podman installed, put a FASTA file in a new working directory:
+
+```bash
+assembly=/path/to/genome.fasta
+mkdir -p cap-run/data cap-run/results cap-run/work
+cp "$assembly" cap-run/data/
+assembly_name=$(basename "$assembly")
+cd cap-run
+
+image=ghcr.io/mellifluousjdg/cap:1.0.0
+podman run --rm --userns=keep-id \
+  -v "$PWD/data:/data:ro" \
+  -v "$PWD/results:/results" \
+  -v "$PWD/work:/work" \
+  "$image" \
+  --assembly "/data/$assembly_name" \
+  --cores 1 \
+  --outdir /results \
+  -work-dir /work/nextflow
+```
+
+CAP writes final
+CSV, RDS, model, and PNG files to `results/`; `work/nextflow` contains disposable
+Nextflow intermediates. Successful rootless Podman runs leave both directories
+owned by the invoking user. Remove `work/` after success to reclaim space.
+
+For an immutable pull, replace the image assignment with:
+
+```bash
+image=ghcr.io/mellifluousjdg/cap@sha256:c6ec1c840e0a4184a249019b3ea317330754e5699f2550e009fe28b0729e889b
+```
+
+See `docs/OCI_IMAGE.md` for Docker, permissions, SELinux, troubleshooting,
+cleanup, image details, and the published corresponding-source artifact; see
+`docs/OCI_HPC.md` for single-allocation cluster templates.
 
 ## License
 
-[MIT License](LICENSE)
+CAP's original code is distributed under the [MIT License](LICENSE). The
+BCT-derived source in `bin/src/BCT` and its compiled `bin/ctw-calc` executable
+use `GPL-2.0-or-later`, based on the `GPL (>= 2)` CRAN metadata for the related
+BCT package published by the same author. See `bin/src/BCT/README.md` for the
+license basis, provenance, build instructions, and corresponding-source
+requirements.
 
 ## Contact
 
