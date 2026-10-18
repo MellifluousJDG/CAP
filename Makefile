@@ -7,7 +7,7 @@ MAX_REP_SIZE ?= 1000
 MIN_REP_SIZE ?= 7
 TEMPLATES ?=
 
-.PHONY: install compile run run-trash2 lint test-conda test-trash2-standalone test-container test-slurm-wrapper appimage test-appimage clean-appimage oci-inventory oci-compliance remove-env clean-build clean
+.PHONY: install compile run run-trash2 lint check-policy check-container-policy check-config-policy test-conda test-trash2-standalone test-container test-slurm-wrapper appimage test-appimage clean-appimage oci-inventory oci-compliance remove-env clean-build clean
 
 install:
 	@echo "Setting up Conda environment '$(ENV_NAME)'..."
@@ -39,16 +39,24 @@ run-trash2:
 lint:
 	bash scripts/lint.sh
 
+check-policy: check-container-policy check-config-policy
+
+check-container-policy:
+	bash scripts/check-container-policy.sh
+
+check-config-policy:
+	bash scripts/check-config-policy.sh
+
 test-conda:
 	CAP_ENV_NAME="$(ENV_NAME)" bash scripts/test-conda.sh
 
 test-trash2-standalone:
-	bash scripts/test-trash2-standalone.sh
+	CAP_TEST_CONDA="$(CONDA)" CAP_TEST_ENV_NAME="$(ENV_NAME)" bash scripts/test-trash2-standalone.sh
 
-test-container:
+test-container: check-container-policy
 	bash scripts/test-container.sh
 
-test-slurm-wrapper:
+test-slurm-wrapper: check-config-policy
 	bash scripts/test-slurm-wrapper.sh
 
 appimage:

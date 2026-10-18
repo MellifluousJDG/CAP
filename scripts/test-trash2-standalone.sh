@@ -40,7 +40,9 @@ set -euo pipefail
 printf 'R_REPOSITORIES=%s\n' "${R_REPOSITORIES:-}" >> "$FAKE_RSCRIPT_LOG"
 printf 'R_PROFILE_USER=%s\n' "${R_PROFILE_USER:-}" >> "$FAKE_RSCRIPT_LOG"
 [ -s "${R_PROFILE_USER:-}" ] || exit 97
-grep -F 'install.packages <- function' "$R_PROFILE_USER" >/dev/null || exit 98
+if [ -n "${CAPTURED_R_PROFILE:-}" ] && [ ! -e "$CAPTURED_R_PROFILE" ]; then
+    cp "$R_PROFILE_USER" "$CAPTURED_R_PROFILE"
+fi
 [ "${http_proxy:-}" = 'http://127.0.0.1:9' ] || exit 99
 [ "${https_proxy:-}" = 'http://127.0.0.1:9' ] || exit 100
 printf '%q ' "$@" >> "$FAKE_RSCRIPT_LOG"
@@ -84,6 +86,7 @@ run_launcher() {
     PATH="$BIN_DIR:$PATH" \
     FAKE_CONDA_LOG="$LOG_DIR/conda.log" \
     FAKE_RSCRIPT_LOG="$LOG_DIR/rscript.log" \
+    CAPTURED_R_PROFILE="$TMP_DIR/generated.Rprofile" \
     EXPECTED_TRASH2_SCRIPT="$PROJECT_DIR/modules/TRASH_2/src/TRASH.R" \
         "$LAUNCHER" "$@"
 }
@@ -109,6 +112,35 @@ run_launcher \
 
 test -f "$TMP_DIR/TRASH_2 output/input genome.fasta_repeats_with_seq.csv"
 test -f "$TMP_DIR/TRASH_2 output/input genome.fasta_arrays.csv"
+
+REAL_RSCRIPT=${CAP_TEST_RSCRIPT:-}
+R_RUNNER=()
+if [ -n "$REAL_RSCRIPT" ]; then
+    R_RUNNER=("$REAL_RSCRIPT")
+elif command -v Rscript >/dev/null 2>&1; then
+    R_RUNNER=(Rscript)
+elif command -v "${CAP_TEST_CONDA:-conda}" >/dev/null 2>&1; then
+    R_RUNNER=("${CAP_TEST_CONDA:-conda}" run --no-capture-output
+        -n "${CAP_TEST_ENV_NAME:-cap-pipeline}" Rscript)
+fi
+if [ "${#R_RUNNER[@]}" -gt 0 ]; then
+    if R_PROFILE_USER="$TMP_DIR/generated.Rprofile" \
+        "${R_RUNNER[@]}" -e 'install.packages("cap-runtime-install-must-fail")' \
+        >"$TMP_DIR/install-guard.log" 2>&1; then
+        echo "Runtime R package installation was not blocked." >&2
+        exit 1
+    fi
+    grep -F 'runtime package installation is disabled' \
+        "$TMP_DIR/install-guard.log" >/dev/null || {
+        echo "R profile failed for an unexpected reason." >&2
+        cat "$TMP_DIR/install-guard.log" >&2
+        exit 1
+    }
+    echo "Runtime R package installation guard passed."
+else
+    echo "Skipping R installation-guard behavior test: no Rscript or Conda available."
+fi
+
 test "$(grep -c '^R_REPOSITORIES=' "$LOG_DIR/rscript.log")" -eq 2
 test "$(grep -c '^R_PROFILE_USER=' "$LOG_DIR/rscript.log")" -eq 2
 if grep '^R_REPOSITORIES=' "$LOG_DIR/rscript.log" |
