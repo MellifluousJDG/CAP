@@ -100,6 +100,7 @@ CAP_ENV_NAME=my-cap bash setup_conda.sh
 - `make run ASSEMBLY=...` runs CAP on the supplied FASTA assembly.
 - `make run-trash2 ASSEMBLY=... OUTDIR=...` runs only the pinned TRASH_2 module.
 - `make lint` checks every tracked shell and Python script for syntax errors.
+- `make check-policy` checks container-source and Nextflow execution policies.
 - `make test-conda` performs the bundled deterministic one-core regression test.
 - `make test-trash2-standalone` validates the standalone launcher without running a full analysis.
 - `make remove-env` removes the selected Conda environment.
@@ -314,11 +315,13 @@ CAP/
 ├── Dockerfile                      # Reproducible OCI image definition
 ├── scripts/
 │   ├── lint.sh                     # Shell and Python syntax checks
+│   ├── check-container-policy.sh   # OCI source and packaging policy checks
+│   ├── check-config-policy.sh      # Nextflow execution policy checks
 │   ├── cap-container-entrypoint.sh # OCI runtime entry point
 │   ├── run-cap-slurm.sh            # Single-allocation SLURM launcher
 │   ├── run-trash2.sh               # Locked standalone TRASH_2 launcher
 │   ├── test-conda.sh               # One-core CAP regression test
-│   ├── test-container.sh           # OCI source, lock, and compliance checks
+│   ├── test-container.sh           # OCI lock and compliance checks
 │   ├── test-container-image.sh     # Built OCI image integration test
 │   ├── test-slurm-wrapper.sh       # Scheduler-free SLURM launcher tests
 │   ├── test-trash2-standalone.sh   # Standalone TRASH_2 launcher tests
