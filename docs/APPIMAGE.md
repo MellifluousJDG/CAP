@@ -116,6 +116,67 @@ cd ..
 rm -rf cap-appimage
 ```
 
+## Run in one SLURM allocation
+
+CAP includes a generic AppImage `sbatch` wrapper that starts the workflow once
+inside one allocation. Nextflow uses its local executor and does not submit
+separate jobs for pipeline processes.
+
+Place the AppImage, assembly, and final output directory on storage visible to
+the compute node, then submit:
+
+```bash
+sbatch scripts/run-cap-appimage-slurm.sh \
+  --appimage /shared/apps/CAP-<version>-x86_64.AppImage \
+  --assembly /shared/data/genome.fasta \
+  --outdir /shared/results/genome-cap
+```
+
+The generic header requests one CPU and 36 GB of memory. Override resources with
+site-appropriate `sbatch` options; the wrapper passes `SLURM_CPUS_PER_TASK` to
+CAP:
+
+```bash
+sbatch --cpus-per-task=4 --mem=36G --time=24:00:00 \
+  scripts/run-cap-appimage-slurm.sh \
+  --appimage /shared/apps/CAP-<version>-x86_64.AppImage \
+  --assembly /shared/data/genome.fasta \
+  --outdir /shared/results/genome-cap
+```
+
+Partition, account, reservation, mail, and node-exclusion settings are not
+hard-coded. Supply them as `sbatch` options or adapt the header for the site.
+Optional inputs use `--te-gff`, `--gene-gff`, `--metadata`, `--templates`, and
+`--trash2`. Repeat limits use `--max-rep-size` and `--min-rep-size`.
+
+If compute nodes do not support FUSE, extract the AppImage once on shared
+storage and pass the extracted entry point instead:
+
+```bash
+sbatch scripts/run-cap-appimage-slurm.sh \
+  --appimage /shared/apps/cap-appimage/squashfs-root/AppRun \
+  --assembly /shared/data/genome.fasta \
+  --outdir /shared/results/genome-cap
+```
+
+The wrapper places Nextflow intermediates under
+`${SLURM_TMPDIR:-${TMPDIR:-/tmp}}/cap-appimage-nextflow-${SLURM_JOB_ID}`. It
+removes that directory after success and retains it with a diagnostic path after
+failure. Final output must therefore use persistent storage; node-local work may
+be lost when an allocation ends.
+
+Run its scheduler-free behavioral tests with:
+
+```bash
+make test-appimage-slurm-wrapper
+```
+
+These tests use a fake AppImage to validate arguments, CPU propagation,
+optional inputs, paths containing spaces, and cleanup without calling `sbatch`.
+They do not validate a real scheduler, compute-node FUSE, shared filesystems, or
+site policy. A run on the target cluster is still required before treating the
+wrapper as cluster-validated.
+
 ## Offline use
 
 The AppImage contains CAP and all required runtime dependencies. The pipeline
