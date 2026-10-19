@@ -42,11 +42,28 @@ set -euo pipefail
 image=ghcr.io/mellifluousjdg/cap:1.0.0
 assembly=/shared/data/genome.fasta
 outdir=/shared/results/genome-cap
-work_root="${SLURM_TMPDIR:-${TMPDIR:-/tmp}}/cap-${SLURM_JOB_ID}"
+tmp_base="${SLURM_TMPDIR:-${TMPDIR:-/tmp}}"
+job_id=${SLURM_JOB_ID:?submit this script with sbatch}
+work_root="$tmp_base/cap-$job_id"
+
+cleanup() {
+  status=$?
+  if [ "$status" -eq 0 ]; then
+    expected="$tmp_base/cap-$job_id"
+    if [ -n "$tmp_base" ] && [ "$tmp_base" != / ] && \
+       [ "$work_root" = "$expected" ]; then
+      rm -rf -- "$work_root"
+    else
+      echo "Refusing to remove unexpected work directory: $work_root" >&2
+      return 1
+    fi
+  else
+    echo "Work retained at $work_root" >&2
+  fi
+}
 
 mkdir -p "$outdir" "$work_root"
-trap 'status=$?; if [ "$status" -eq 0 ]; then rm -rf "$work_root"; \
-  else echo "Work retained at $work_root" >&2; fi; exit "$status"' EXIT
+trap cleanup EXIT
 
 podman run --rm --userns=keep-id \
   -v "$(dirname "$assembly"):/data:ro" \
@@ -105,11 +122,28 @@ Then copy the immutable SIF to shared storage and execute it in one allocation:
 
 ```bash
 outdir=/shared/results/genome-cap
-work_root="${SLURM_TMPDIR:-${TMPDIR:-/tmp}}/cap-${SLURM_JOB_ID}"
+tmp_base="${SLURM_TMPDIR:-${TMPDIR:-/tmp}}"
+job_id=${SLURM_JOB_ID:?run this command inside a SLURM allocation}
+work_root="$tmp_base/cap-$job_id"
+
+cleanup() {
+  status=$?
+  if [ "$status" -eq 0 ]; then
+    expected="$tmp_base/cap-$job_id"
+    if [ -n "$tmp_base" ] && [ "$tmp_base" != / ] && \
+       [ "$work_root" = "$expected" ]; then
+      rm -rf -- "$work_root"
+    else
+      echo "Refusing to remove unexpected work directory: $work_root" >&2
+      return 1
+    fi
+  else
+    echo "Work retained at $work_root" >&2
+  fi
+}
 
 mkdir -p "$outdir" "$work_root/home"
-trap 'status=$?; if [ "$status" -eq 0 ]; then rm -rf "$work_root"; \
-  else echo "Work retained at $work_root" >&2; fi; exit "$status"' EXIT
+trap cleanup EXIT
 
 apptainer exec \
   --env HOME=/work/home \
