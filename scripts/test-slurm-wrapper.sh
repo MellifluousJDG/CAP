@@ -74,21 +74,28 @@ bash "$WRAPPER" \
     --conda "$fake_conda" \
     > "$tmp_dir/success.out" 2>&1
 
-grep -Fx -- "test-cap" "$args_file" >/dev/null
-grep -Fx -- "--cores" "$args_file" >/dev/null
-grep -Fx -- "4" "$args_file" >/dev/null
-grep -Fx -- "--trash2" "$args_file" >/dev/null
-grep -Fx -- "$trash2" "$args_file" >/dev/null
-grep -Fx -- "--max_rep_size" "$args_file" >/dev/null
-grep -Fx -- "500" "$args_file" >/dev/null
-grep -Fx -- "--min_rep_size" "$args_file" >/dev/null
-grep -Fx -- "8" "$args_file" >/dev/null
-grep -Fx -- "-work-dir" "$args_file" >/dev/null
+python3 - "$args_file" "$assembly" "$outdir" "$trash2" "$run_tmp" <<'PY'
+from pathlib import Path
+import sys
+
+args = Path(sys.argv[1]).read_text().splitlines()
+work_dir = Path(args[args.index("-work-dir") + 1])
+assert work_dir.parent == Path(sys.argv[5]).resolve(), work_dir
+assert work_dir.name.startswith("cap-nextflow-1234-"), work_dir
+assert len(work_dir.name.removeprefix("cap-nextflow-1234-")) == 8, work_dir
+expected = [
+    "run", "-n", "test-cap", "nextflow", "run", str(Path.cwd()),
+    "--assembly", str(Path(sys.argv[2]).resolve()),
+    "--cores", "4",
+    "--outdir", str(Path(sys.argv[3]).resolve()),
+    "-work-dir", str(work_dir),
+    "--trash2", str(Path(sys.argv[4]).resolve()),
+    "--max_rep_size", "500",
+    "--min_rep_size", "8",
+]
+assert args == expected, (args, expected)
+PY
 work_dir=$(awk 'previous == "-work-dir" { print; exit } { previous=$0 }' "$args_file")
-case "$work_dir" in
-    "$run_tmp"/cap-nextflow-1234-????????) ;;
-    *) echo "Unexpected work directory: $work_dir" >&2; exit 1 ;;
-esac
 [ -d "$work_dir" ] || {
     echo "Successful run did not retain its work directory." >&2
     exit 1
