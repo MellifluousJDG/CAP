@@ -68,7 +68,8 @@ The AppImage accepts the same workflow arguments as the Conda installation:
 
 - `--te_gff`: EDTA transposable-element annotation in GFF3 format.
 - `--gene_gff`: Helixer gene annotation in GFF format.
-- `--metadata`: optional sample metadata.
+- `--metadata`: existing chromosome metadata CSV.
+- `--templates`: repeat-template FASTA passed to TRASH_2.
 - `--trash2`: existing TRASH_2 output directory.
 - `--max_rep_size`: maximum tandem-repeat size; default `1000`.
 - `--min_rep_size`: minimum tandem-repeat size; default `7`.

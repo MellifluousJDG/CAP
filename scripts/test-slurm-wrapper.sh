@@ -51,6 +51,11 @@ expect_failure "invalid --trash2 directory" \
     --assembly "$assembly" --outdir "$outdir" \
     --trash2 "$tmp_dir" --conda "$fake_conda"
 
+expect_failure "--min-rep-size must not exceed --max-rep-size" \
+    env CAP_SLURM_LOCAL_TEST=1 bash "$WRAPPER" \
+    --assembly "$assembly" --outdir "$outdir" \
+    --min-rep-size 20 --max-rep-size 10 --conda "$fake_conda"
+
 args_file="$tmp_dir/args.txt"
 run_tmp="$tmp_dir/node tmp"
 mkdir -p "$run_tmp"
@@ -63,6 +68,8 @@ bash "$WRAPPER" \
     --assembly "$assembly" \
     --outdir "$outdir" \
     --trash2 "$trash2" \
+    --max-rep-size 500 \
+    --min-rep-size 8 \
     --env-name test-cap \
     --conda "$fake_conda" \
     > "$tmp_dir/success.out"
@@ -72,6 +79,10 @@ grep -Fx -- "--cores" "$args_file" >/dev/null
 grep -Fx -- "4" "$args_file" >/dev/null
 grep -Fx -- "--trash2" "$args_file" >/dev/null
 grep -Fx -- "$trash2" "$args_file" >/dev/null
+grep -Fx -- "--max_rep_size" "$args_file" >/dev/null
+grep -Fx -- "500" "$args_file" >/dev/null
+grep -Fx -- "--min_rep_size" "$args_file" >/dev/null
+grep -Fx -- "8" "$args_file" >/dev/null
 grep -Fx -- "-work-dir" "$args_file" >/dev/null
 grep -Fx -- "$run_tmp/cap-nextflow-1234" "$args_file" >/dev/null
 [ ! -e "$run_tmp/cap-nextflow-1234" ] || {

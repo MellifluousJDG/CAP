@@ -23,6 +23,7 @@ Optional:
   --metadata FILE       Existing chromosome metadata CSV
   --templates FILE      TRASH_2 repeat templates
   --max-rep-size INT    Maximum tandem-repeat size
+  --min-rep-size INT    Minimum tandem-repeat size
   --env-name NAME       Conda environment (default: cap-pipeline)
   --conda EXE           Conda executable (default: conda from PATH)
   --help                Show this help
@@ -53,6 +54,7 @@ GENE_GFF=""
 METADATA=""
 TEMPLATES=""
 MAX_REP_SIZE=""
+MIN_REP_SIZE=""
 
 while [ "$#" -gt 0 ]; do
     case "$1" in
@@ -72,6 +74,8 @@ while [ "$#" -gt 0 ]; do
             require_value "$@"; TEMPLATES=$2; shift 2 ;;
         --max-rep-size)
             require_value "$@"; MAX_REP_SIZE=$2; shift 2 ;;
+        --min-rep-size)
+            require_value "$@"; MIN_REP_SIZE=$2; shift 2 ;;
         --env-name)
             require_value "$@"; ENV_NAME=$2; shift 2 ;;
         --conda)
@@ -107,10 +111,18 @@ OUTDIR="$(cd -- "$OUTDIR_PARENT" && pwd)/$(basename -- "$OUTDIR")"
 [ -z "$METADATA" ] || METADATA="$(cd -- "$(dirname -- "$METADATA")" && pwd)/$(basename -- "$METADATA")"
 [ -z "$TEMPLATES" ] || TEMPLATES="$(cd -- "$(dirname -- "$TEMPLATES")" && pwd)/$(basename -- "$TEMPLATES")"
 
-case "$MAX_REP_SIZE" in
-    "") ;;
-    *[!0-9]*|0) fail "--max-rep-size must be a positive integer." ;;
-esac
+for item in "max-rep-size:$MAX_REP_SIZE" "min-rep-size:$MIN_REP_SIZE"; do
+    label=${item%%:*}
+    value=${item#*:}
+    case "$value" in
+        "") ;;
+        *[!0-9]*|0) fail "--$label must be a positive integer." ;;
+    esac
+done
+if [ -n "$MIN_REP_SIZE" ] && [ -n "$MAX_REP_SIZE" ] && \
+    [ "$MIN_REP_SIZE" -gt "$MAX_REP_SIZE" ]; then
+    fail "--min-rep-size must not exceed --max-rep-size."
+fi
 
 if [ -n "$TRASH2" ]; then
     [ -d "$TRASH2" ] || fail "TRASH_2 directory not found: $TRASH2"
@@ -171,6 +183,7 @@ nextflow_args=(
 [ -z "$METADATA" ] || nextflow_args+=(--metadata "$METADATA")
 [ -z "$TEMPLATES" ] || nextflow_args+=(--templates "$TEMPLATES")
 [ -z "$MAX_REP_SIZE" ] || nextflow_args+=(--max_rep_size "$MAX_REP_SIZE")
+[ -z "$MIN_REP_SIZE" ] || nextflow_args+=(--min_rep_size "$MIN_REP_SIZE")
 
 command=("$CONDA_EXE" run -n "$ENV_NAME" "${nextflow_args[@]}")
 

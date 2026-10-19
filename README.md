@@ -184,6 +184,8 @@ A genome assembly contains one or more reconstructed genomic DNA sequences, such
 
 - `--te_gff`: EDTA transposable-element annotation in GFF3 format; default `null`.
 - `--gene_gff`: Helixer gene annotation in GFF format; default `null`.
+- `--metadata`: existing chromosome metadata CSV; default `null`.
+- `--templates`: repeat-template FASTA passed to TRASH_2; default `null`.
 - `--trash2`: existing TRASH_2 results directory, which skips the TRASH_2 run; default `null`.
 - `--cores`: number of CPU cores; default `1`.
 - `--outdir`: output directory; default `./results`.
@@ -393,7 +395,9 @@ sbatch scripts/run-cap-slurm.sh \
   --conda /shared/tools/miniconda3/bin/conda
 ```
 
-Optional annotations use `--te-gff`, `--gene-gff`, and `--metadata`. To reuse existing TRASH_2 output explicitly:
+Optional annotations use `--te-gff`, `--gene-gff`, and `--metadata`; repeat
+templates use `--templates`. Repeat limits use `--max-rep-size` and
+`--min-rep-size`. To reuse existing TRASH_2 output explicitly:
 
 ```bash
 sbatch scripts/run-cap-slurm.sh \
