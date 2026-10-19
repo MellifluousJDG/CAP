@@ -16,10 +16,10 @@ ghcr.io/mellifluousjdg/cap@sha256:c6ec1c840e0a4184a249019b3ea317330754e5699f2550
 
 ## Tag and digest policy
 
-Published version tags are immutable. For each future release, publish one full
-version tag such as `1.1.0`; do not replace an existing version tag or rely on
-mutable `latest`, major, or minor aliases. Documentation, release notes, and
-archived validation records must also record the immutable manifest digest.
+Published version tags are immutable. For each release, publish one full version
+tag such as `1.1.0`; do not replace an existing version tag or rely on mutable
+`latest`, major, or minor aliases. Documentation, release notes, and archived
+validation records must also record the immutable manifest digest.
 
 ## Manual publication
 
@@ -32,7 +32,7 @@ printf '%s' "$GHCR_TOKEN" | podman login ghcr.io \
   --username MellifluousJDG --password-stdin
 ```
 
-Tag and push a tested future image, replacing `<version>` with a new version:
+Tag and push the tested release image, replacing `<version>` with the new version:
 
 ```bash
 version=<version>
@@ -90,5 +90,12 @@ and publish its checksum and location in the release notes.
   copyright files, binary-to-source mappings, and corresponding source, in the
   external compliance bundle.
 
-For every future release, complete and checksum-verify the compliance bundle
-before publishing the image.
+The bundle generator writes `SHA256SUMS`. Before publishing or after transferring
+the bundle, check that its files have not been corrupted or incompletely copied:
+
+```bash
+(cd /path/to/compliance-bundle && sha256sum --check --strict SHA256SUMS)
+```
+
+This integrity check does not establish artifact authenticity or replace the
+license and source review above.
