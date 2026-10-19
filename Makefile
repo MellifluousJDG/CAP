@@ -7,7 +7,7 @@ MAX_REP_SIZE ?= 1000
 MIN_REP_SIZE ?= 7
 TEMPLATES ?=
 
-.PHONY: install compile run run-trash2 lint check-policy check-container-policy check-config-policy test-conda test-trash2-standalone test-container test-slurm-wrapper test-appimage-slurm-wrapper appimage test-appimage clean-appimage oci-inventory oci-compliance remove-env clean-build clean
+.PHONY: install compile run run-trash2 lint check-policy check-container-policy check-config-policy test-conda test-make-interface test-trash2-standalone test-container test-slurm-wrapper test-appimage-slurm-wrapper appimage test-appimage clean-appimage oci-inventory oci-compliance remove-env clean-build clean
 
 install:
 	@echo "Setting up Conda environment '$(ENV_NAME)'..."
@@ -50,6 +50,9 @@ check-config-policy:
 test-conda:
 	CAP_ENV_NAME="$(ENV_NAME)" bash scripts/test-conda.sh
 
+test-make-interface:
+	bash scripts/test-make-interface.sh
+
 test-trash2-standalone:
 	CAP_TEST_CONDA="$(CONDA)" CAP_TEST_ENV_NAME="$(ENV_NAME)" bash scripts/test-trash2-standalone.sh
 
@@ -89,5 +92,8 @@ clean-build:
 	rm -f bin/ctw-calc
 
 clean:
-	@echo "DEPRECATED: 'make clean' removes the Conda environment. Use 'make remove-env' instead."
-	@$(MAKE) remove-env ENV_NAME="$(ENV_NAME)"
+	@echo "ERROR: 'make clean' is intentionally disabled because cleanup is ambiguous." >&2
+	@echo "Use 'make remove-env [ENV_NAME=name]' to remove a Conda environment." >&2
+	@echo "Use 'make clean-build' to remove the compiled CTW/BCT binary." >&2
+	@echo "Use 'make clean-appimage' to remove AppImage build output and artifacts." >&2
+	@exit 2

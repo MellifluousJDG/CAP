@@ -33,7 +33,7 @@ and troubleshooting.
 The tested packaging path is Conda on Linux x86-64. Conda must already be installed; Nextflow, Java, R, Python, Git, and scientific dependencies are installed in one CAP environment.
 
 ```bash
-git clone --branch reproducible-conda-pipeline --recurse-submodules \
+git clone --recurse-submodules \
   https://github.com/MellifluousJDG/CAP.git
 cd CAP
 
@@ -60,7 +60,7 @@ On another platform, setup falls back to solving `environment.yml`. That fallbac
 A recursive clone is preferred:
 
 ```bash
-git clone --branch reproducible-conda-pipeline --recurse-submodules \
+git clone --recurse-submodules \
   https://github.com/MellifluousJDG/CAP.git
 cd CAP
 make install
@@ -329,6 +329,7 @@ CAP/
 │   ├── run-cap-appimage-slurm.sh   # AppImage single-allocation SLURM launcher
 │   ├── run-trash2.sh               # Locked standalone TRASH_2 launcher
 │   ├── test-conda.sh               # One-core CAP regression test
+│   ├── test-make-interface.sh      # Make cleanup and clone-instruction tests
 │   ├── test-container.sh           # OCI lock and compliance checks
 │   ├── test-container-image.sh     # Built OCI image integration test
 │   ├── test-slurm-wrapper.sh       # Scheduler-free Conda SLURM launcher tests
