@@ -48,9 +48,7 @@ podman logout ghcr.io
 ```
 
 Set the GHCR package visibility deliberately in GitHub's package settings and
-link the package to the CAP repository. Pull the digest-pinned image into a
-clean image store and rerun `scripts/test-container-image.sh` before announcing
-the release.
+link the package to the CAP repository.
 
 ## Release artifacts
 

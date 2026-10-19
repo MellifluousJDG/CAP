@@ -214,12 +214,12 @@ Test a built artifact with:
 make test-appimage APPIMAGE=dist/CAP-<revision>-x86_64.AppImage
 ```
 
-This first checks the AppImage against its adjacent `.AppImage.sha256` file.
-It then runs the complete one-core CAP regression in both normal FUSE-mounted
+This runs the complete one-core CAP regression in both normal FUSE-mounted
 execution and from a separately extracted directory. Each run must produce 16
 outputs, all 15 deterministic non-PNG files must match their expected SHA-256
-values, and the PNG must be nonempty. Normal execution therefore requires FUSE
-2 support, including `libfuse.so.2`, on the test host.
+values, and the PNG must be nonempty. It also checks key bundled runtimes and
+confirms that excluded Windows dependency bundles are absent. Normal execution
+therefore requires FUSE 2 support, including `libfuse.so.2`, on the test host.
 
 Remove generated AppImage build directories and artifacts with:
 

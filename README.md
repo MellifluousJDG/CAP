@@ -253,15 +253,10 @@ When dependencies must change:
    conda list -n cap-pipeline --explicit > conda-linux-64.lock
    ```
 
-7. recreate a disposable environment from that lock:
-
-   ```bash
-   conda create -n cap-lock-test --file conda-linux-64.lock
-   ```
-
-8. repeat setup and the complete smoke test from a fresh recursive clone;
-9. update `test/expected-results.sha256` only when output changes are understood and approved;
-10. commit dependency specifications, lock changes, and intentional output-baseline changes separately where practical.
+7. from a fresh recursive clone, create a disposable environment from that lock
+   and run the complete smoke test;
+8. update `test/expected-results.sha256` only when output changes are understood and approved;
+9. commit dependency specifications, lock changes, and intentional output-baseline changes separately where practical.
 
 The lock must not contain local filesystem paths or private package URLs. Review the generated file before committing it.
 
