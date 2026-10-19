@@ -162,7 +162,8 @@ Common problems:
 - Permission denied under `results/` or `work/`: create both host directories
   before running, retain `--userns=keep-id`, and check SELinux labeling.
 - Interrupted or failed execution: inspect `.nextflow.log` and retain
-  `work/nextflow` for diagnosis; remove work only after success.
+  `work/nextflow` for diagnosis or Nextflow resume. Remove it manually when it is
+  no longer needed.
 - A Nextflow version-check warning when offline is harmless; the bundled
   workflow and dependencies run without downloading packages.
 
@@ -255,13 +256,13 @@ archive format.
 
 The bundle generator deliberately does not guess third-party source URLs or
 claim that binary package URLs satisfy corresponding-source obligations.
-For a future dependency update, review and add exact source archives and
-mappings before public distribution.
+For a dependency update, review and add exact source archives and mappings
+before public distribution.
 
 ## Validation and publication
 
-For a future release, run `scripts/test-container-image.sh` inside the built
-image before publication. The test requires 16 nonempty outputs and checks exact
+For each release, run `scripts/test-container-image.sh` inside the built image
+before publication. The test requires 16 nonempty outputs and checks exact
 hashes for all 15 non-PNG outputs. The PNG is not byte-compared because font
 discovery and rasterization can vary with the base OS even when R packages are
 locked; it must still be present and nonempty. Record the image's immutable OCI
