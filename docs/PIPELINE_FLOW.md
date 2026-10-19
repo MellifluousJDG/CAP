@@ -57,8 +57,8 @@ assembly FASTA
                                                                                            └──> R data
 ```
 
-When neither optional annotation is supplied, CAP sends an internal `NO_FILE`
-value down that branch instead. `GC` and `CTW` do not feed
+When neither optional annotation is supplied, CAP skips that parsing branch and
+continues without the corresponding annotation files. `GC` and `CTW` do not feed
 `SCORE_CENTROMERIC`; they join the other results at the final `CAP` process.
 
 Nextflow may execute independent branches concurrently. For example, metadata,
@@ -170,7 +170,7 @@ Published files:
 <TE-stem>_TEs_parsed_filtered.csv
 ```
 
-Without `--te_gff`, CAP passes the internal value `NO_FILE` to downstream scripts and publishes neither TE file.
+Without `--te_gff`, CAP skips these processes and publishes neither TE file.
 
 ### `PARSE_GENES` and `FILTER_GENES`
 
@@ -184,7 +184,7 @@ Published files:
 <gene-stem>_genes_parsed_filtered.csv
 ```
 
-Without `--gene_gff`, CAP passes the internal value `NO_FILE` to downstream scripts and publishes neither gene file.
+Without `--gene_gff`, CAP skips these processes and publishes neither gene file.
 
 ### `SCORE_CENTROMERIC`
 

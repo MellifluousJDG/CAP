@@ -104,10 +104,19 @@ apptainer pull cap-1.0.0.sif \
 Then copy the immutable SIF to shared storage and execute it in one allocation:
 
 ```bash
+outdir=/shared/results/genome-cap
+work_root="${SLURM_TMPDIR:-${TMPDIR:-/tmp}}/cap-${SLURM_JOB_ID}"
+
+mkdir -p "$outdir" "$work_root/home"
+trap 'status=$?; if [ "$status" -eq 0 ]; then rm -rf "$work_root"; \
+  else echo "Work retained at $work_root" >&2; fi; exit "$status"' EXIT
+
 apptainer exec \
+  --env HOME=/work/home \
+  --env NXF_HOME=/work/home/.nextflow \
   --bind /shared/data:/data:ro \
-  --bind /shared/results/genome-cap:/results \
-  --bind "${SLURM_TMPDIR}/cap-work:/work" \
+  --bind "$outdir:/results" \
+  --bind "$work_root:/work" \
   cap-1.0.0.sif \
   /usr/local/bin/cap \
   --assembly /data/genome.fasta \
@@ -117,7 +126,8 @@ apptainer exec \
 ```
 
 Apptainer does not necessarily honor an OCI image's entrypoint, so invoke
-`/usr/local/bin/cap` explicitly.
+`/usr/local/bin/cap` explicitly. Final results remain on shared storage; the
+node-local work directory is removed only after success.
 
 ## Offline transfer
 
