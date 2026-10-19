@@ -329,7 +329,6 @@ CAP/
 │   ├── run-cap-appimage-slurm.sh   # AppImage single-allocation SLURM launcher
 │   ├── run-trash2.sh               # Locked standalone TRASH_2 launcher
 │   ├── test-conda.sh               # One-core CAP regression test
-│   ├── test-make-interface.sh      # Make cleanup and clone-instruction tests
 │   ├── test-container.sh           # OCI lock and compliance checks
 │   ├── test-container-image.sh     # Built OCI image integration test
 │   ├── test-slurm-wrapper.sh       # Scheduler-free Conda SLURM launcher tests
