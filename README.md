@@ -111,7 +111,6 @@ operations are invoked directly as documented in the relevant guides under
 - `make test-trash2-standalone` validates the standalone launcher without running a full analysis.
 - `make remove-env` removes the selected Conda environment.
 - `make clean-build` removes the generated `bin/ctw-calc` binary without removing the environment.
-- `make clean` is deprecated because its name is ambiguous; it currently explains the replacement and delegates to `make remove-env`.
 
 ### Removing the environment
 
@@ -222,7 +221,9 @@ The test:
 
 The exact checksum guarantee currently applies to the tested Linux x86-64 environment, committed model and dependencies, bundled input, published TRASH_2 revision, and one-core execution. A fixed sampling seed is used, but deterministic multiprocessing has not yet been established. Do not interpret the one-core regression test as a guarantee that every multicore run is byte-identical.
 
-The expected PNG omits the former rightmost `Cen probability` table column. Probability calculations and CSV output remain available.
+`test/ath_Chr1_extraction_trc.fasta` is the committed regression input, and
+`test/expected-results.sha256` records the expected output hashes. Generated
+result and Nextflow work files remain uncommitted.
 
 Override disposable test locations if needed:
 
@@ -353,7 +354,9 @@ CAP/
 ├── bin/                            # Pipeline scripts and CTW source
 ├── modules/TRASH_2/                # Pinned TRASH_2 Git submodule
 ├── model/                          # Pre-trained prediction models
-└── test/                           # Bundled inputs and expected checksums
+└── test/
+    ├── ath_Chr1_extraction_trc.fasta # Regression-test assembly input
+    └── expected-results.sha256       # Deterministic output checksums
 ```
 
 Run `make lint` before committing changes to shell or Python scripts. It checks
