@@ -42,11 +42,11 @@ set -euo pipefail
 image=ghcr.io/mellifluousjdg/cap:1.0.0
 assembly=/shared/data/genome.fasta
 outdir=/shared/results/genome-cap
-work_root="${SLURM_TMPDIR:-${TMPDIR:-/tmp}}/cap-${SLURM_JOB_ID}"
+tmp_base="${SLURM_TMPDIR:-${TMPDIR:-/tmp}}"
+job_id=${SLURM_JOB_ID:?submit this script with sbatch}
+work_root=$(mktemp -d "$tmp_base/cap-$job_id-XXXXXXXX")
 
-mkdir -p "$outdir" "$work_root"
-trap 'status=$?; if [ "$status" -eq 0 ]; then rm -rf "$work_root"; \
-  else echo "Work retained at $work_root" >&2; fi; exit "$status"' EXIT
+mkdir -p "$outdir"
 
 podman run --rm --userns=keep-id \
   -v "$(dirname "$assembly"):/data:ro" \
@@ -57,6 +57,9 @@ podman run --rm --userns=keep-id \
   --outdir /results \
   --cores "${SLURM_CPUS_PER_TASK:-1}" \
   -work-dir /work/nextflow
+
+printf 'Work directory retained at: %s\n' "$work_root"
+printf 'Remove it when no longer needed with:\n  rm -rf -- %q\n' "$work_root"
 ```
 
 `--userns=keep-id` is important for rootless Podman: it makes bind-mounted
@@ -71,13 +74,16 @@ The command shape is similar, but map the runtime process to the submitting
 user so bind-mounted outputs remain host-owned:
 
 ```bash
+work_root="${SLURM_TMPDIR}/cap-work"
+mkdir -p "$work_root/home" /shared/results/genome-cap
+
 docker run --rm \
   --user "$(id -u):$(id -g)" \
   -e HOME=/work/home \
   -e NXF_HOME=/work/home/.nextflow \
   -v /shared/data:/data:ro \
   -v /shared/results/genome-cap:/results \
-  -v "${SLURM_TMPDIR}/cap-work:/work" \
+  -v "$work_root:/work" \
   ghcr.io/mellifluousjdg/cap:1.0.0 \
   --assembly /data/genome.fasta \
   --outdir /results \
@@ -85,8 +91,9 @@ docker run --rm \
   -work-dir /work/nextflow
 ```
 
-Create `/work/home` before launching if the container runtime does not create
-it.
+The example creates the writable home and result directories before launching.
+Its work directory is retained; keep it for diagnosis or resume, and remove it
+manually when it is no longer needed.
 
 ## Apptainer or Singularity
 
@@ -101,20 +108,34 @@ apptainer pull cap-1.0.0.sif \
 Then copy the immutable SIF to shared storage and execute it in one allocation:
 
 ```bash
+outdir=/shared/results/genome-cap
+tmp_base="${SLURM_TMPDIR:-${TMPDIR:-/tmp}}"
+job_id=${SLURM_JOB_ID:?run this command inside a SLURM allocation}
+work_root=$(mktemp -d "$tmp_base/cap-$job_id-XXXXXXXX")
+
+mkdir -p "$outdir" "$work_root/home"
+
 apptainer exec \
+  --env HOME=/work/home \
+  --env NXF_HOME=/work/home/.nextflow \
   --bind /shared/data:/data:ro \
-  --bind /shared/results/genome-cap:/results \
-  --bind "${SLURM_TMPDIR}/cap-work:/work" \
+  --bind "$outdir:/results" \
+  --bind "$work_root:/work" \
   cap-1.0.0.sif \
   /usr/local/bin/cap \
   --assembly /data/genome.fasta \
   --outdir /results \
   --cores "${SLURM_CPUS_PER_TASK:-1}" \
   -work-dir /work/nextflow
+
+printf 'Work directory retained at: %s\n' "$work_root"
+printf 'Remove it when no longer needed with:\n  rm -rf -- %q\n' "$work_root"
 ```
 
 Apptainer does not necessarily honor an OCI image's entrypoint, so invoke
-`/usr/local/bin/cap` explicitly.
+`/usr/local/bin/cap` explicitly. Final results remain on shared storage. The
+node-local work directory is retained for diagnosis or Nextflow resume; remove
+it manually when it is no longer needed.
 
 ## Offline transfer
 

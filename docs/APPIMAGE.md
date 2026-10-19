@@ -68,7 +68,8 @@ The AppImage accepts the same workflow arguments as the Conda installation:
 
 - `--te_gff`: EDTA transposable-element annotation in GFF3 format.
 - `--gene_gff`: Helixer gene annotation in GFF format.
-- `--metadata`: optional sample metadata.
+- `--metadata`: existing chromosome metadata CSV.
+- `--templates`: repeat-template FASTA passed to TRASH_2.
 - `--trash2`: existing TRASH_2 output directory.
 - `--max_rep_size`: maximum tandem-repeat size; default `1000`.
 - `--min_rep_size`: minimum tandem-repeat size; default `7`.
@@ -159,11 +160,12 @@ sbatch scripts/run-cap-appimage-slurm.sh \
   --outdir /shared/results/genome-cap
 ```
 
-The wrapper places Nextflow intermediates under
-`${SLURM_TMPDIR:-${TMPDIR:-/tmp}}/cap-appimage-nextflow-${SLURM_JOB_ID}`. It
-removes that directory after success and retains it with a diagnostic path after
-failure. Final output must therefore use persistent storage; node-local work may
-be lost when an allocation ends.
+The wrapper creates a unique Nextflow work directory under
+`${SLURM_TMPDIR:-${TMPDIR:-/tmp}}`. It retains the directory after both success
+and failure and prints its exact path plus a cleanup command. Final output must
+use persistent storage; node-local work may be lost when an allocation ends.
+Keep it for diagnosis or Nextflow resume, and remove it manually when no longer
+needed.
 
 Run its scheduler-free behavioral tests with:
 
@@ -172,7 +174,8 @@ make test-appimage-slurm-wrapper
 ```
 
 These tests use a fake AppImage to validate arguments, CPU propagation,
-optional inputs, paths containing spaces, and cleanup without calling `sbatch`.
+optional inputs, paths containing spaces, unique work-directory creation, and
+retention without calling `sbatch`.
 They cannot check your scheduler, compute-node FUSE support, shared filesystems,
 or site policy. Ask your cluster administrators about those requirements before
 submitting CAP.
@@ -211,12 +214,12 @@ Test a built artifact with:
 make test-appimage APPIMAGE=dist/CAP-<revision>-x86_64.AppImage
 ```
 
-This first checks the AppImage against its adjacent `.AppImage.sha256` file.
-It then runs the complete one-core CAP regression in both normal FUSE-mounted
+This runs the complete one-core CAP regression in both normal FUSE-mounted
 execution and from a separately extracted directory. Each run must produce 16
 outputs, all 15 deterministic non-PNG files must match their expected SHA-256
-values, and the PNG must be nonempty. Normal execution therefore requires FUSE
-2 support, including `libfuse.so.2`, on the test host.
+values, and the PNG must be nonempty. It also checks key bundled runtimes and
+confirms that excluded Windows dependency bundles are absent. Normal execution
+therefore requires FUSE 2 support, including `libfuse.so.2`, on the test host.
 
 Remove generated AppImage build directories and artifacts with:
 

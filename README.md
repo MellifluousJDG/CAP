@@ -55,7 +55,9 @@ make run ASSEMBLY=/path/to/genome.fasta
 
 On Linux x86-64, `setup_conda.sh` creates the environment from the committed `conda-linux-64.lock`. The lock contains the exact package URLs used by the tested environment.
 
-On another platform, setup falls back to solving `environment.yml`. That fallback is convenient but does not have the same exact-package reproducibility guarantee. Linux is currently the supported and tested platform.
+On other platforms, setup falls back to solving `environment.yml`. This is a
+best-effort installation path without the exact-package reproducibility or test
+coverage of Linux x86-64.
 
 A recursive clone is preferred:
 
@@ -184,6 +186,8 @@ A genome assembly contains one or more reconstructed genomic DNA sequences, such
 
 - `--te_gff`: EDTA transposable-element annotation in GFF3 format; default `null`.
 - `--gene_gff`: Helixer gene annotation in GFF format; default `null`.
+- `--metadata`: existing chromosome metadata CSV; default `null`.
+- `--templates`: repeat-template FASTA passed to TRASH_2; default `null`.
 - `--trash2`: existing TRASH_2 results directory, which skips the TRASH_2 run; default `null`.
 - `--cores`: number of CPU cores; default `1`.
 - `--outdir`: output directory; default `./results`.
@@ -214,7 +218,7 @@ The test:
 
 1. uses the bundled small FASTA assembly;
 2. requires the TRASH_2 submodule and compiled `bin/ctw-calc`;
-3. runs all ten CAP processes with one core and fresh result/work directories;
+3. runs the complete ten-process workflow with one core and fresh result/work directories;
 4. requires 16 nonempty output files, including CSV, PNG, and RDS output;
 5. verifies every result against `test/expected-results.sha256`.
 
@@ -249,15 +253,17 @@ When dependencies must change:
    conda list -n cap-pipeline --explicit > conda-linux-64.lock
    ```
 
-7. recreate a disposable environment from that lock:
+7. from a fresh recursive clone containing the candidate lock, create a
+   disposable environment from that lock and run the complete smoke test:
 
    ```bash
    conda create -n cap-lock-test --file conda-linux-64.lock
+   make compile ENV_NAME=cap-lock-test
+   make test-conda ENV_NAME=cap-lock-test
    ```
 
-8. repeat setup and the complete smoke test from a fresh recursive clone;
-9. update `test/expected-results.sha256` only when output changes are understood and approved;
-10. commit dependency specifications, lock changes, and intentional output-baseline changes separately where practical.
+8. update `test/expected-results.sha256` only when output changes are understood and approved;
+9. commit dependency specifications, lock changes, and intentional output-baseline changes separately where practical.
 
 The lock must not contain local filesystem paths or private package URLs. Review the generated file before committing it.
 
@@ -393,7 +399,9 @@ sbatch scripts/run-cap-slurm.sh \
   --conda /shared/tools/miniconda3/bin/conda
 ```
 
-Optional annotations use `--te-gff`, `--gene-gff`, and `--metadata`. To reuse existing TRASH_2 output explicitly:
+Optional annotations use `--te-gff`, `--gene-gff`, and `--metadata`; repeat
+templates use `--templates`. Repeat limits use `--max-rep-size` and
+`--min-rep-size`. To reuse existing TRASH_2 output explicitly:
 
 ```bash
 sbatch scripts/run-cap-slurm.sh \
@@ -404,7 +412,11 @@ sbatch scripts/run-cap-slurm.sh \
 
 For an assembly named `genome.fasta`, that directory must contain both `genome.fasta_repeats_with_seq.csv` and `genome.fasta_arrays.csv`. A supplied but invalid `--trash2` directory causes an error instead of silently rerunning TRASH_2. Omit `--trash2` to run TRASH_2 normally.
 
-Nextflow work is placed in `${SLURM_TMPDIR:-${TMPDIR:-/tmp}}/cap-nextflow-${SLURM_JOB_ID}` to avoid shared-filesystem temporary-I/O problems. It is removed after success and retained with its path printed after failure. Final output must therefore use persistent/shared storage.
+The wrapper creates a unique Nextflow work directory under
+`${SLURM_TMPDIR:-${TMPDIR:-/tmp}}`, retains it after both successful and failed
+runs, and prints its exact path plus a cleanup command. Final output must use
+persistent/shared storage. Keep the work directory for diagnosis or Nextflow
+resume; remove it manually when it is no longer needed.
 
 The script refuses to run directly on a login node. Its explicit local-validation mode is:
 
@@ -420,7 +432,9 @@ Run the scheduler-free launcher tests with:
 make test-slurm-wrapper
 ```
 
-These tests validate argument handling, CPU propagation, optional TRASH_2 behavior, and temporary-work cleanup without calling `sbatch`.
+These tests validate argument handling, CPU propagation, optional TRASH_2
+behavior, unique work-directory creation, and unconditional retention without
+calling `sbatch`.
 
 For AppImage-based clusters, use `scripts/run-cap-appimage-slurm.sh` instead.
 See `docs/APPIMAGE.md` for submission, extracted-AppImage use, and the limits of

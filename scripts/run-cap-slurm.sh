@@ -23,6 +23,7 @@ Optional:
   --metadata FILE       Existing chromosome metadata CSV
   --templates FILE      TRASH_2 repeat templates
   --max-rep-size INT    Maximum tandem-repeat size
+  --min-rep-size INT    Minimum tandem-repeat size
   --env-name NAME       Conda environment (default: cap-pipeline)
   --conda EXE           Conda executable (default: conda from PATH)
   --help                Show this help
@@ -53,6 +54,7 @@ GENE_GFF=""
 METADATA=""
 TEMPLATES=""
 MAX_REP_SIZE=""
+MIN_REP_SIZE=""
 
 while [ "$#" -gt 0 ]; do
     case "$1" in
@@ -72,6 +74,8 @@ while [ "$#" -gt 0 ]; do
             require_value "$@"; TEMPLATES=$2; shift 2 ;;
         --max-rep-size)
             require_value "$@"; MAX_REP_SIZE=$2; shift 2 ;;
+        --min-rep-size)
+            require_value "$@"; MIN_REP_SIZE=$2; shift 2 ;;
         --env-name)
             require_value "$@"; ENV_NAME=$2; shift 2 ;;
         --conda)
@@ -107,10 +111,18 @@ OUTDIR="$(cd -- "$OUTDIR_PARENT" && pwd)/$(basename -- "$OUTDIR")"
 [ -z "$METADATA" ] || METADATA="$(cd -- "$(dirname -- "$METADATA")" && pwd)/$(basename -- "$METADATA")"
 [ -z "$TEMPLATES" ] || TEMPLATES="$(cd -- "$(dirname -- "$TEMPLATES")" && pwd)/$(basename -- "$TEMPLATES")"
 
-case "$MAX_REP_SIZE" in
-    "") ;;
-    *[!0-9]*|0) fail "--max-rep-size must be a positive integer." ;;
-esac
+for item in "max-rep-size:$MAX_REP_SIZE" "min-rep-size:$MIN_REP_SIZE"; do
+    label=${item%%:*}
+    value=${item#*:}
+    case "$value" in
+        "") ;;
+        *[!0-9]*|0) fail "--$label must be a positive integer." ;;
+    esac
+done
+if [ -n "$MIN_REP_SIZE" ] && [ -n "$MAX_REP_SIZE" ] && \
+    [ "$MIN_REP_SIZE" -gt "$MAX_REP_SIZE" ]; then
+    fail "--min-rep-size must not exceed --max-rep-size."
+fi
 
 if [ -n "$TRASH2" ]; then
     [ -d "$TRASH2" ] || fail "TRASH_2 directory not found: $TRASH2"
@@ -136,25 +148,8 @@ esac
 
 JOB_ID="${SLURM_JOB_ID:-local-$$}"
 TMP_BASE="${SLURM_TMPDIR:-${TMPDIR:-/tmp}}"
-WORK_DIR="$TMP_BASE/cap-nextflow-$JOB_ID"
-mkdir -p -- "$WORK_DIR"
-
-TEMPORARY_WORK=1
-cleanup() {
-    status=$?
-    if [ "$status" -eq 0 ] && [ "$TEMPORARY_WORK" -eq 1 ]; then
-        expected="$TMP_BASE/cap-nextflow-$JOB_ID"
-        if [ "$WORK_DIR" = "$expected" ] && [ -n "$TMP_BASE" ] && [ "$TMP_BASE" != / ]; then
-            rm -rf -- "$WORK_DIR"
-        else
-            echo "Refusing to remove unexpected work directory: $WORK_DIR" >&2
-            return 1
-        fi
-    elif [ -d "$WORK_DIR" ]; then
-        echo "CAP failed; Nextflow work directory retained at: $WORK_DIR" >&2
-    fi
-}
-trap cleanup EXIT
+[ -d "$TMP_BASE" ] || fail "temporary directory base not found: $TMP_BASE"
+WORK_DIR=$(mktemp -d "$TMP_BASE/cap-nextflow-$JOB_ID-XXXXXXXX")
 
 mkdir -p -- "$OUTDIR"
 
@@ -171,6 +166,7 @@ nextflow_args=(
 [ -z "$METADATA" ] || nextflow_args+=(--metadata "$METADATA")
 [ -z "$TEMPLATES" ] || nextflow_args+=(--templates "$TEMPLATES")
 [ -z "$MAX_REP_SIZE" ] || nextflow_args+=(--max_rep_size "$MAX_REP_SIZE")
+[ -z "$MIN_REP_SIZE" ] || nextflow_args+=(--min_rep_size "$MIN_REP_SIZE")
 
 command=("$CONDA_EXE" run -n "$ENV_NAME" "${nextflow_args[@]}")
 
@@ -182,7 +178,17 @@ printf ' %q' "${command[@]}"
 printf '\n'
 
 if [ "${CAP_SLURM_DRY_RUN:-0}" = 1 ]; then
-    exit 0
+    status=0
+else
+    status=0
+    "${command[@]}" || status=$?
 fi
 
-"${command[@]}"
+if [ "$status" -eq 0 ]; then
+    printf 'CAP completed successfully.\n'
+else
+    printf 'CAP failed; retain the work directory for diagnosis.\n' >&2
+fi
+printf 'Nextflow work directory retained at: %s\n' "$WORK_DIR" >&2
+printf 'Remove it when no longer needed with:\n  rm -rf -- %q\n' "$WORK_DIR" >&2
+exit "$status"

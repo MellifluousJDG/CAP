@@ -1,32 +1,25 @@
 # OCI image release and GHCR publication
 
 GitHub Container Registry (GHCR) is an OCI registry. CAP images do not need to
-be published to Docker Hub. The planned image name is:
+be published to Docker Hub. The public image repository is:
 
 ```text
 ghcr.io/mellifluousjdg/cap
 ```
 
-Registry repository names are lowercase. Public publication must wait for the
-redistribution review described below.
-
-## Tag and digest policy
-
-For a release such as `1.0.0`, publish:
+CAP 1.0.0 is published under the immutable release tag and manifest digest:
 
 ```text
 ghcr.io/mellifluousjdg/cap:1.0.0
-ghcr.io/mellifluousjdg/cap:1.0
-ghcr.io/mellifluousjdg/cap:1
-ghcr.io/mellifluousjdg/cap:latest
+ghcr.io/mellifluousjdg/cap@sha256:c6ec1c840e0a4184a249019b3ea317330754e5699f2550e009fe28b0729e889b
 ```
 
-Tags are convenient but mutable. Documentation, release notes, and archived
-validation records must also record the immutable manifest digest:
+## Tag and digest policy
 
-```text
-ghcr.io/mellifluousjdg/cap@sha256:...
-```
+Published version tags are immutable. For each release, publish one full version
+tag such as `1.1.0`; do not replace an existing version tag or rely on mutable
+`latest`, major, or minor aliases. Documentation, release notes, and archived
+validation records must also record the immutable manifest digest.
 
 ## Manual publication
 
@@ -39,11 +32,12 @@ printf '%s' "$GHCR_TOKEN" | podman login ghcr.io \
   --username MellifluousJDG --password-stdin
 ```
 
-Tag and push the already-tested image:
+Tag and push the tested release image, replacing `<version>` with the new version:
 
 ```bash
-podman tag cap:local ghcr.io/mellifluousjdg/cap:1.0.0
-podman push ghcr.io/mellifluousjdg/cap:1.0.0
+version=<version>
+podman tag cap:local "ghcr.io/mellifluousjdg/cap:$version"
+podman push "ghcr.io/mellifluousjdg/cap:$version"
 ```
 
 After pushing, obtain and record the registry manifest digest. Do not confuse a
@@ -54,9 +48,7 @@ podman logout ghcr.io
 ```
 
 Set the GHCR package visibility deliberately in GitHub's package settings and
-link the package to the CAP repository. Pull the digest-pinned image into a
-clean image store and rerun `scripts/test-container-image.sh` before announcing
-the release.
+link the package to the CAP repository.
 
 ## Release artifacts
 
@@ -95,6 +87,3 @@ and publish its checksum and location in the release notes.
 - Preserve the reviewed Conda notices and source mappings, plus the Debian
   copyright files, binary-to-source mappings, and corresponding source, in the
   external compliance bundle.
-
-Do not publish the image until the final compliance bundle is complete and
-checksum-verified.

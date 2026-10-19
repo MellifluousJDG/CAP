@@ -18,6 +18,7 @@ CAP optionally accepts:
 - `--trash2`: a directory containing precomputed TRASH_2 output;
 - `--cores`: CPU count used by process resource configuration and passed to TRASH_2;
 - `--max_rep_size`: maximum repeat size passed to TRASH_2;
+- `--min_rep_size`: minimum repeat size passed to TRASH_2;
 - `--outdir`: directory to which process outputs are copied.
 
 Annotation sequence names and coordinates must correspond to the supplied assembly.
@@ -56,8 +57,8 @@ assembly FASTA
                                                                                            └──> R data
 ```
 
-When neither optional annotation is supplied, CAP sends an internal `NO_FILE`
-value down that branch instead. `GC` and `CTW` do not feed
+When neither optional annotation is supplied, CAP skips that parsing branch and
+continues without the corresponding annotation files. `GC` and `CTW` do not feed
 `SCORE_CENTROMERIC`; they join the other results at the final `CAP` process.
 
 Nextflow may execute independent branches concurrently. For example, metadata,
@@ -103,14 +104,13 @@ Consequently, repeat filenames accumulate processing-stage suffixes such as
 
 ### `CHECK_DEPS`
 
-Checks that `nhmmer` and `mafft` are available. It emits an internal readiness
-value and publishes no file. TRASH_2 waits for this check when CAP performs
-repeat detection.
+Checks that `nhmmer` and `mafft` are available before repeat detection. It
+publishes no file.
 
 ### `TRASH2`
 
 Runs `modules/TRASH_2/src/TRASH.R` on the assembly. It accepts optional
-templates and uses `--cores` and `--max_rep_size`.
+templates and uses `--cores`, `--max_rep_size`, and `--min_rep_size`.
 
 Published files:
 
@@ -169,7 +169,7 @@ Published files:
 <TE-stem>_TEs_parsed_filtered.csv
 ```
 
-Without `--te_gff`, CAP passes the internal value `NO_FILE` to downstream scripts and publishes neither TE file.
+Without `--te_gff`, CAP skips these processes and publishes neither TE file.
 
 ### `PARSE_GENES` and `FILTER_GENES`
 
@@ -183,7 +183,7 @@ Published files:
 <gene-stem>_genes_parsed_filtered.csv
 ```
 
-Without `--gene_gff`, CAP passes the internal value `NO_FILE` to downstream scripts and publishes neither gene file.
+Without `--gene_gff`, CAP skips these processes and publishes neither gene file.
 
 ### `SCORE_CENTROMERIC`
 
@@ -277,9 +277,10 @@ Each file-producing process uses `publishDir` in copy mode:
 - deleting a work directory removes task caches and diagnostics, not successfully published copies;
 - incomplete or failed tasks may leave useful logs and temporary files only in their work directory.
 
-The single-node SLURM wrapper uses node-local temporary storage for the Nextflow
-work directory while keeping `--outdir` on persistent storage. It removes
-temporary work after success and reports its retained location after failure.
+The single-node SLURM wrapper creates a unique work directory under node-local
+temporary storage while keeping `--outdir` on persistent storage. It retains the
+work directory after every run and prints its exact path and a manual cleanup
+command.
 
 ## Diagnosing an incomplete run
 

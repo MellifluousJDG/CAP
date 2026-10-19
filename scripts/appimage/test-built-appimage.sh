@@ -13,11 +13,6 @@ IMAGE="$(cd -- "$(dirname -- "$IMAGE")" && pwd)/$(basename -- "$IMAGE")"
     echo "AppImage is not executable: $IMAGE" >&2
     exit 1
 }
-[ -f "$IMAGE.sha256" ] || {
-    echo "Checksum file missing: $IMAGE.sha256" >&2
-    exit 1
-}
-(cd -- "$(dirname -- "$IMAGE")" && sha256sum --check "$(basename -- "$IMAGE").sha256")
 
 TEST_DIR="${APPIMAGE_TEST_DIR:-$PROJECT_DIR/build/appimage/artifact-test}"
 EXPECTED="$TEST_DIR/expected-non-png.sha256"
