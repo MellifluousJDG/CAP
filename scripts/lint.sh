@@ -14,7 +14,9 @@ import sys
 
 root = Path.cwd()
 outdir = Path(sys.argv[1])
-tracked = subprocess.check_output(["git", "ls-files", "-z"]).split(b"\0")
+tracked = subprocess.check_output(
+    ["git", "ls-files", "-z", "--cached", "--others", "--exclude-standard"]
+).split(b"\0")
 shell = []
 python = []
 for raw_path in tracked:
@@ -36,7 +38,7 @@ for raw_path in tracked:
 
 for name, paths in (("shell", shell), ("python", python)):
     if not paths:
-        raise SystemExit(f"No tracked {name} scripts found.")
+        raise SystemExit(f"No {name} scripts found.")
     (outdir / f"{name}.txt").write_text("\n".join(paths) + "\n")
 PY
 

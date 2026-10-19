@@ -198,20 +198,21 @@ compiler, `curl`, and `sha256sum`. Conda does not need to be installed: the buil
 downloads a checksum-verified Miniconda bootstrap locally.
 
 ```bash
-git clone --recurse-submodules https://github.com/MellifluousJDG/CAP.git
-cd CAP
-make appimage
+version=v1.0.1
+test -z "$(git status --porcelain --ignore-submodules=none)"
+test "$(git describe --tags --exact-match)" = "$version"
+APPIMAGE_VERSION="$version" make appimage
 ```
 
 The build downloads the exact packages named by
-`conda-runtime-linux-64.lock`, compiles CTW/BCT, and writes the generated
-AppImage and checksum under `dist/`. The output filename includes the short CAP
-Git revision.
+`conda-runtime-linux-64.lock`, compiles CTW/BCT, and writes
+`dist/CAP-${version}-x86_64.AppImage` and its checksum. For non-release builds,
+omitting `APPIMAGE_VERSION` retains the short-CAP-revision filename.
 
-Test a built artifact with:
+Test the release artifact with:
 
 ```bash
-make test-appimage APPIMAGE=dist/CAP-<revision>-x86_64.AppImage
+make test-appimage APPIMAGE="dist/CAP-${version}-x86_64.AppImage"
 ```
 
 This runs the complete one-core CAP regression in both normal FUSE-mounted
@@ -220,6 +221,44 @@ outputs, all 15 deterministic non-PNG files must match their expected SHA-256
 values, and the PNG must be nonempty. It also checks key bundled runtimes and
 confirms that excluded Windows dependency bundles are absent. Normal execution
 therefore requires FUSE 2 support, including `libfuse.so.2`, on the test host.
+
+## Publish a release
+
+Publication is manual. Build and test from the exact annotated Git tag as shown
+above. Create the GitHub Release and upload the already-tested files without
+rebuilding or renaming them:
+
+```bash
+version=v1.0.1
+gh release create "$version" \
+  "dist/CAP-${version}-x86_64.AppImage" \
+  "dist/CAP-${version}-x86_64.AppImage.sha256" \
+  --repo MellifluousJDG/CAP \
+  --verify-tag \
+  --title "$version" \
+  --notes "CAP $version"
+```
+
+GitHub CLI authentication must be configured interactively before this command;
+do not place tokens on the command line or in shell history. Published release
+tags and assets are immutable. Do not replace them.
+
+Download both public assets into a new directory, verify the published checksum,
+and rerun the complete artifact test on the downloaded AppImage:
+
+```bash
+mkdir -p "../consumer-${version}"
+gh release download "$version" \
+  --repo MellifluousJDG/CAP \
+  --dir "../consumer-${version}"
+(
+  cd "../consumer-${version}"
+  sha256sum --check "CAP-${version}-x86_64.AppImage.sha256"
+  chmod +x "CAP-${version}-x86_64.AppImage"
+)
+make test-appimage \
+  APPIMAGE="../consumer-${version}/CAP-${version}-x86_64.AppImage"
+```
 
 Remove generated AppImage build directories and artifacts with:
 

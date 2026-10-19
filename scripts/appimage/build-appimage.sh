@@ -96,15 +96,21 @@ grep -F 'PREFIX="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"' \
 
 cap_revision="$(git -C "$PROJECT_DIR" rev-parse HEAD)"
 trash_revision="$(git -C "$PROJECT_DIR/modules/TRASH_2" rev-parse HEAD)"
+appimage_version="${APPIMAGE_VERSION:-${cap_revision:0:7}}"
+if [[ ! "$appimage_version" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+$ && \
+      "$appimage_version" != "${cap_revision:0:7}" ]]; then
+    fail "APPIMAGE_VERSION must be a semantic version such as v1.0.1"
+fi
 cat > "$APPDIR/usr/lib/cap/APPIMAGE-BUILD-METADATA.txt" <<EOF
 CAP revision: $cap_revision
 TRASH_2 revision: $trash_revision
+Release version: $appimage_version
 Runtime lock SHA-256: $(sha256sum "$PROJECT_DIR/conda-runtime-linux-64.lock" | cut -d' ' -f1)
 Miniconda version: $MINICONDA_VERSION
 AppImage architecture: x86_64
 EOF
 
-output="$OUTPUT_DIR/CAP-${cap_revision:0:7}-x86_64.AppImage"
+output="$OUTPUT_DIR/CAP-${appimage_version}-x86_64.AppImage"
 rm -f "$output"
 ARCH=x86_64 APPIMAGE_EXTRACT_AND_RUN=1 "$appimagetool" "$APPDIR" "$output"
 chmod 0755 "$output"
