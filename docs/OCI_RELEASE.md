@@ -89,13 +89,3 @@ and publish its checksum and location in the release notes.
 - Preserve the reviewed Conda notices and source mappings, plus the Debian
   copyright files, binary-to-source mappings, and corresponding source, in the
   external compliance bundle.
-
-The bundle generator writes `SHA256SUMS`. Before publishing or after transferring
-the bundle, check that its files have not been corrupted or incompletely copied:
-
-```bash
-(cd /path/to/compliance-bundle && sha256sum --check --strict SHA256SUMS)
-```
-
-This integrity check does not establish artifact authenticity or replace the
-license and source review above.
