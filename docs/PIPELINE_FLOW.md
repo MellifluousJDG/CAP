@@ -18,6 +18,7 @@ CAP optionally accepts:
 - `--trash2`: a directory containing precomputed TRASH_2 output;
 - `--cores`: CPU count used by process resource configuration and passed to TRASH_2;
 - `--max_rep_size`: maximum repeat size passed to TRASH_2;
+- `--min_rep_size`: minimum repeat size passed to TRASH_2;
 - `--outdir`: directory to which process outputs are copied.
 
 Annotation sequence names and coordinates must correspond to the supplied assembly.
@@ -110,7 +111,7 @@ repeat detection.
 ### `TRASH2`
 
 Runs `modules/TRASH_2/src/TRASH.R` on the assembly. It accepts optional
-templates and uses `--cores` and `--max_rep_size`.
+templates and uses `--cores`, `--max_rep_size`, and `--min_rep_size`.
 
 Published files:
 

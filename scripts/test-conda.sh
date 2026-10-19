@@ -35,6 +35,14 @@ conda run -n "$ENV_NAME" nextflow run . \
     --outdir "$RESULTS_DIR" \
     -work-dir "$WORK_DIR"
 
+trash2_command=$(find "$WORK_DIR" -type f -name .command.sh -exec \
+    grep -l -- 'modules/TRASH_2/src/TRASH.R' {} + | head -n 1)
+if [ -z "$trash2_command" ] || \
+    ! grep -F -- '--min_rep_size 7' "$trash2_command" >/dev/null; then
+    echo "TRASH_2 task did not receive the configured minimum repeat size." >&2
+    exit 1
+fi
+
 file_count=$(find "$RESULTS_DIR" -maxdepth 1 -type f | wc -l)
 if [ "$file_count" -ne 16 ]; then
     echo "Expected 16 result files, found $file_count in $RESULTS_DIR." >&2

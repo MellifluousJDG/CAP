@@ -71,13 +71,16 @@ The command shape is similar, but map the runtime process to the submitting
 user so bind-mounted outputs remain host-owned:
 
 ```bash
+work_root="${SLURM_TMPDIR}/cap-work"
+mkdir -p "$work_root/home" /shared/results/genome-cap
+
 docker run --rm \
   --user "$(id -u):$(id -g)" \
   -e HOME=/work/home \
   -e NXF_HOME=/work/home/.nextflow \
   -v /shared/data:/data:ro \
   -v /shared/results/genome-cap:/results \
-  -v "${SLURM_TMPDIR}/cap-work:/work" \
+  -v "$work_root:/work" \
   ghcr.io/mellifluousjdg/cap:1.0.0 \
   --assembly /data/genome.fasta \
   --outdir /results \
@@ -85,8 +88,8 @@ docker run --rm \
   -work-dir /work/nextflow
 ```
 
-Create `/work/home` before launching if the container runtime does not create
-it.
+The example creates the writable home and result directories before launching.
+Retain the work directory after failure; remove it after a successful run.
 
 ## Apptainer or Singularity
 

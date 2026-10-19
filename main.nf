@@ -51,6 +51,7 @@ process TRASH2 {
     Rscript ${workflow.projectDir}/modules/TRASH_2/src/TRASH.R -f ${assembly} -o \$PWD \
         --cores_no ${task.cpus} \
         --max_rep_size ${params.max_rep_size} \
+        --min_rep_size ${params.min_rep_size} \
         ${t}
     """
 }
