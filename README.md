@@ -95,6 +95,12 @@ CAP_ENV_NAME=my-cap bash setup_conda.sh
 
 ### Make targets
 
+The Makefile is a curated convenience interface for common installation,
+execution, testing, packaging, and maintenance tasks; it is not an exhaustive
+list of every supported command. Specialized release, compliance, and cluster
+operations are invoked directly as documented in the relevant guides under
+`docs/`.
+
 - `make install` creates or reuses the environment, initializes TRASH_2 when necessary, and compiles CTW/BCT.
 - `make compile` recompiles CTW/BCT in the selected environment.
 - `make run ASSEMBLY=...` runs CAP on the supplied FASTA assembly.
