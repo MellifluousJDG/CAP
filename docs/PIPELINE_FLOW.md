@@ -277,9 +277,10 @@ Each file-producing process uses `publishDir` in copy mode:
 - deleting a work directory removes task caches and diagnostics, not successfully published copies;
 - incomplete or failed tasks may leave useful logs and temporary files only in their work directory.
 
-The single-node SLURM wrapper uses node-local temporary storage for the Nextflow
-work directory while keeping `--outdir` on persistent storage. It removes
-temporary work after success and reports its retained location after failure.
+The single-node SLURM wrapper creates a unique work directory under node-local
+temporary storage while keeping `--outdir` on persistent storage. It retains the
+work directory after every run and prints its exact path and a manual cleanup
+command.
 
 ## Diagnosing an incomplete run
 

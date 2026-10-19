@@ -410,7 +410,11 @@ sbatch scripts/run-cap-slurm.sh \
 
 For an assembly named `genome.fasta`, that directory must contain both `genome.fasta_repeats_with_seq.csv` and `genome.fasta_arrays.csv`. A supplied but invalid `--trash2` directory causes an error instead of silently rerunning TRASH_2. Omit `--trash2` to run TRASH_2 normally.
 
-Nextflow work is placed in `${SLURM_TMPDIR:-${TMPDIR:-/tmp}}/cap-nextflow-${SLURM_JOB_ID}` to avoid shared-filesystem temporary-I/O problems. It is removed after success and retained with its path printed after failure. Final output must therefore use persistent/shared storage.
+The wrapper creates a unique Nextflow work directory under
+`${SLURM_TMPDIR:-${TMPDIR:-/tmp}}`, retains it after both successful and failed
+runs, and prints its exact path plus a cleanup command. Final output must use
+persistent/shared storage. Keep the work directory for diagnosis or Nextflow
+resume; remove it manually when it is no longer needed.
 
 The script refuses to run directly on a login node. Its explicit local-validation mode is:
 
@@ -426,7 +430,9 @@ Run the scheduler-free launcher tests with:
 make test-slurm-wrapper
 ```
 
-These tests validate argument handling, CPU propagation, optional TRASH_2 behavior, and temporary-work cleanup without calling `sbatch`.
+These tests validate argument handling, CPU propagation, optional TRASH_2
+behavior, unique work-directory creation, and unconditional retention without
+calling `sbatch`.
 
 For AppImage-based clusters, use `scripts/run-cap-appimage-slurm.sh` instead.
 See `docs/APPIMAGE.md` for submission, extracted-AppImage use, and the limits of

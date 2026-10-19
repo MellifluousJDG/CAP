@@ -89,7 +89,7 @@ bash "$WRAPPER" \
     --metadata "$metadata" \
     --templates "$templates" \
     --max-rep-size 500 \
-    --min-rep-size 8 > "$TMP_DIR/success.out"
+    --min-rep-size 8 > "$TMP_DIR/success.out" 2>&1
 
 python3 - "$args_file" "$assembly" "$outdir" "$trash2" "$te_gff" \
     "$gene_gff" "$metadata" "$templates" "$node_tmp" <<'PY'
@@ -97,11 +97,15 @@ from pathlib import Path
 import sys
 
 args = Path(sys.argv[1]).read_text().splitlines()
+work_dir = Path(args[args.index("-work-dir") + 1])
+assert work_dir.parent == Path(sys.argv[9]).resolve(), work_dir
+assert work_dir.name.startswith("cap-appimage-nextflow-4321-"), work_dir
+assert len(work_dir.name.removeprefix("cap-appimage-nextflow-4321-")) == 8, work_dir
 expected = [
     "--assembly", str(Path(sys.argv[2]).resolve()),
     "--cores", "6",
     "--outdir", str(Path(sys.argv[3]).resolve()),
-    "-work-dir", str(Path(sys.argv[9]).resolve() / "cap-appimage-nextflow-4321"),
+    "-work-dir", str(work_dir),
     "--trash2", str(Path(sys.argv[4]).resolve()),
     "--te_gff", str(Path(sys.argv[5]).resolve()),
     "--gene_gff", str(Path(sys.argv[6]).resolve()),
@@ -112,10 +116,14 @@ expected = [
 ]
 assert args == expected, (args, expected)
 PY
-[ ! -e "$node_tmp/cap-appimage-nextflow-4321" ] || {
-    echo "Successful run did not remove its temporary work directory." >&2
+success_work=$(awk 'previous == "-work-dir" { print; exit } { previous=$0 }' \
+    "$args_file")
+[ -d "$success_work" ] || {
+    echo "Successful run did not retain its work directory." >&2
     exit 1
 }
+grep -F -- "Nextflow work directory retained at: $success_work" \
+    "$TMP_DIR/success.out" >/dev/null
 
 without_optional="$TMP_DIR/without-optional.txt"
 FAKE_APPIMAGE_ARGS="$without_optional" \
@@ -123,24 +131,42 @@ CAP_SLURM_LOCAL_TEST=1 \
 SLURM_JOB_ID=4322 \
 SLURM_TMPDIR="$node_tmp" \
 bash "$WRAPPER" --appimage "$fake_appimage" \
-    --assembly "$assembly" --outdir "$outdir" > "$TMP_DIR/minimal.out"
+    --assembly "$assembly" --outdir "$outdir" > "$TMP_DIR/minimal.out" 2>&1
 if grep -Eq -- '--trash2|--te_gff|--gene_gff|--metadata|--templates' \
     "$without_optional"; then
     echo "Wrapper passed an omitted optional argument." >&2
     exit 1
 fi
+second_work=$(awk 'previous == "-work-dir" { print; exit } { previous=$0 }' \
+    "$without_optional")
+[ "$second_work" != "$success_work" ] || {
+    echo "Separate runs reused the same work directory." >&2
+    exit 1
+}
+[ -d "$second_work" ] || {
+    echo "Second successful run did not retain its work directory." >&2
+    exit 1
+}
 
-failed_work="$node_tmp/cap-appimage-nextflow-4323"
-expect_failure \
-    "CAP AppImage failed; Nextflow work directory retained at: $failed_work" \
-    env FAKE_APPIMAGE_ARGS="$TMP_DIR/failed-args.txt" FAKE_APPIMAGE_STATUS=9 \
+failed_output="$TMP_DIR/failed.out"
+if env FAKE_APPIMAGE_ARGS="$TMP_DIR/failed-args.txt" FAKE_APPIMAGE_STATUS=9 \
     CAP_SLURM_LOCAL_TEST=1 SLURM_JOB_ID=4323 SLURM_TMPDIR="$node_tmp" \
     bash "$WRAPPER" --appimage "$fake_appimage" \
-    --assembly "$assembly" --outdir "$outdir"
+    --assembly "$assembly" --outdir "$outdir" > "$failed_output" 2>&1; then
+    echo "Failed AppImage launcher command unexpectedly succeeded." >&2
+    exit 1
+fi
+failed_work=$(awk -F ': ' '/Nextflow work directory retained at:/ { print $2 }' \
+    "$failed_output")
+case "$failed_work" in
+    "$node_tmp"/cap-appimage-nextflow-4323-????????) ;;
+    *) echo "Unexpected failed work directory: $failed_work" >&2; exit 1 ;;
+esac
 [ -d "$failed_work" ] || {
     echo "Failed run did not retain its work directory." >&2
     exit 1
 }
-rm -rf -- "$failed_work"
+grep -F -- "CAP AppImage failed; retain the work directory for diagnosis." \
+    "$failed_output" >/dev/null
 
 printf 'AppImage SLURM wrapper tests passed without submitting a job.\n'

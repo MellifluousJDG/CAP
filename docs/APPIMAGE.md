@@ -160,11 +160,12 @@ sbatch scripts/run-cap-appimage-slurm.sh \
   --outdir /shared/results/genome-cap
 ```
 
-The wrapper places Nextflow intermediates under
-`${SLURM_TMPDIR:-${TMPDIR:-/tmp}}/cap-appimage-nextflow-${SLURM_JOB_ID}`. It
-removes that directory after success and retains it with a diagnostic path after
-failure. Final output must therefore use persistent storage; node-local work may
-be lost when an allocation ends.
+The wrapper creates a unique Nextflow work directory under
+`${SLURM_TMPDIR:-${TMPDIR:-/tmp}}`. It retains the directory after both success
+and failure and prints its exact path plus a cleanup command. Final output must
+use persistent storage; node-local work may be lost when an allocation ends.
+Keep it for diagnosis or Nextflow resume, and remove it manually when no longer
+needed.
 
 Run its scheduler-free behavioral tests with:
 
@@ -173,7 +174,8 @@ make test-appimage-slurm-wrapper
 ```
 
 These tests use a fake AppImage to validate arguments, CPU propagation,
-optional inputs, paths containing spaces, and cleanup without calling `sbatch`.
+optional inputs, paths containing spaces, unique work-directory creation, and
+retention without calling `sbatch`.
 They cannot check your scheduler, compute-node FUSE support, shared filesystems,
 or site policy. Ask your cluster administrators about those requirements before
 submitting CAP.

@@ -148,25 +148,8 @@ esac
 
 JOB_ID="${SLURM_JOB_ID:-local-$$}"
 TMP_BASE="${SLURM_TMPDIR:-${TMPDIR:-/tmp}}"
-WORK_DIR="$TMP_BASE/cap-nextflow-$JOB_ID"
-mkdir -p -- "$WORK_DIR"
-
-TEMPORARY_WORK=1
-cleanup() {
-    status=$?
-    if [ "$status" -eq 0 ] && [ "$TEMPORARY_WORK" -eq 1 ]; then
-        expected="$TMP_BASE/cap-nextflow-$JOB_ID"
-        if [ "$WORK_DIR" = "$expected" ] && [ -n "$TMP_BASE" ] && [ "$TMP_BASE" != / ]; then
-            rm -rf -- "$WORK_DIR"
-        else
-            echo "Refusing to remove unexpected work directory: $WORK_DIR" >&2
-            return 1
-        fi
-    elif [ -d "$WORK_DIR" ]; then
-        echo "CAP failed; Nextflow work directory retained at: $WORK_DIR" >&2
-    fi
-}
-trap cleanup EXIT
+[ -d "$TMP_BASE" ] || fail "temporary directory base not found: $TMP_BASE"
+WORK_DIR=$(mktemp -d "$TMP_BASE/cap-nextflow-$JOB_ID-XXXXXXXX")
 
 mkdir -p -- "$OUTDIR"
 
@@ -195,7 +178,17 @@ printf ' %q' "${command[@]}"
 printf '\n'
 
 if [ "${CAP_SLURM_DRY_RUN:-0}" = 1 ]; then
-    exit 0
+    status=0
+else
+    status=0
+    "${command[@]}" || status=$?
 fi
 
-"${command[@]}"
+if [ "$status" -eq 0 ]; then
+    printf 'CAP completed successfully.\n'
+else
+    printf 'CAP failed; retain the work directory for diagnosis.\n' >&2
+fi
+printf 'Nextflow work directory retained at: %s\n' "$WORK_DIR" >&2
+printf 'Remove it when no longer needed with:\n  rm -rf -- %q\n' "$WORK_DIR" >&2
+exit "$status"

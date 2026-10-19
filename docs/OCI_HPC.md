@@ -44,26 +44,9 @@ assembly=/shared/data/genome.fasta
 outdir=/shared/results/genome-cap
 tmp_base="${SLURM_TMPDIR:-${TMPDIR:-/tmp}}"
 job_id=${SLURM_JOB_ID:?submit this script with sbatch}
-work_root="$tmp_base/cap-$job_id"
+work_root=$(mktemp -d "$tmp_base/cap-$job_id-XXXXXXXX")
 
-cleanup() {
-  status=$?
-  if [ "$status" -eq 0 ]; then
-    expected="$tmp_base/cap-$job_id"
-    if [ -n "$tmp_base" ] && [ "$tmp_base" != / ] && \
-       [ "$work_root" = "$expected" ]; then
-      rm -rf -- "$work_root"
-    else
-      echo "Refusing to remove unexpected work directory: $work_root" >&2
-      return 1
-    fi
-  else
-    echo "Work retained at $work_root" >&2
-  fi
-}
-
-mkdir -p "$outdir" "$work_root"
-trap cleanup EXIT
+mkdir -p "$outdir"
 
 podman run --rm --userns=keep-id \
   -v "$(dirname "$assembly"):/data:ro" \
@@ -74,6 +57,9 @@ podman run --rm --userns=keep-id \
   --outdir /results \
   --cores "${SLURM_CPUS_PER_TASK:-1}" \
   -work-dir /work/nextflow
+
+printf 'Work directory retained at: %s\n' "$work_root"
+printf 'Remove it when no longer needed with:\n  rm -rf -- %q\n' "$work_root"
 ```
 
 `--userns=keep-id` is important for rootless Podman: it makes bind-mounted
@@ -106,7 +92,8 @@ docker run --rm \
 ```
 
 The example creates the writable home and result directories before launching.
-Retain the work directory after failure; remove it after a successful run.
+Its work directory is retained; keep it for diagnosis or resume, and remove it
+manually when it is no longer needed.
 
 ## Apptainer or Singularity
 
@@ -124,26 +111,9 @@ Then copy the immutable SIF to shared storage and execute it in one allocation:
 outdir=/shared/results/genome-cap
 tmp_base="${SLURM_TMPDIR:-${TMPDIR:-/tmp}}"
 job_id=${SLURM_JOB_ID:?run this command inside a SLURM allocation}
-work_root="$tmp_base/cap-$job_id"
-
-cleanup() {
-  status=$?
-  if [ "$status" -eq 0 ]; then
-    expected="$tmp_base/cap-$job_id"
-    if [ -n "$tmp_base" ] && [ "$tmp_base" != / ] && \
-       [ "$work_root" = "$expected" ]; then
-      rm -rf -- "$work_root"
-    else
-      echo "Refusing to remove unexpected work directory: $work_root" >&2
-      return 1
-    fi
-  else
-    echo "Work retained at $work_root" >&2
-  fi
-}
+work_root=$(mktemp -d "$tmp_base/cap-$job_id-XXXXXXXX")
 
 mkdir -p "$outdir" "$work_root/home"
-trap cleanup EXIT
 
 apptainer exec \
   --env HOME=/work/home \
@@ -157,11 +127,15 @@ apptainer exec \
   --outdir /results \
   --cores "${SLURM_CPUS_PER_TASK:-1}" \
   -work-dir /work/nextflow
+
+printf 'Work directory retained at: %s\n' "$work_root"
+printf 'Remove it when no longer needed with:\n  rm -rf -- %q\n' "$work_root"
 ```
 
 Apptainer does not necessarily honor an OCI image's entrypoint, so invoke
-`/usr/local/bin/cap` explicitly. Final results remain on shared storage; the
-node-local work directory is removed only after success.
+`/usr/local/bin/cap` explicitly. Final results remain on shared storage. The
+node-local work directory is retained for diagnosis or Nextflow resume; remove
+it manually when it is no longer needed.
 
 ## Offline transfer
 

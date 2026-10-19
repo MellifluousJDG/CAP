@@ -72,7 +72,7 @@ bash "$WRAPPER" \
     --min-rep-size 8 \
     --env-name test-cap \
     --conda "$fake_conda" \
-    > "$tmp_dir/success.out"
+    > "$tmp_dir/success.out" 2>&1
 
 grep -Fx -- "test-cap" "$args_file" >/dev/null
 grep -Fx -- "--cores" "$args_file" >/dev/null
@@ -84,11 +84,17 @@ grep -Fx -- "500" "$args_file" >/dev/null
 grep -Fx -- "--min_rep_size" "$args_file" >/dev/null
 grep -Fx -- "8" "$args_file" >/dev/null
 grep -Fx -- "-work-dir" "$args_file" >/dev/null
-grep -Fx -- "$run_tmp/cap-nextflow-1234" "$args_file" >/dev/null
-[ ! -e "$run_tmp/cap-nextflow-1234" ] || {
-    echo "Successful run did not remove its temporary work directory." >&2
+work_dir=$(awk 'previous == "-work-dir" { print; exit } { previous=$0 }' "$args_file")
+case "$work_dir" in
+    "$run_tmp"/cap-nextflow-1234-????????) ;;
+    *) echo "Unexpected work directory: $work_dir" >&2; exit 1 ;;
+esac
+[ -d "$work_dir" ] || {
+    echo "Successful run did not retain its work directory." >&2
     exit 1
 }
+grep -F -- "Nextflow work directory retained at: $work_dir" \
+    "$tmp_dir/success.out" >/dev/null
 
 without_trash_args="$tmp_dir/without-trash.txt"
 FAKE_CONDA_ARGS="$without_trash_args" \
@@ -99,22 +105,41 @@ bash "$WRAPPER" \
     --assembly "$assembly" \
     --outdir "$outdir" \
     --conda "$fake_conda" \
-    > "$tmp_dir/without-trash.out"
+    > "$tmp_dir/without-trash.out" 2>&1
 if grep -Fx -- "--trash2" "$without_trash_args" >/dev/null; then
     echo "Wrapper passed --trash2 when it was omitted." >&2
     exit 1
 fi
+second_work=$(awk 'previous == "-work-dir" { print; exit } { previous=$0 }' \
+    "$without_trash_args")
+[ "$second_work" != "$work_dir" ] || {
+    echo "Separate runs reused the same work directory." >&2
+    exit 1
+}
+[ -d "$second_work" ] || {
+    echo "Second successful run did not retain its work directory." >&2
+    exit 1
+}
 
-failed_work="$run_tmp/cap-nextflow-1236"
-expect_failure "CAP failed; Nextflow work directory retained at: $failed_work" \
-    env FAKE_CONDA_ARGS="$tmp_dir/failed-args.txt" FAKE_CONDA_STATUS=9 \
+failed_output="$tmp_dir/failed.out"
+if env FAKE_CONDA_ARGS="$tmp_dir/failed-args.txt" FAKE_CONDA_STATUS=9 \
     CAP_SLURM_LOCAL_TEST=1 SLURM_JOB_ID=1236 SLURM_TMPDIR="$run_tmp" \
     bash "$WRAPPER" --assembly "$assembly" --outdir "$outdir" \
-    --conda "$fake_conda"
+    --conda "$fake_conda" > "$failed_output" 2>&1; then
+    echo "Failed launcher command unexpectedly succeeded." >&2
+    exit 1
+fi
+failed_work=$(awk -F ': ' '/Nextflow work directory retained at:/ { print $2 }' \
+    "$failed_output")
+case "$failed_work" in
+    "$run_tmp"/cap-nextflow-1236-????????) ;;
+    *) echo "Unexpected failed work directory: $failed_work" >&2; exit 1 ;;
+esac
 [ -d "$failed_work" ] || {
     echo "Failed run did not retain its work directory." >&2
     exit 1
 }
-rm -rf -- "$failed_work"
+grep -F -- "CAP failed; retain the work directory for diagnosis." \
+    "$failed_output" >/dev/null
 
 echo "Single-node SLURM wrapper tests passed without submitting a job."
