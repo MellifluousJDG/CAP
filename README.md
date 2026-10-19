@@ -95,6 +95,12 @@ CAP_ENV_NAME=my-cap bash setup_conda.sh
 
 ### Make targets
 
+The Makefile is a curated convenience interface for common installation,
+execution, testing, packaging, and maintenance tasks; it is not an exhaustive
+list of every supported command. Specialized release, compliance, and cluster
+operations are invoked directly as documented in the relevant guides under
+`docs/`.
+
 - `make install` creates or reuses the environment, initializes TRASH_2 when necessary, and compiles CTW/BCT.
 - `make compile` recompiles CTW/BCT in the selected environment.
 - `make run ASSEMBLY=...` runs CAP on the supplied FASTA assembly.
@@ -318,12 +324,14 @@ CAP/
 │   ├── check-container-policy.sh   # OCI source and packaging policy checks
 │   ├── check-config-policy.sh      # Nextflow execution policy checks
 │   ├── cap-container-entrypoint.sh # OCI runtime entry point
-│   ├── run-cap-slurm.sh            # Single-allocation SLURM launcher
+│   ├── run-cap-slurm.sh            # Conda single-allocation SLURM launcher
+│   ├── run-cap-appimage-slurm.sh   # AppImage single-allocation SLURM launcher
 │   ├── run-trash2.sh               # Locked standalone TRASH_2 launcher
 │   ├── test-conda.sh               # One-core CAP regression test
 │   ├── test-container.sh           # OCI lock and compliance checks
 │   ├── test-container-image.sh     # Built OCI image integration test
-│   ├── test-slurm-wrapper.sh       # Scheduler-free SLURM launcher tests
+│   ├── test-slurm-wrapper.sh       # Scheduler-free Conda SLURM launcher tests
+│   ├── test-appimage-slurm-wrapper.sh # Scheduler-free AppImage SLURM tests
 │   ├── test-trash2-standalone.sh   # Standalone TRASH_2 launcher tests
 │   ├── appimage/
 │   │   ├── AppRun                  # AppImage entry point
@@ -413,6 +421,10 @@ make test-slurm-wrapper
 ```
 
 These tests validate argument handling, CPU propagation, optional TRASH_2 behavior, and temporary-work cleanup without calling `sbatch`.
+
+For AppImage-based clusters, use `scripts/run-cap-appimage-slurm.sh` instead.
+See `docs/APPIMAGE.md` for submission, extracted-AppImage use, and the limits of
+scheduler-free validation.
 
 ## OCI container quick start
 
