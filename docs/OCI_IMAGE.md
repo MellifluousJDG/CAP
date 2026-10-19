@@ -140,9 +140,10 @@ docker run --rm \
   -work-dir /work/nextflow
 ```
 
-Optional CAP parameters, including `--te_gff`, `--gene_gff`, `--metadata`,
-`--trash2`, and `--cores`, follow the normal workflow interface. Do not select
-Nextflow's `docker` profile: the whole workflow is already inside the CAP image.
+Optional CAP parameters follow the normal workflow interface, including
+`--te_gff`, `--gene_gff`, `--metadata`, `--templates`, `--trash2`, `--cores`,
+`--max_rep_size`, and `--min_rep_size`. Do not select Nextflow's `docker`
+profile: the whole workflow is already inside the CAP image.
 
 ### Diagnostics and troubleshooting
 

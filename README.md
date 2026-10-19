@@ -55,7 +55,9 @@ make run ASSEMBLY=/path/to/genome.fasta
 
 On Linux x86-64, `setup_conda.sh` creates the environment from the committed `conda-linux-64.lock`. The lock contains the exact package URLs used by the tested environment.
 
-On another platform, setup falls back to solving `environment.yml`. That fallback is convenient but does not have the same exact-package reproducibility guarantee. Linux is currently the supported and tested platform.
+On other platforms, setup falls back to solving `environment.yml`. This is a
+best-effort installation path without the exact-package reproducibility or test
+coverage of Linux x86-64.
 
 A recursive clone is preferred:
 
@@ -216,7 +218,7 @@ The test:
 
 1. uses the bundled small FASTA assembly;
 2. requires the TRASH_2 submodule and compiled `bin/ctw-calc`;
-3. runs all ten CAP processes with one core and fresh result/work directories;
+3. runs the complete ten-process workflow with one core and fresh result/work directories;
 4. requires 16 nonempty output files, including CSV, PNG, and RDS output;
 5. verifies every result against `test/expected-results.sha256`.
 

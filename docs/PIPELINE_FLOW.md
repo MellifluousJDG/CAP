@@ -104,9 +104,8 @@ Consequently, repeat filenames accumulate processing-stage suffixes such as
 
 ### `CHECK_DEPS`
 
-Checks that `nhmmer` and `mafft` are available. It emits an internal readiness
-value and publishes no file. TRASH_2 waits for this check when CAP performs
-repeat detection.
+Checks that `nhmmer` and `mafft` are available before repeat detection. It
+publishes no file.
 
 ### `TRASH2`
 
