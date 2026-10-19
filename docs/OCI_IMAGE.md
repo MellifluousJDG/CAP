@@ -44,7 +44,7 @@ Source archives without Git submodule contents are unsupported.
 
 ## Build
 
-Run the static checks first:
+Run the lock, compliance-fixture, and licensing checks first:
 
 ```bash
 make test-container
@@ -254,15 +254,15 @@ archive format.
 
 The bundle generator deliberately does not guess third-party source URLs or
 claim that binary package URLs satisfy corresponding-source obligations.
-Review and add exact source archives and mappings before public distribution.
+For a future dependency update, review and add exact source archives and
+mappings before public distribution.
 
 ## Validation and publication
 
-A candidate release image must pass `scripts/test-container-image.sh` inside a
-clean container before publication. The test requires 16 nonempty outputs and
-checks exact hashes for all 15 non-PNG outputs. The PNG is not byte-compared
-because font discovery and rasterization can vary with the base OS even when R
-packages are locked; it must still be present and nonempty. Record the image's
-immutable OCI digest and generate an SBOM and license inventory. Public registry
-publication and release archives must wait until redistribution terms for all
-bundled dependencies have been reviewed.
+For a future release, run `scripts/test-container-image.sh` inside the built
+image before publication. The test requires 16 nonempty outputs and checks exact
+hashes for all 15 non-PNG outputs. The PNG is not byte-compared because font
+discovery and rasterization can vary with the base OS even when R packages are
+locked; it must still be present and nonempty. Record the image's immutable OCI
+digest and generate its SBOM, license inventory, and compliance bundle before
+publishing the new version.
