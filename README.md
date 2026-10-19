@@ -33,7 +33,7 @@ and troubleshooting.
 The tested packaging path is Conda on Linux x86-64. Conda must already be installed; Nextflow, Java, R, Python, Git, and scientific dependencies are installed in one CAP environment.
 
 ```bash
-git clone --branch reproducible-conda-pipeline --recurse-submodules \
+git clone --recurse-submodules \
   https://github.com/MellifluousJDG/CAP.git
 cd CAP
 
@@ -60,7 +60,7 @@ On another platform, setup falls back to solving `environment.yml`. That fallbac
 A recursive clone is preferred:
 
 ```bash
-git clone --branch reproducible-conda-pipeline --recurse-submodules \
+git clone --recurse-submodules \
   https://github.com/MellifluousJDG/CAP.git
 cd CAP
 make install
@@ -106,7 +106,6 @@ operations are invoked directly as documented in the relevant guides under
 - `make run ASSEMBLY=...` runs CAP on the supplied FASTA assembly.
 - `make run-trash2 ASSEMBLY=... OUTDIR=...` runs only the pinned TRASH_2 module.
 - `make lint` checks every tracked shell and Python script for syntax errors.
-- `make check-policy` checks container-source and Nextflow execution policies.
 - `make test-conda` performs the bundled deterministic one-core regression test.
 - `make test-trash2-standalone` validates the standalone launcher without running a full analysis.
 - `make remove-env` removes the selected Conda environment.
@@ -322,8 +321,6 @@ CAP/
 ├── Dockerfile                      # Reproducible OCI image definition
 ├── scripts/
 │   ├── lint.sh                     # Shell and Python syntax checks
-│   ├── check-container-policy.sh   # OCI source and packaging policy checks
-│   ├── check-config-policy.sh      # Nextflow execution policy checks
 │   ├── cap-container-entrypoint.sh # OCI runtime entry point
 │   ├── run-cap-slurm.sh            # Conda single-allocation SLURM launcher
 │   ├── run-cap-appimage-slurm.sh   # AppImage single-allocation SLURM launcher
