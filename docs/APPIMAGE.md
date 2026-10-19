@@ -212,6 +212,7 @@ omitting `APPIMAGE_VERSION` retains the short-CAP-revision filename.
 Test the release artifact with:
 
 ```bash
+version=v1.0.1
 make test-appimage APPIMAGE="dist/CAP-${version}-x86_64.AppImage"
 ```
 
@@ -247,6 +248,7 @@ Download both public assets into a new directory, verify the published checksum,
 and rerun the complete artifact test on the downloaded AppImage:
 
 ```bash
+version=v1.0.1
 mkdir -p "../consumer-${version}"
 gh release download "$version" \
   --repo MellifluousJDG/CAP \
