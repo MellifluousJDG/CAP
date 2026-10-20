@@ -43,7 +43,7 @@ test-ctw-build:
 	bash scripts/test-ctw-build.sh
 
 test-conda:
-	CAP_ENV_NAME="$(ENV_NAME)" bash scripts/test-conda.sh
+	CAP_ENV_NAME="$(ENV_NAME)" CAP_CONDA_EXE="$(CONDA)" bash scripts/test-conda.sh
 
 test-trash2-standalone:
 	CAP_TEST_CONDA="$(CONDA)" CAP_TEST_ENV_NAME="$(ENV_NAME)" bash scripts/test-trash2-standalone.sh
