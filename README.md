@@ -108,6 +108,7 @@ operations are invoked directly as documented in the relevant guides under
 - `make run ASSEMBLY=...` runs CAP on the supplied FASTA assembly.
 - `make run-trash2 ASSEMBLY=... OUTDIR=...` runs only the pinned TRASH_2 module.
 - `make lint` checks every tracked shell and Python script for syntax errors.
+- `make test-ctw-build` compiles CTW through the shared helper, runs its exact-output smoke test, and checks the failing-binary diagnostic; it requires the selected Conda compiler environment and `Rscript`.
 - `make test-conda` performs the bundled deterministic one-core regression test.
 - `make test-trash2-standalone` validates the standalone launcher without running a full analysis.
 - `make remove-env` removes the selected Conda environment.
@@ -327,6 +328,8 @@ CAP/
 ├── Dockerfile                      # Reproducible OCI image definition
 ├── scripts/
 │   ├── lint.sh                     # Shell and Python syntax checks
+│   ├── build-ctw.sh                # Shared CTW build and execution validation
+│   ├── test-ctw-build.sh           # CTW build and diagnostic behavior tests
 │   ├── cap-container-entrypoint.sh # OCI runtime entry point
 │   ├── run-cap-slurm.sh            # Conda single-allocation SLURM launcher
 │   ├── run-cap-appimage-slurm.sh   # AppImage single-allocation SLURM launcher
@@ -349,9 +352,12 @@ CAP/
 │       ├── generate-oci-inventory.sh         # Export OCI package inventory
 │       ├── test-collect-conda-notices.sh     # Conda notice collector fixtures
 │       ├── test-collect-conda-sources.sh     # Conda source collector fixtures
+│       ├── test-collect-debian-sources.py    # Debian source collector fixtures
 │       ├── test-conda-source-notices.sh      # Source-notice review fixtures
 │       ├── test-finalize-compliance-checksums.sh # Bundle checksum fixtures
+│       ├── test-merge-conda-source-corpora.py # Source-corpus merge fixtures
 │       ├── test-sbom.sh                      # CycloneDX SBOM fixtures
+│       ├── test-source-review-policy.py      # Source-review policy fixtures
 │       └── test-source-obligations.sh        # License-obligation fixtures
 ├── docs/                           # Usage, architecture, and release guides
 ├── bin/                            # Pipeline scripts and CTW source
