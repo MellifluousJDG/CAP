@@ -6,6 +6,7 @@ APPDIR="${APPDIR:-$(cd -- "$(dirname -- "$0")" && pwd)}"
 CAP_DIR="$APPDIR/usr/lib/cap"
 
 export PATH="$APPDIR/usr/bin${PATH:+:$PATH}"
+export LD_LIBRARY_PATH="$APPDIR/usr/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 export JAVA_HOME="$APPDIR/usr/lib/jvm"
 export LANG="${LANG:-C.UTF-8}"
 export LC_ALL="${LC_ALL:-C.UTF-8}"

@@ -3,6 +3,8 @@
 set -euo pipefail
 
 ENV_NAME="${CAP_ENV_NAME:-cap-pipeline}"
+CONDA_EXE="${CAP_CONDA_EXE:-conda}"
+PROJECT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 ASSEMBLY="${ASSEMBLY:-test/ath_Chr1_extraction_trc.fasta}"
 RESULTS_DIR="${RESULTS_DIR:-results_test_conda}"
 WORK_DIR="${WORK_DIR:-work_test_conda}"
@@ -22,14 +24,14 @@ if [ ! -x bin/ctw-calc ]; then
     exit 1
 fi
 
-if ! conda env list | awk '{print $1}' | grep -qx "$ENV_NAME"; then
+if ! "$CONDA_EXE" env list | awk '{print $1}' | grep -qx "$ENV_NAME"; then
     echo "Conda environment '$ENV_NAME' does not exist; run make install first." >&2
     exit 1
 fi
 
 rm -rf "$RESULTS_DIR" "$WORK_DIR"
 
-conda run -n "$ENV_NAME" nextflow run . \
+"$CONDA_EXE" run -n "$ENV_NAME" nextflow run . \
     --assembly "$ASSEMBLY" \
     --cores 1 \
     --outdir "$RESULTS_DIR" \
@@ -61,13 +63,13 @@ if find "$RESULTS_DIR" -maxdepth 1 -type f -empty -print -quit | grep -q .; then
     exit 1
 fi
 
-EXPECTED_CHECKSUMS="test/expected-results.sha256"
+EXPECTED_CHECKSUMS="$PROJECT_DIR/test/expected-results.sha256"
 if [ ! -f "$EXPECTED_CHECKSUMS" ]; then
     echo "Expected checksum manifest not found: $EXPECTED_CHECKSUMS" >&2
     exit 1
 fi
 
-if ! (cd "$RESULTS_DIR" && sha256sum --check "../$EXPECTED_CHECKSUMS"); then
+if ! (cd "$RESULTS_DIR" && sha256sum --check "$EXPECTED_CHECKSUMS"); then
     echo "Result checksums do not match $EXPECTED_CHECKSUMS." >&2
     exit 1
 fi

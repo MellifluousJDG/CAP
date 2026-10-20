@@ -35,11 +35,11 @@ echo "Activating environment..."
 echo "Setting up BCT (Bayesian Context Trees)..."
 echo "Attempting to compile local C++ binary (faster)..."
 
-# Try compilation first
-if conda run -n "$ENV_NAME" make -C bin/src/BCT; then
-    echo "✓ C++ binary compiled successfully."
+# Try compilation and an execution smoke test first
+if CAP_ENV_NAME="$ENV_NAME" CAP_CONDA_EXE=conda scripts/build-ctw.sh; then
+    echo "✓ C++ binary compiled and executed successfully."
 else
-    echo "⚠️  C++ compilation failed. Falling back to CRAN installation (slower)..."
+    echo "⚠️  C++ build or execution validation failed. Falling back to CRAN installation (slower)..."
     conda run -n "$ENV_NAME" Rscript install_bioc_packages.R
 fi
 

@@ -26,7 +26,8 @@ while IFS= read -r package_url; do
     }
 done < <(grep '^https://' "$runtime_lock")
 for build_package in gcc_impl_linux-64 gxx_impl_linux-64 \
-    gfortran_impl_linux-64 binutils_impl_linux-64 cmake make git; do
+    gfortran_impl_linux-64 binutils_impl_linux-64 sysroot_linux-64 \
+    kernel-headers_linux-64 cmake make git; do
     if grep -Eq "/${build_package}-[0-9]" "$runtime_lock"; then
         echo "Build package present in runtime lock: $build_package" >&2
         exit 1

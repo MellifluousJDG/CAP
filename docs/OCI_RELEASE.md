@@ -24,8 +24,17 @@ validation records must also record the immutable manifest digest.
 ## Manual publication
 
 Publish release images manually; do not configure automated registry pushes.
-Create a GitHub personal access token with package write permission, then avoid
-putting it on the command line or in shell history:
+Before assigning or pushing the immutable release tag, run the integration test
+inside the exact final local image:
+
+```bash
+podman run --rm --entrypoint /bin/bash \
+  cap:local /opt/CAP/scripts/test-container-image.sh
+```
+
+Do not publish if this test fails. After it passes, create a GitHub personal
+access token with package write permission, then avoid putting it on the command
+line or in shell history:
 
 ```bash
 printf '%s' "$GHCR_TOKEN" | podman login ghcr.io \
