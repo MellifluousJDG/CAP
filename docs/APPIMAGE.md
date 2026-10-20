@@ -193,9 +193,9 @@ use the extraction procedure above.
 ## Build from source
 
 Building is supported on Linux x86-64. The build requires a recursive CAP Git
-checkout, network access, and common host tools including Bash, Git, Make, a C++
-compiler, `curl`, and `sha256sum`. Conda does not need to be installed: the build
-downloads a checksum-verified Miniconda bootstrap locally.
+checkout, network access, and common host tools including Bash, Git, `curl`,
+`readelf`, and `sha256sum`. Conda and a C++ compiler do not need to be installed:
+the build downloads a checksum-verified Miniconda bootstrap locally.
 
 ```bash
 version=v1.0.1
@@ -204,8 +204,9 @@ test "$(git describe --tags --exact-match)" = "$version"
 APPIMAGE_VERSION="$version" make appimage
 ```
 
-The build downloads the exact packages named by
-`conda-runtime-linux-64.lock`, compiles CTW/BCT, and writes
+The build downloads the exact runtime packages named by
+`conda-runtime-linux-64.lock`, compiles CTW/BCT with the pinned compiler and
+sysroot from `conda-linux-64.lock`, and writes
 `dist/CAP-${version}-x86_64.AppImage` and its checksum. For non-release builds,
 omitting `APPIMAGE_VERSION` retains the short-CAP-revision filename.
 

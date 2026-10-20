@@ -7,7 +7,7 @@ MAX_REP_SIZE ?= 1000
 MIN_REP_SIZE ?= 7
 TEMPLATES ?=
 
-.PHONY: install compile run run-trash2 lint test-ctw-build test-conda test-trash2-standalone test-container test-slurm-wrapper test-appimage-slurm-wrapper appimage test-appimage clean-appimage oci-inventory oci-compliance remove-env clean-build clean
+.PHONY: install compile run run-trash2 lint test-ctw-build test-conda test-trash2-standalone test-container test-slurm-wrapper test-appimage-slurm-wrapper test-apprun-library-path appimage test-appimage clean-appimage oci-inventory oci-compliance remove-env clean-build clean
 
 install:
 	@echo "Setting up Conda environment '$(ENV_NAME)'..."
@@ -56,6 +56,9 @@ test-slurm-wrapper:
 
 test-appimage-slurm-wrapper:
 	bash scripts/test-appimage-slurm-wrapper.sh
+
+test-apprun-library-path:
+	bash scripts/appimage/test-apprun-library-path.sh
 
 appimage:
 	bash scripts/appimage/build-appimage.sh

@@ -74,6 +74,9 @@ export HOME="$TEST_DIR/extracted/home"
     Rscript -e "library(Biostrings); library(GenomicRanges); library(msa)"
     python3 -c "import sklearn, xgboost; assert sklearn.__version__ == '\''1.7.2'\''; assert xgboost.__version__ == '\''3.0.5'\''"
     test -x "$APPDIR/usr/lib/cap/bin/ctw-calc"
+    ldd "$APPDIR/usr/lib/cap/bin/ctw-calc" | grep -F "$APPDIR/usr/lib/libstdc++.so.6"
+    ldd "$APPDIR/usr/lib/cap/bin/ctw-calc" | grep -F "$APPDIR/usr/lib/libgcc_s.so.1"
+    "$APPDIR/usr/lib/cap/bin/ctw-calc" >/dev/null 2>&1 || test "$?" -eq 1
     test ! -e "$APPDIR/usr/lib/cap/modules/TRASH_2/dep/hmmer"
     test ! -e "$APPDIR/usr/lib/cap/modules/TRASH_2/dep/mafft-7.520-win64-signed"
 '

@@ -8,6 +8,7 @@ OUTPUT_DIR="${APPIMAGE_OUTPUT_DIR:-$PROJECT_DIR/dist}"
 CACHE_DIR="${APPIMAGE_CACHE_DIR:-$BUILD_DIR/cache}"
 APPDIR="$BUILD_DIR/CAP.AppDir"
 CONDA_DIR="$BUILD_DIR/conda-bootstrap"
+CTW_BUILD_DIR="$BUILD_DIR/ctw-build"
 
 MINICONDA_VERSION=py313_25.7.0-2
 MINICONDA_SHA256=dda3629462ba1cfa72eb74535214c2e315c77f1cfb0f02046537e99f1bf64abc
@@ -36,10 +37,11 @@ download_verified() {
 
 [ "$(uname -s)" = Linux ] || fail "only Linux builds are supported"
 [ "$(uname -m)" = x86_64 ] || fail "only Linux x86-64 builds are supported"
-for command in bash curl sha256sum git make g++ sed find; do
+for command in bash cmp curl git readelf sed sha256sum sort; do
     command -v "$command" >/dev/null || fail "required host command not found: $command"
 done
 [ -s "$PROJECT_DIR/conda-runtime-linux-64.lock" ] || fail "runtime lock is missing"
+[ -s "$PROJECT_DIR/conda-linux-64.lock" ] || fail "development lock is missing"
 [ -f "$PROJECT_DIR/modules/TRASH_2/src/TRASH.R" ] ||
     fail "TRASH_2 is not initialized; run git submodule update --init --recursive"
 [ -n "$APPIMAGETOOL_SHA256" ] || fail \
@@ -52,17 +54,45 @@ download_verified "$MINICONDA_URL" "$miniconda" "$MINICONDA_SHA256"
 download_verified "$APPIMAGETOOL_URL" "$appimagetool" "$APPIMAGETOOL_SHA256"
 chmod 0755 "$appimagetool"
 
-rm -rf "$APPDIR" "$CONDA_DIR"
+rm -rf "$APPDIR" "$CONDA_DIR" "$CTW_BUILD_DIR"
 bash "$miniconda" -b -p "$CONDA_DIR"
 "$CONDA_DIR/bin/conda" create --yes --prefix "$APPDIR/usr" \
     --override-channels \
     --channel conda-forge \
     --channel bioconda \
     --file "$PROJECT_DIR/conda-runtime-linux-64.lock"
-"$CONDA_DIR/bin/conda" clean --all --yes
 
-# Build CTW from tracked source with the host compiler, as the OCI build does.
-make -C "$PROJECT_DIR/bin/src/BCT" clean all
+# Build CTW with the pinned development lock rather than the host compiler.
+# Compile from a disposable source copy so the repository stays artifact-free.
+"$CONDA_DIR/bin/conda" create --yes --prefix "$CTW_BUILD_DIR" \
+    --file "$PROJECT_DIR/conda-linux-64.lock"
+mkdir -p "$CTW_BUILD_DIR/bin/src/BCT"
+cp -a "$PROJECT_DIR/bin/src/BCT/." "$CTW_BUILD_DIR/bin/src/BCT/"
+"$CONDA_DIR/bin/conda" run --prefix "$CTW_BUILD_DIR" \
+    make -C "$CTW_BUILD_DIR/bin/src/BCT"
+ctw_binary="$CTW_BUILD_DIR/bin/ctw-calc"
+test -x "$ctw_binary" || fail "CTW build did not produce ctw-calc"
+
+ctw_test_dir="$CTW_BUILD_DIR/smoke-test"
+mkdir -p "$ctw_test_dir"
+printf '>smoke\n' > "$ctw_test_dir/input.fa"
+i=0
+while [ "$i" -lt 30 ]; do
+    printf 'ACGT' >> "$ctw_test_dir/input.fa"
+    i=$((i + 1))
+done
+printf '\n' >> "$ctw_test_dir/input.fa"
+"$ctw_binary" "$ctw_test_dir/input.fa" "$ctw_test_dir/output.csv" 100 \
+    >/dev/null
+printf 'chromosome,bin_mid,bin_value\nsmoke,61.00,20.57\n' > \
+    "$ctw_test_dir/expected.csv"
+cmp -s "$ctw_test_dir/expected.csv" "$ctw_test_dir/output.csv" ||
+    fail "CTW execution smoke test failed"
+
+highest_glibc=$(readelf --version-info "$ctw_binary" |
+    grep -o 'GLIBC_[0-9.]*' | sort -V | tail -n 1)
+[ "$highest_glibc" = GLIBC_2.14 ] ||
+    fail "ctw-calc unexpectedly requires $highest_glibc"
 
 mkdir -p "$APPDIR/usr/lib/cap" "$APPDIR/usr/share/applications" \
     "$APPDIR/usr/share/icons/hicolor/scalable/apps"
@@ -70,8 +100,10 @@ git -C "$PROJECT_DIR" archive --format=tar HEAD | \
     tar -xf - -C "$APPDIR/usr/lib/cap"
 git -C "$PROJECT_DIR/modules/TRASH_2" archive --format=tar HEAD | \
     tar -xf - -C "$APPDIR/usr/lib/cap/modules/TRASH_2"
-install -m 0755 "$PROJECT_DIR/bin/ctw-calc" \
+install -m 0755 "$ctw_binary" \
     "$APPDIR/usr/lib/cap/bin/ctw-calc"
+rm -rf "$CTW_BUILD_DIR"
+"$CONDA_DIR/bin/conda" clean --all --yes
 rm -rf \
     "$APPDIR/usr/lib/cap/modules/TRASH_2/dep/hmmer" \
     "$APPDIR/usr/lib/cap/modules/TRASH_2/dep/mafft-7.520-win64-signed" \
