@@ -49,4 +49,6 @@ with tempfile.TemporaryDirectory() as directory:
     assert result[1]["collected_path"] == "supplemental/upstream-source/b.tar.gz"
     for row in result:
         assert (output / row["collected_path"]).is_file()
+    assert not primary.exists()
+    assert not supplemental.exists()
 print("Conda source-corpus merge test passed.")

@@ -75,8 +75,9 @@ scripts/compliance/collect-conda-notice-sources.py \
   "$bundle/source/conda-notice-supplemental"
 ```
 
-Merge the two verified Conda corpora and their mappings without modifying the
-primary or supplemental evidence:
+Merge the two verified Conda corpora and their mappings into one canonical
+corpus. The command consumes the two input directories after collection so the
+same large binary and source archives are not duplicated in the release bundle:
 
 ```bash
 scripts/compliance/merge-conda-source-corpora.py \

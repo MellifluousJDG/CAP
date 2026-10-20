@@ -43,18 +43,18 @@ def main() -> None:
         },
     )
     args.output.mkdir(parents=True)
-    shutil.copytree(args.primary, args.output / "primary")
-    shutil.copytree(args.supplemental, args.output / "supplemental")
+    shutil.move(args.primary, args.output / "primary")
+    shutil.move(args.supplemental, args.output / "supplemental")
 
     rows: list[dict[str, str]] = []
     for row in primary_rows:
-        source = args.primary / row["collected_path"]
+        source = args.output / "primary" / row["collected_path"]
         if not source.is_file():
             raise SystemExit(f"Primary source file is missing: {source}")
         row["collected_path"] = f"primary/{row['collected_path']}"
         rows.append(row)
     for source in supplemental_rows:
-        source_path = args.supplemental / source["collected_path"]
+        source_path = args.output / "supplemental" / source["collected_path"]
         if not source_path.is_file():
             raise SystemExit(f"Supplemental source file is missing: {source_path}")
         rows.append({
