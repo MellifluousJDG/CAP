@@ -226,8 +226,8 @@ therefore requires FUSE 2 support, including `libfuse.so.2`, on the test host.
 ## Publish a release
 
 Publication is manual. Build and test from the exact annotated Git tag as shown
-above. Create the GitHub Release and upload the already-tested files without
-rebuilding or renaming them:
+above. If the GitHub Release does not exist yet, create it and upload the
+already-tested files without rebuilding or renaming them:
 
 ```bash
 version=v1.0.1
@@ -240,26 +240,39 @@ gh release create "$version" \
   --notes "CAP $version"
 ```
 
-GitHub CLI authentication must be configured interactively before this command;
-do not place tokens on the command line or in shell history. Published release
-tags and assets are immutable. Do not replace them.
+If the GitHub Release already exists but does not yet contain these assets,
+upload them without replacing any existing asset:
+
+```bash
+version=v1.0.1
+gh release upload "$version" \
+  "dist/CAP-${version}-x86_64.AppImage" \
+  "dist/CAP-${version}-x86_64.AppImage.sha256" \
+  --repo MellifluousJDG/CAP
+```
+
+GitHub CLI authentication must be configured interactively before either
+command; do not place tokens on the command line or in shell history. Published
+release tags and assets are immutable. Do not replace them.
 
 Download both public assets into a new directory, verify the published checksum,
 and rerun the complete artifact test on the downloaded AppImage:
 
 ```bash
 version=v1.0.1
-mkdir -p "../consumer-${version}"
+consumer_dir="../consumer-${version}"
+test ! -e "$consumer_dir"
+mkdir "$consumer_dir"
 gh release download "$version" \
   --repo MellifluousJDG/CAP \
-  --dir "../consumer-${version}"
+  --dir "$consumer_dir"
 (
-  cd "../consumer-${version}"
+  cd "$consumer_dir"
   sha256sum --check "CAP-${version}-x86_64.AppImage.sha256"
   chmod +x "CAP-${version}-x86_64.AppImage"
 )
 make test-appimage \
-  APPIMAGE="../consumer-${version}/CAP-${version}-x86_64.AppImage"
+  APPIMAGE="$consumer_dir/CAP-${version}-x86_64.AppImage"
 ```
 
 Remove generated AppImage build directories and artifacts with:
