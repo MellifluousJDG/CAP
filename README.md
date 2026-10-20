@@ -329,7 +329,7 @@ CAP/
 ├── scripts/
 │   ├── lint.sh                     # Shell and Python syntax checks
 │   ├── build-ctw.sh                # Shared CTW build and execution validation
-│   ├── test-ctw-build.sh           # CTW build and diagnostic behavior tests
+│   ├── test-ctw-build.sh           # Isolated CTW build-validator fixtures
 │   ├── cap-container-entrypoint.sh # OCI runtime entry point
 │   ├── run-cap-slurm.sh            # Conda single-allocation SLURM launcher
 │   ├── run-cap-appimage-slurm.sh   # AppImage single-allocation SLURM launcher
