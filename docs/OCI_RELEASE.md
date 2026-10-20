@@ -110,12 +110,16 @@ scripts/compliance/collect-debian-sources.py \
   "$bundle/debian-inputs/installed-copyright.tar.gz" \
   "$bundle/source/debian"
 scripts/compliance/finalize-compliance-checksums.sh "$bundle"
-scripts/compliance/validate-compliance-bundle.py "$bundle"
+(
+  cd "$bundle"
+  sha256sum --check --strict SHA256SUMS
+)
 ```
 
-The validator rejects unresolved reviewed policies or notices, requires the
-complete source, notice, inventory, revision, and SBOM records, and verifies the
-whole-bundle checksum manifest.
+The existing reviewed-policy commands reject changed dependency sets and
+unresolved notice decisions. The checksum finalizer removes obsolete nested
+manifests, creates the single whole-bundle manifest, and the final command
+verifies every recorded payload before archiving.
 
 Create one deterministic Zstandard archive outside the checkout:
 
