@@ -108,7 +108,7 @@ operations are invoked directly as documented in the relevant guides under
 - `make run ASSEMBLY=...` runs CAP on the supplied FASTA assembly.
 - `make run-trash2 ASSEMBLY=... OUTDIR=...` runs only the pinned TRASH_2 module.
 - `make lint` checks every tracked shell and Python script for syntax errors.
-- `make test-ctw-build` compiles CTW through the shared helper, runs its exact-output smoke test, and checks the failing-binary diagnostic; it requires the selected Conda compiler environment and `Rscript`.
+- `make test-ctw-build` runs isolated fixtures against the shared CTW build and execution validator; it does not require a Conda environment or modify `bin/ctw-calc`.
 - `make test-conda` performs the bundled deterministic one-core regression test.
 - `make test-trash2-standalone` validates the standalone launcher without running a full analysis.
 - `make remove-env` removes the selected Conda environment.

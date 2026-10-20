@@ -15,37 +15,44 @@ exec "$@"
 EOF
 chmod +x "$fake_conda"
 
-CAP_CONDA_EXE="$fake_conda" \
-CAP_ENV_NAME=unused \
-    bash "$PROJECT_DIR/scripts/build-ctw.sh" > "$TMP_DIR/build.log"
-grep -Fq "ctw-calc compiled and passed its execution smoke test." \
-    "$TMP_DIR/build.log"
+fixture="$TMP_DIR/project"
+mkdir -p "$fixture/bin/src/BCT"
+cat > "$fixture/bin/src/BCT/Makefile" <<'EOF'
+all:
+	cp ctw-calc.sh ../../ctw-calc
+	chmod +x ../../ctw-calc
+EOF
 
-workflow_dir="$TMP_DIR/workflow"
-mkdir -p "$workflow_dir/bin"
-cp "$PROJECT_DIR/bin/CTW.R" "$workflow_dir/bin/CTW.R"
-cat > "$workflow_dir/bin/ctw-calc" <<'EOF'
+cat > "$fixture/bin/src/BCT/ctw-calc.sh" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+cat > "$2" <<'CSV'
+chromosome,bin_mid,bin_value
+smoke,61.00,20.57
+CSV
+EOF
+
+CAP_PROJECT_DIR="$fixture" CAP_CONDA_EXE="$fake_conda" \
+    CAP_ENV_NAME=unused bash "$PROJECT_DIR/scripts/build-ctw.sh" \
+    > "$TMP_DIR/success.log"
+grep -Fq "ctw-calc compiled and passed its execution smoke test." \
+    "$TMP_DIR/success.log"
+
+cat > "$fixture/bin/src/BCT/ctw-calc.sh" <<'EOF'
 #!/usr/bin/env bash
 exit 126
 EOF
-chmod +x "$workflow_dir/bin/ctw-calc"
 
 set +e
-WORKFLOW_DIR="$workflow_dir" \
-    Rscript "$workflow_dir/bin/CTW.R" \
-    "$PROJECT_DIR/test/ath_Chr1_extraction_trc.fasta" \
-    "$TMP_DIR/output.csv" > "$TMP_DIR/ctw.out" 2>&1
+CAP_PROJECT_DIR="$fixture" CAP_CONDA_EXE="$fake_conda" \
+    CAP_ENV_NAME=unused bash "$PROJECT_DIR/scripts/build-ctw.sh" \
+    > "$TMP_DIR/failure.log" 2>&1
 status=$?
 set -e
 
 if [ "$status" -eq 0 ]; then
-    echo "CTW.R unexpectedly succeeded with a failing binary and no BCT package." >&2
-    exit 1
-fi
-grep -Fq "ctw-calc exists but failed to execute" "$TMP_DIR/ctw.out"
-if grep -Fq "ctw-calc binary not found" "$TMP_DIR/ctw.out"; then
-    echo "CTW.R incorrectly reported the failing binary as absent." >&2
+    echo "CTW build validation accepted a binary that could not execute." >&2
     exit 1
 fi
 
-echo "CTW build and failure-diagnostic tests passed."
+echo "CTW build validation tests passed."

@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-PROJECT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
+PROJECT_DIR=${CAP_PROJECT_DIR:-$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)}
 ENV_NAME=${CAP_ENV_NAME:-cap-pipeline}
 CONDA_EXE=${CAP_CONDA_EXE:-conda}
 
