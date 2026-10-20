@@ -65,6 +65,9 @@ bash "$miniconda" -b -p "$CONDA_DIR"
 # Build CTW with the pinned development lock rather than the host compiler.
 # Compile from a disposable source copy so the repository stays artifact-free.
 "$CONDA_DIR/bin/conda" create --yes --prefix "$CTW_BUILD_DIR" \
+    --override-channels \
+    --channel conda-forge \
+    --channel bioconda \
     --file "$PROJECT_DIR/conda-linux-64.lock"
 mkdir -p "$CTW_BUILD_DIR/bin/src/BCT"
 cp -a "$PROJECT_DIR/bin/src/BCT/." "$CTW_BUILD_DIR/bin/src/BCT/"
