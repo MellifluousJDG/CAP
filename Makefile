@@ -7,14 +7,14 @@ MAX_REP_SIZE ?= 1000
 MIN_REP_SIZE ?= 7
 TEMPLATES ?=
 
-.PHONY: install compile run run-trash2 lint test-conda test-trash2-standalone test-container test-slurm-wrapper test-appimage-slurm-wrapper appimage test-appimage clean-appimage oci-inventory oci-compliance remove-env clean-build clean
+.PHONY: install compile run run-trash2 lint test-ctw-build test-conda test-trash2-standalone test-container test-slurm-wrapper test-appimage-slurm-wrapper appimage test-appimage clean-appimage oci-inventory oci-compliance remove-env clean-build clean
 
 install:
 	@echo "Setting up Conda environment '$(ENV_NAME)'..."
 	CAP_ENV_NAME="$(ENV_NAME)" bash setup_conda.sh
 
 compile:
-	conda run -n "$(ENV_NAME)" make -C bin/src/BCT
+	CAP_ENV_NAME="$(ENV_NAME)" CAP_CONDA_EXE="$(CONDA)" scripts/build-ctw.sh
 
 run:
 	@test -n "$(ASSEMBLY)" || { \
@@ -38,6 +38,9 @@ run-trash2:
 
 lint:
 	bash scripts/lint.sh
+
+test-ctw-build:
+	bash scripts/test-ctw-build.sh
 
 test-conda:
 	CAP_ENV_NAME="$(ENV_NAME)" bash scripts/test-conda.sh
