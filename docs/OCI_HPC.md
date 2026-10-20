@@ -24,8 +24,8 @@ choice. Also determine whether compute nodes can reach GHCR; if not, pull or
 convert the image in advance on a connected system.
 
 The convenient release reference is
-`ghcr.io/mellifluousjdg/cap:1.0.0`. For an exact immutable image, use
-`ghcr.io/mellifluousjdg/cap@sha256:c6ec1c840e0a4184a249019b3ea317330754e5699f2550e009fe28b0729e889b`.
+`ghcr.io/mellifluousjdg/cap:1.0.1`. For an exact immutable image, use
+`ghcr.io/mellifluousjdg/cap@sha256:64cbd81547c4888bce9ec6948b5fda34c7be29c411e6dd24c2aa440b421772d1`.
 
 ## Rootless Podman
 
@@ -39,7 +39,7 @@ storage for temporary Nextflow work:
 
 set -euo pipefail
 
-image=ghcr.io/mellifluousjdg/cap:1.0.0
+image=ghcr.io/mellifluousjdg/cap:1.0.1
 assembly=/shared/data/genome.fasta
 outdir=/shared/results/genome-cap
 tmp_base="${SLURM_TMPDIR:-${TMPDIR:-/tmp}}"
@@ -84,7 +84,7 @@ docker run --rm \
   -v /shared/data:/data:ro \
   -v /shared/results/genome-cap:/results \
   -v "$work_root:/work" \
-  ghcr.io/mellifluousjdg/cap:1.0.0 \
+  ghcr.io/mellifluousjdg/cap:1.0.1 \
   --assembly /data/genome.fasta \
   --outdir /results \
   --cores "${SLURM_CPUS_PER_TASK:-1}" \
@@ -101,8 +101,8 @@ Because the image is public, a connected login or transfer node can normally
 convert it to a SIF file:
 
 ```bash
-apptainer pull cap-1.0.0.sif \
-  docker://ghcr.io/mellifluousjdg/cap:1.0.0
+apptainer pull cap-1.0.1.sif \
+  docker://ghcr.io/mellifluousjdg/cap:1.0.1
 ```
 
 Then copy the immutable SIF to shared storage and execute it in one allocation:
@@ -121,7 +121,7 @@ apptainer exec \
   --bind /shared/data:/data:ro \
   --bind "$outdir:/results" \
   --bind "$work_root:/work" \
-  cap-1.0.0.sif \
+  cap-1.0.1.sif \
   /usr/local/bin/cap \
   --assembly /data/genome.fasta \
   --outdir /results \
@@ -144,9 +144,9 @@ host:
 
 ```bash
 podman save --format oci-archive \
-  -o cap-1.0.0.oci.tar \
-  ghcr.io/mellifluousjdg/cap:1.0.0
-sha256sum cap-1.0.0.oci.tar > cap-1.0.0.oci.tar.sha256
+  -o cap-1.0.1.oci.tar \
+  ghcr.io/mellifluousjdg/cap:1.0.1
+sha256sum cap-1.0.1.oci.tar > cap-1.0.1.oci.tar.sha256
 ```
 
 Transfer both files, verify the checksum, and import with the cluster's
