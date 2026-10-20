@@ -76,6 +76,27 @@ labels. Local modifications or untracked files could therefore make the copied
 source differ from the commits named by those labels. Normal container
 execution does not install or download CAP dependencies.
 
+## Test the built image
+
+Run the integration test inside every newly built image. It verifies the
+runtime contents, rejects bundled AppImage artifacts and build tools, and runs
+the complete deterministic one-core CAP regression:
+
+```bash
+podman run --rm --entrypoint /bin/bash \
+  cap:local /opt/CAP/scripts/test-container-image.sh
+```
+
+With Docker, use:
+
+```bash
+docker run --rm --entrypoint /bin/bash \
+  cap:local /opt/CAP/scripts/test-container-image.sh
+```
+
+For a release, run this test against the exact final image before generating
+its inventory or compliance bundle and before tagging or publishing it.
+
 ## Run the published image
 
 CAP 1.0.1 is public at:
