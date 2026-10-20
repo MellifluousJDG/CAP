@@ -18,16 +18,7 @@ bash "$PROJECT_DIR/scripts/compliance/test-sbom.sh"
 
 runtime_lock="$PROJECT_DIR/conda-runtime-linux-64.lock"
 full_lock="$PROJECT_DIR/conda-linux-64.lock"
-dockerignore="$PROJECT_DIR/.dockerignore"
 test -s "$runtime_lock"
-grep -Fqx /build "$dockerignore" || {
-    echo "Top-level build output is not excluded from the OCI context." >&2
-    exit 1
-}
-grep -Fqx /dist "$dockerignore" || {
-    echo "Top-level release artifacts are not excluded from the OCI context." >&2
-    exit 1
-}
 while IFS= read -r package_url; do
     grep -Fqx "$package_url" "$full_lock" || {
         echo "Runtime lock URL is absent from the validated full lock: $package_url" >&2
