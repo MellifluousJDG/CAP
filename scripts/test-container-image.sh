@@ -32,6 +32,11 @@ test ! -e "$CAP_DIR/modules/TRASH_2/dep/hmmer"
 test ! -e "$CAP_DIR/modules/TRASH_2/dep/mafft-7.520-win64-signed"
 test ! -e "$CAP_DIR/modules/TRASH_2/dep/new.hor"
 test ! -e "$CAP_DIR/modules/TRASH_2/temp"
+appimage=$(find "$CAP_DIR" -type f -name '*.AppImage' -print -quit)
+if [ -n "$appimage" ]; then
+    echo "AppImage artifact must not be present in the OCI image: $appimage" >&2
+    exit 1
+fi
 
 python3 - <<'PY'
 import sklearn
