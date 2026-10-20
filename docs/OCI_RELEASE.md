@@ -44,6 +44,7 @@ After pushing, obtain and record the registry manifest digest. Do not confuse a
 local image ID with the registry digest. Log out when finished:
 
 ```bash
+version=<version>
 oras manifest fetch --descriptor \
   "ghcr.io/mellifluousjdg/cap:$version" | \
   python3 -c 'import json, sys; print(json.load(sys.stdin)["digest"])'
