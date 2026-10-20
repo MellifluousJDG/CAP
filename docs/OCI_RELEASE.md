@@ -44,6 +44,9 @@ After pushing, obtain and record the registry manifest digest. Do not confuse a
 local image ID with the registry digest. Log out when finished:
 
 ```bash
+oras manifest fetch --descriptor \
+  "ghcr.io/mellifluousjdg/cap:$version" | \
+  python3 -c 'import json, sys; print(json.load(sys.stdin)["digest"])'
 podman logout ghcr.io
 ```
 
@@ -145,6 +148,9 @@ oras push \
   --artifact-type application/vnd.cap.compliance-bundle.v1 \
   "ghcr.io/mellifluousjdg/cap-source:$version" \
   "../cap-$version-compliance-bundle.tar.zst:application/zstd"
+oras manifest fetch --descriptor \
+  "ghcr.io/mellifluousjdg/cap-source:$version" | \
+  python3 -c 'import json, sys; print(json.load(sys.stdin)["digest"])'
 oras logout ghcr.io
 ```
 
