@@ -207,8 +207,10 @@ APPIMAGE_VERSION="$version" make appimage
 The build downloads the exact runtime packages named by
 `conda-runtime-linux-64.lock`, compiles CTW/BCT with the pinned compiler and
 sysroot from `conda-linux-64.lock`, and writes
-`dist/CAP-${version}-x86_64.AppImage` and its checksum. For non-release builds,
-omitting `APPIMAGE_VERSION` retains the short-CAP-revision filename.
+`dist/CAP-${version}-x86_64.AppImage` and its checksum. Both temporary Conda
+environments use only conda-forge and bioconda; the build does not consult
+Anaconda's default channels. For non-release builds, omitting
+`APPIMAGE_VERSION` retains the short-CAP-revision filename.
 
 Test the release artifact with:
 
