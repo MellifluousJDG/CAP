@@ -32,14 +32,27 @@ podman run --rm --entrypoint /bin/bash \
   cap:local /opt/CAP/scripts/test-container-image.sh
 ```
 
-Do not publish if this test fails. After it passes, create a GitHub personal
-access token with package write permission, then avoid putting it on the command
-line or in shell history:
+Do not publish if this test fails. Reuse an existing authenticated host session
+when available:
+
+```bash
+podman login --get-login ghcr.io
+```
+
+If that command does not report the intended account, create a GitHub personal
+access token with package write permission and log in without putting the token
+on the command line or in shell history:
 
 ```bash
 printf '%s' "$GHCR_TOKEN" | podman login ghcr.io \
   --username MellifluousJDG --password-stdin
 ```
+
+Podman normally stores this login in
+`${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/containers/auth.json`. Pass that path to
+ORAS with `--registry-config` when ORAS does not discover the Podman login
+automatically. Do not log out at the end if the authenticated session was
+created separately and should remain available.
 
 Tag and push the tested release image, replacing `<version>` with the new version:
 
@@ -50,14 +63,14 @@ podman push "ghcr.io/mellifluousjdg/cap:$version"
 ```
 
 After pushing, obtain and record the registry manifest digest. Do not confuse a
-local image ID with the registry digest. Log out when finished:
+local image ID with the registry digest:
 
 ```bash
 version=<version>
-oras manifest fetch --descriptor \
+authfile="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/containers/auth.json"
+oras manifest fetch --registry-config "$authfile" --descriptor \
   "ghcr.io/mellifluousjdg/cap:$version" | \
   python3 -c 'import json, sys; print(json.load(sys.stdin)["digest"])'
-podman logout ghcr.io
 ```
 
 Set the GHCR package visibility deliberately in GitHub's package settings and
@@ -147,21 +160,19 @@ sha256sum ../cap-1.0.1-compliance-bundle.tar.zst
 
 ## Publish the corresponding source artifact
 
-Authenticate ORAS without putting a token on the command line, then publish the
-single tested archive under the immutable release version:
+Authenticate ORAS using the existing Podman login described above, then publish
+the single tested archive under the immutable release version:
 
 ```bash
 version=1.0.1
-printf '%s' "$GHCR_TOKEN" | oras login ghcr.io \
-  --username MellifluousJDG --password-stdin
-oras push \
+authfile="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/containers/auth.json"
+oras push --registry-config "$authfile" \
   --artifact-type application/vnd.cap.compliance-bundle.v1 \
   "ghcr.io/mellifluousjdg/cap-source:$version" \
   "../cap-$version-compliance-bundle.tar.zst:application/zstd"
-oras manifest fetch --descriptor \
+oras manifest fetch --registry-config "$authfile" --descriptor \
   "ghcr.io/mellifluousjdg/cap-source:$version" | \
   python3 -c 'import json, sys; print(json.load(sys.stdin)["digest"])'
-oras logout ghcr.io
 ```
 
 Record the returned manifest digest and archive SHA-256. Pull by digest into a
