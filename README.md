@@ -452,7 +452,7 @@ cp "$assembly" cap-run/data/
 assembly_name=$(basename "$assembly")
 cd cap-run
 
-image=ghcr.io/mellifluousjdg/cap:1.0.0
+image=ghcr.io/mellifluousjdg/cap:1.0.1
 podman run --rm --userns=keep-id \
   -v "$PWD/data:/data:ro" \
   -v "$PWD/results:/results" \
@@ -472,7 +472,7 @@ owned by the invoking user. Remove `work/` after success to reclaim space.
 For an immutable pull, replace the image assignment with:
 
 ```bash
-image=ghcr.io/mellifluousjdg/cap@sha256:c6ec1c840e0a4184a249019b3ea317330754e5699f2550e009fe28b0729e889b
+image=ghcr.io/mellifluousjdg/cap@sha256:64cbd81547c4888bce9ec6948b5fda34c7be29c411e6dd24c2aa440b421772d1
 ```
 
 See `docs/OCI_IMAGE.md` for Docker, permissions, SELinux, troubleshooting,

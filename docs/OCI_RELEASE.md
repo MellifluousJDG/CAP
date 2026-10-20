@@ -7,11 +7,11 @@ be published to Docker Hub. The public image repository is:
 ghcr.io/mellifluousjdg/cap
 ```
 
-CAP 1.0.0 is published under the immutable release tag and manifest digest:
+CAP 1.0.1 is published under the immutable release tag and manifest digest:
 
 ```text
-ghcr.io/mellifluousjdg/cap:1.0.0
-ghcr.io/mellifluousjdg/cap@sha256:c6ec1c840e0a4184a249019b3ea317330754e5699f2550e009fe28b0729e889b
+ghcr.io/mellifluousjdg/cap:1.0.1
+ghcr.io/mellifluousjdg/cap@sha256:64cbd81547c4888bce9ec6948b5fda34c7be29c411e6dd24c2aa440b421772d1
 ```
 
 ## Tag and digest policy
