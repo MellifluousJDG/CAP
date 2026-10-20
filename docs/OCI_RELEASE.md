@@ -80,7 +80,18 @@ link the package to the CAP repository.
 
 Generate the initial bundle from the final tested image as described in
 `docs/OCI_IMAGE.md`, then complete the reviewed source and notice collection.
-The following commands are intentionally explicit: generation requires network
+By default, generation verifies image revision labels against the checkout. For
+an image already proven to come from an exact clean release checkout, explicit
+expected revisions may be supplied instead:
+
+```bash
+CAP_EXPECTED_REVISION=$(git rev-parse HEAD) \
+CAP_EXPECTED_TRASH2_REVISION=$(git rev-parse HEAD:modules/TRASH_2) \
+make oci-compliance IMAGE="$image" OUTDIR="$bundle"
+```
+
+Both explicit revisions are required together and must match the checkout. The
+following commands are intentionally explicit: generation requires network
 access and can be lengthy, and each collector verifies downloaded checksums.
 
 ```bash

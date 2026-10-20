@@ -14,6 +14,7 @@ python3 "$PROJECT_DIR/scripts/compliance/test-merge-conda-source-corpora.py"
 python3 "$PROJECT_DIR/scripts/compliance/test-collect-debian-sources.py"
 bash "$PROJECT_DIR/scripts/compliance/test-conda-source-notices.sh"
 bash "$PROJECT_DIR/scripts/compliance/test-finalize-compliance-checksums.sh"
+bash "$PROJECT_DIR/scripts/compliance/test-resolve-release-revisions.sh"
 bash "$PROJECT_DIR/scripts/compliance/test-sbom.sh"
 
 runtime_lock="$PROJECT_DIR/conda-runtime-linux-64.lock"
