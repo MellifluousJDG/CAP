@@ -54,23 +54,17 @@ if [[ "$git_available" == "1" ]]; then
     checkout_cap_revision="$($GIT_COMMAND -C "$PROJECT_DIR" rev-parse HEAD)"
     checkout_trash_revision="$($GIT_COMMAND -C "$PROJECT_DIR" \
         rev-parse HEAD:modules/TRASH_2)"
-    if [[ -z "$image_cap_revision" || "$image_cap_revision" == "UNSPECIFIED" ]]; then
-        echo "Image has no specific CAP revision label." >&2
+    mapfile -t resolved_revisions < <(
+        "$PROJECT_DIR/scripts/compliance/resolve-release-revisions.sh" \
+            "$image_cap_revision" "$image_trash_revision" \
+            "$checkout_cap_revision" "$checkout_trash_revision"
+    )
+    [[ "${#resolved_revisions[@]}" == "2" ]] || {
+        echo "Could not resolve CAP and TRASH_2 release revisions." >&2
         exit 1
-    fi
-    if [[ -z "$image_trash_revision" || \
-          "$image_trash_revision" == "UNSPECIFIED" ]]; then
-        echo "Image has no specific TRASH_2 revision label." >&2
-        exit 1
-    fi
-    if [[ "$checkout_cap_revision" != "$image_cap_revision" ]]; then
-        echo "Checkout revision does not match image CAP revision." >&2
-        exit 1
-    fi
-    if [[ "$checkout_trash_revision" != "$image_trash_revision" ]]; then
-        echo "Checkout TRASH_2 revision does not match image revision." >&2
-        exit 1
-    fi
+    }
+    cap_revision="${resolved_revisions[0]}"
+    trash_revision="${resolved_revisions[1]}"
 fi
 {
     printf 'image_reference=%s\n' "$IMAGE"
