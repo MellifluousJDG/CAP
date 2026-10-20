@@ -6,6 +6,10 @@ work_*
 results
 results_*
 
+# Generated local release/test artifacts must never enter the OCI context.
+/build
+/dist
+
 # The image must compile this from tracked source.
 bin/ctw-calc
 
