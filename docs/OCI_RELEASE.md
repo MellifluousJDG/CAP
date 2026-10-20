@@ -50,6 +50,107 @@ podman logout ghcr.io
 Set the GHCR package visibility deliberately in GitHub's package settings and
 link the package to the CAP repository.
 
+## Corresponding-source bundle
+
+Generate the initial bundle from the final tested image as described in
+`docs/OCI_IMAGE.md`, then complete the reviewed source and notice collection.
+The following commands are intentionally explicit: generation requires network
+access and can be lengthy, and each collector verifies downloaded checksums.
+
+```bash
+bundle=../cap-1.0.1-compliance-bundle
+image=cap:local
+
+scripts/compliance/apply-source-review-policy.py \
+  "$bundle/source-obligations.csv" \
+  "$bundle/source-obligations-reviewed.csv"
+scripts/compliance/collect-conda-sources.py \
+  "$bundle/source-obligations-reviewed.csv" \
+  "$bundle/source/conda"
+scripts/compliance/collect-conda-notices.py \
+  "$bundle/inventory/conda-source-urls.csv" \
+  "$bundle/notices/conda"
+scripts/compliance/collect-conda-notice-sources.py \
+  licenses/conda-notice-supplemental-sources.csv \
+  "$bundle/source/conda-notice-supplemental"
+```
+
+Merge the two verified Conda corpora and their mappings without modifying the
+primary or supplemental evidence:
+
+```bash
+scripts/compliance/merge-conda-source-corpora.py \
+  "$bundle/source/conda" \
+  "$bundle/source/conda-notice-supplemental" \
+  "$bundle/source/conda-all"
+```
+
+Export the canonical R license texts from the exact image, resolve all reviewed
+Conda notice gaps, and collect exact Debian sources:
+
+```bash
+mkdir "$bundle/notices/R-shared-licenses"
+podman run --rm --entrypoint /bin/bash "$image" -c \
+  'tar -C /opt/cap-env/lib/R/share/licenses -cf - .' | \
+  tar -C "$bundle/notices/R-shared-licenses" -xf -
+scripts/compliance/collect-conda-source-notices.py \
+  "$bundle/notices/conda/conda-notice-manifest.csv" \
+  "$bundle/source/conda-all/source-to-binary.csv" \
+  "$bundle/source/conda-all" "$bundle/notices/conda-source" \
+  --shared-license-dir "$bundle/notices/R-shared-licenses"
+scripts/compliance/finalize-conda-source-notices.py \
+  "$bundle/notices/conda-source/source-notice-manifest.csv" \
+  licenses/conda-source-notice-review.csv \
+  "$bundle/notices/R-shared-licenses" \
+  "$bundle/notices/conda-source/final-review.csv"
+scripts/compliance/export-debian-compliance-inputs.sh \
+  "$image" "$bundle/debian-inputs"
+scripts/compliance/collect-debian-sources.py \
+  "$bundle/debian-inputs/binary-to-source.csv" \
+  "$bundle/debian-inputs/installed-copyright.tar.gz" \
+  "$bundle/source/debian"
+scripts/compliance/finalize-compliance-checksums.sh "$bundle"
+(
+  cd "$bundle"
+  sha256sum --check --strict SHA256SUMS
+)
+```
+
+The existing reviewed-policy commands reject changed dependency sets and
+unresolved notice decisions. The checksum finalizer removes obsolete nested
+manifests, creates the single whole-bundle manifest, and the final command
+verifies every recorded payload before archiving.
+
+Create one deterministic Zstandard archive outside the checkout:
+
+```bash
+tar --sort=name --mtime='UTC 1970-01-01' --owner=0 --group=0 \
+  --numeric-owner -C "$(dirname "$bundle")" \
+  -cf - "$(basename "$bundle")" | \
+  zstd -T0 -19 -o ../cap-1.0.1-compliance-bundle.tar.zst
+sha256sum ../cap-1.0.1-compliance-bundle.tar.zst
+```
+
+## Publish the corresponding source artifact
+
+Authenticate ORAS without putting a token on the command line, then publish the
+single tested archive under the immutable release version:
+
+```bash
+version=1.0.1
+printf '%s' "$GHCR_TOKEN" | oras login ghcr.io \
+  --username MellifluousJDG --password-stdin
+oras push \
+  --artifact-type application/vnd.cap.compliance-bundle.v1 \
+  "ghcr.io/mellifluousjdg/cap-source:$version" \
+  "../cap-$version-compliance-bundle.tar.zst:application/zstd"
+oras logout ghcr.io
+```
+
+Record the returned manifest digest and archive SHA-256. Pull by digest into a
+new directory, verify that the downloaded archive is byte-identical, and test
+its complete checksum manifest before considering publication complete.
+
 ## Release artifacts
 
 In addition to the registry image, preserve:
