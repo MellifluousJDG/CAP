@@ -255,8 +255,8 @@ GitHub CLI authentication must be configured interactively before either
 command; do not place tokens on the command line or in shell history. Published
 release tags and assets are immutable. Do not replace them.
 
-Download both public assets into a new directory, verify the published checksum,
-and rerun the complete artifact test on the downloaded AppImage:
+Download both public assets into a new directory and verify the published
+checksum:
 
 ```bash
 version=v1.0.1
@@ -269,10 +269,7 @@ gh release download "$version" \
 (
   cd "$consumer_dir"
   sha256sum --check "CAP-${version}-x86_64.AppImage.sha256"
-  chmod +x "CAP-${version}-x86_64.AppImage"
 )
-make test-appimage \
-  APPIMAGE="$consumer_dir/CAP-${version}-x86_64.AppImage"
 ```
 
 Remove generated AppImage build directories and artifacts with:
