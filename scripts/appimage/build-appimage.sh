@@ -134,7 +134,7 @@ trash_revision="$(git -C "$PROJECT_DIR/modules/TRASH_2" rev-parse HEAD)"
 appimage_version="${APPIMAGE_VERSION:-${cap_revision:0:7}}"
 if [[ ! "$appimage_version" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+$ && \
       "$appimage_version" != "${cap_revision:0:7}" ]]; then
-    fail "APPIMAGE_VERSION must be a semantic version such as v1.0.1"
+    fail "APPIMAGE_VERSION must be a semantic version such as v1.0.3"
 fi
 cat > "$APPDIR/usr/lib/cap/APPIMAGE-BUILD-METADATA.txt" <<EOF
 CAP revision: $cap_revision

@@ -190,6 +190,17 @@ For offline systems, download the AppImage and checksum on a connected machine,
 verify them, and transfer both files. If the destination does not provide FUSE,
 use the extraction procedure above.
 
+## Published v1.0.3 artifact
+
+The immutable Linux x86-64 AppImage release is:
+
+```text
+CAP-v1.0.3-x86_64.AppImage
+Size: 636,085,440 bytes
+SHA-256: c4b586e6dc1d73fd80cbdb6d7a141051164b8aafb72e9b8327328fcb477f12fc
+Release: https://github.com/MellifluousJDG/CAP/releases/tag/v1.0.3
+```
+
 ## Build from source
 
 Building is supported on Linux x86-64. The build requires a recursive CAP Git
@@ -198,7 +209,7 @@ checkout, network access, and common host tools including Bash, Git, `curl`,
 the build downloads a checksum-verified Miniconda bootstrap locally.
 
 ```bash
-version=v1.0.1
+version=v<version>
 test -z "$(git status --porcelain --ignore-submodules=none)"
 test "$(git describe --tags --exact-match)" = "$version"
 APPIMAGE_VERSION="$version" make appimage
@@ -215,7 +226,7 @@ Anaconda's default channels. For non-release builds, omitting
 Test the release artifact with:
 
 ```bash
-version=v1.0.1
+version=v<version>
 make test-appimage APPIMAGE="dist/CAP-${version}-x86_64.AppImage"
 ```
 
@@ -233,7 +244,7 @@ above. If the GitHub Release does not exist yet, create it and upload the
 already-tested files without rebuilding or renaming them:
 
 ```bash
-version=v1.0.1
+version=v<version>
 gh release create "$version" \
   "dist/CAP-${version}-x86_64.AppImage" \
   "dist/CAP-${version}-x86_64.AppImage.sha256" \
@@ -247,7 +258,7 @@ If the GitHub Release already exists but does not yet contain these assets,
 upload them without replacing any existing asset:
 
 ```bash
-version=v1.0.1
+version=v<version>
 gh release upload "$version" \
   "dist/CAP-${version}-x86_64.AppImage" \
   "dist/CAP-${version}-x86_64.AppImage.sha256" \
@@ -262,7 +273,7 @@ Download both public assets into a new directory and verify the published
 checksum:
 
 ```bash
-version=v1.0.1
+version=v<version>
 consumer_dir="../consumer-${version}"
 test ! -e "$consumer_dir"
 mkdir "$consumer_dir"

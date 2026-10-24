@@ -99,11 +99,11 @@ its inventory or compliance bundle and before tagging or publishing it.
 
 ## Run the published image
 
-CAP 1.0.1 is public at:
+CAP 1.0.3 is public at:
 
 ```text
-ghcr.io/mellifluousjdg/cap:1.0.1
-ghcr.io/mellifluousjdg/cap@sha256:64cbd81547c4888bce9ec6948b5fda34c7be29c411e6dd24c2aa440b421772d1
+ghcr.io/mellifluousjdg/cap:1.0.3
+ghcr.io/mellifluousjdg/cap@sha256:2563036a264a3d7b72bba57215229df599af15a36ae0c4d7155b70a3127b6f95
 ```
 
 The tag is convenient and the digest selects one exact image. The following
@@ -116,7 +116,7 @@ cp "$assembly" cap-run/data/
 assembly_name=$(basename "$assembly")
 cd cap-run
 
-image=ghcr.io/mellifluousjdg/cap:1.0.1
+image=ghcr.io/mellifluousjdg/cap:1.0.3
 podman run --rm --userns=keep-id \
   -v "$PWD/data:/data:ro" \
   -v "$PWD/results:/results" \
@@ -134,7 +134,7 @@ PNG files appear directly under `results/`. Nextflow intermediates are under
 
 ```bash
 rm -rf work
-podman image rm ghcr.io/mellifluousjdg/cap:1.0.1
+podman image rm ghcr.io/mellifluousjdg/cap:1.0.3
 ```
 
 The image runs as non-root user `cap` (UID/GID 1000). With rootless Podman,
@@ -154,7 +154,7 @@ docker run --rm \
   -v "$PWD/data:/data:ro" \
   -v "$PWD/results:/results" \
   -v "$PWD/work:/work" \
-  ghcr.io/mellifluousjdg/cap:1.0.1 \
+  ghcr.io/mellifluousjdg/cap:1.0.3 \
   --assembly /data/genome.fasta \
   --cores 1 \
   --outdir /results \
@@ -171,9 +171,9 @@ profile: the whole workflow is already inside the CAP image.
 Display help or open an interactive shell:
 
 ```bash
-podman run --rm ghcr.io/mellifluousjdg/cap:1.0.1 --help
+podman run --rm ghcr.io/mellifluousjdg/cap:1.0.3 --help
 podman run --rm --userns=keep-id -it \
-  ghcr.io/mellifluousjdg/cap:1.0.1 --shell
+  ghcr.io/mellifluousjdg/cap:1.0.3 --shell
 ```
 
 Common problems:
@@ -193,25 +193,25 @@ archives, and release procedure, see `docs/OCI_RELEASE.md`.
 
 ## Corresponding source
 
-The complete CAP 1.0.1 source and compliance bundle is published as a public OCI
+The complete CAP 1.0.3 source and compliance bundle is published as a public OCI
 artifact:
 
 ```text
-ghcr.io/mellifluousjdg/cap-source:1.0.1
-ghcr.io/mellifluousjdg/cap-source@sha256:23c63c8f40eb8aeb22fb889e0a8929ee41fdf3b9226b0e5c481483686d709d8d
+ghcr.io/mellifluousjdg/cap-source:1.0.3
+ghcr.io/mellifluousjdg/cap-source@sha256:33daf3e3b1b90011201c528d93b3bd86052258cf9a410bb1d1376c4a2a0699e0
 ```
 
 Download the immutable artifact with ORAS:
 
 ```bash
 oras pull \
-  ghcr.io/mellifluousjdg/cap-source@sha256:23c63c8f40eb8aeb22fb889e0a8929ee41fdf3b9226b0e5c481483686d709d8d
+  ghcr.io/mellifluousjdg/cap-source@sha256:33daf3e3b1b90011201c528d93b3bd86052258cf9a410bb1d1376c4a2a0699e0
 ```
 
-The downloaded file is `cap-1.0.1-compliance-bundle.tar.zst`. Its SHA-256 is:
+The downloaded file is `cap-1.0.3-compliance-bundle.tar.zst`. Its SHA-256 is:
 
 ```text
-defbe6054a39888a2d3a8e858efca0df9f37fc38b8655c5c610412a224b05fdb
+eeb0e951ca253dff3fc13569ac1a5e4945f8586b7681ee495f341c79a16cc57d
 ```
 
 ## Inventory

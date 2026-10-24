@@ -2,11 +2,31 @@
 
 **CAP** is a Nextflow pipeline for centromere prediction and repeat analysis in genomic assemblies. It integrates **TRASH_2** for tandem-repeat detection, processes optional transposon and gene annotations, and produces plots and tables.
 
+## Published v1.0.3 artifacts
+
+The current immutable Linux release artifacts are:
+
+```text
+AppImage: CAP-v1.0.3-x86_64.AppImage
+SHA-256: c4b586e6dc1d73fd80cbdb6d7a141051164b8aafb72e9b8327328fcb477f12fc
+
+OCI: ghcr.io/mellifluousjdg/cap:1.0.3
+Digest: sha256:2563036a264a3d7b72bba57215229df599af15a36ae0c4d7155b70a3127b6f95
+
+Source: ghcr.io/mellifluousjdg/cap-source:1.0.3
+Digest: sha256:33daf3e3b1b90011201c528d93b3bd86052258cf9a410bb1d1376c4a2a0699e0
+```
+
+See `docs/OCI_RELEASE.md` for the source archive size and SHA-256 and for the
+manual publication and verification procedure.
+
 ## AppImage quick start
 
-For Linux x86-64, download the AppImage and its `.sha256` file from the CAP
-GitHub Release page. The AppImage contains CAP and all runtime dependencies, so
-Conda and a container runtime are not required.
+For Linux x86-64, CAP v1.0.3 is available from the GitHub Release page as
+`CAP-v1.0.3-x86_64.AppImage` (636,085,440 bytes, SHA-256
+`c4b586e6dc1d73fd80cbdb6d7a141051164b8aafb72e9b8327328fcb477f12fc`).
+Download the AppImage and its `.sha256` file. The AppImage contains CAP and all
+runtime dependencies, so Conda and a container runtime are not required.
 
 ```bash
 sha256sum --check CAP-<version>-x86_64.AppImage.sha256
@@ -458,7 +478,7 @@ cp "$assembly" cap-run/data/
 assembly_name=$(basename "$assembly")
 cd cap-run
 
-image=ghcr.io/mellifluousjdg/cap:1.0.1
+image=ghcr.io/mellifluousjdg/cap:1.0.3
 podman run --rm --userns=keep-id \
   -v "$PWD/data:/data:ro" \
   -v "$PWD/results:/results" \
@@ -478,7 +498,7 @@ owned by the invoking user. Remove `work/` after success to reclaim space.
 For an immutable pull, replace the image assignment with:
 
 ```bash
-image=ghcr.io/mellifluousjdg/cap@sha256:64cbd81547c4888bce9ec6948b5fda34c7be29c411e6dd24c2aa440b421772d1
+image=ghcr.io/mellifluousjdg/cap@sha256:2563036a264a3d7b72bba57215229df599af15a36ae0c4d7155b70a3127b6f95
 ```
 
 See `docs/OCI_IMAGE.md` for Docker, permissions, SELinux, troubleshooting,

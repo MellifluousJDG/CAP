@@ -7,12 +7,20 @@ be published to Docker Hub. The public image repository is:
 ghcr.io/mellifluousjdg/cap
 ```
 
-CAP 1.0.1 is published under the immutable release tag and manifest digest:
+CAP 1.0.3 is published under immutable release tags and digests:
 
 ```text
-ghcr.io/mellifluousjdg/cap:1.0.1
-ghcr.io/mellifluousjdg/cap@sha256:64cbd81547c4888bce9ec6948b5fda34c7be29c411e6dd24c2aa440b421772d1
+OCI image:
+ghcr.io/mellifluousjdg/cap:1.0.3
+ghcr.io/mellifluousjdg/cap@sha256:2563036a264a3d7b72bba57215229df599af15a36ae0c4d7155b70a3127b6f95
+
+Corresponding source:
+ghcr.io/mellifluousjdg/cap-source:1.0.3
+ghcr.io/mellifluousjdg/cap-source@sha256:33daf3e3b1b90011201c528d93b3bd86052258cf9a410bb1d1376c4a2a0699e0
 ```
+
+The source archive is 3,206,034,233 bytes with SHA-256
+`eeb0e951ca253dff3fc13569ac1a5e4945f8586b7681ee495f341c79a16cc57d`.
 
 ## Tag and digest policy
 
@@ -23,7 +31,14 @@ validation records must also record the immutable manifest digest.
 
 ## Manual publication
 
-Publish release images manually; do not configure automated registry pushes.
+CAP release images are currently published manually. The commands below
+document the manual release procedure.
+Build the release image from the exact clean release checkout using the image
+build command documented in `docs/OCI_IMAGE.md`. Keep the canonical local name
+`cap:local` for the test and publication commands below. OCI labels are useful
+metadata but are not themselves a release gate; establish provenance from the
+exact checkout, tested artifact, immutable tag, and recorded registry digest.
+
 Before assigning or pushing the immutable release tag, run the integration test
 inside the exact final local image:
 
@@ -32,27 +47,23 @@ podman run --rm --entrypoint /bin/bash \
   cap:local /opt/CAP/scripts/test-container-image.sh
 ```
 
-Do not publish if this test fails. Reuse an existing authenticated host session
-when available:
+Do not publish if this test fails. Podman and ORAS can use different default
+credential stores. Authenticate with the client that will publish the artifact:
 
 ```bash
-podman login --get-login ghcr.io
+# For OCI image publication with Podman:
+podman login ghcr.io --username MellifluousJDG
+
+# For corresponding-source publication with ORAS:
+oras login ghcr.io --username MellifluousJDG
 ```
 
-If that command does not report the intended account, create a GitHub personal
-access token with package write permission and log in without putting the token
-on the command line or in shell history:
-
-```bash
-printf '%s' "$GHCR_TOKEN" | podman login ghcr.io \
-  --username MellifluousJDG --password-stdin
-```
-
-Podman normally stores this login in
-`${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/containers/auth.json`. Pass that path to
-ORAS with `--registry-config` when ORAS does not discover the Podman login
-automatically. Do not log out at the end if the authenticated session was
-created separately and should remain available.
+Use a classic GitHub personal access token with `read:packages` and
+`write:packages` when prompted for the password. Interactive prompting keeps the
+token out of command-line arguments and shell history. After `oras login`,
+invoke ORAS normally and let it use its default credential store. Pass
+`--registry-config` only when intentionally supplying an alternate credential
+file; doing so overrides the default ORAS credentials.
 
 Tag and push the tested release image, replacing `<version>` with the new version:
 
@@ -62,15 +73,12 @@ podman tag cap:local "ghcr.io/mellifluousjdg/cap:$version"
 podman push "ghcr.io/mellifluousjdg/cap:$version"
 ```
 
-After pushing, obtain and record the registry manifest digest. Do not confuse a
-local image ID with the registry digest:
+After pushing, display the registry descriptor and record its `digest` field.
+Do not confuse a local image ID with the registry digest:
 
 ```bash
-version=<version>
-authfile="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/containers/auth.json"
-oras manifest fetch --registry-config "$authfile" --descriptor \
-  "ghcr.io/mellifluousjdg/cap:$version" | \
-  python3 -c 'import json, sys; print(json.load(sys.stdin)["digest"])'
+oras manifest fetch --descriptor \
+  "ghcr.io/mellifluousjdg/cap:$version"
 ```
 
 Set the GHCR package visibility deliberately in GitHub's package settings and
@@ -95,7 +103,7 @@ following commands are intentionally explicit: generation requires network
 access and can be lengthy, and each collector verifies downloaded checksums.
 
 ```bash
-bundle=../cap-1.0.1-compliance-bundle
+bundle=../cap-<version>-compliance-bundle
 image=cap:local
 
 scripts/compliance/apply-source-review-policy.py \
@@ -165,25 +173,36 @@ Create one deterministic Zstandard archive outside the checkout:
 tar --sort=name --mtime='UTC 1970-01-01' --owner=0 --group=0 \
   --numeric-owner -C "$(dirname "$bundle")" \
   -cf - "$(basename "$bundle")" | \
-  zstd -T0 -19 -o ../cap-1.0.1-compliance-bundle.tar.zst
-sha256sum ../cap-1.0.1-compliance-bundle.tar.zst
+  zstd -T0 -19 -o ../cap-<version>-compliance-bundle.tar.zst
+sha256sum ../cap-<version>-compliance-bundle.tar.zst
 ```
 
 ## Publish the corresponding source artifact
 
-Authenticate ORAS using the existing Podman login described above, then publish
-the single tested archive under the immutable release version:
+Authenticate with `oras login` as described above, then check whether the
+release source tag already exists:
 
 ```bash
-version=1.0.1
-authfile="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/containers/auth.json"
-oras push --registry-config "$authfile" \
+version=<version>
+oras manifest fetch "ghcr.io/mellifluousjdg/cap-source:$version"
+```
+
+Proceed only if GHCR reports that the tag was not found. If the command returns
+a manifest or any other error, stop and investigate. Never replace an existing
+release tag. Publish the single tested archive:
+
+```bash
+oras push \
   --artifact-type application/vnd.cap.compliance-bundle.v1 \
   "ghcr.io/mellifluousjdg/cap-source:$version" \
   "../cap-$version-compliance-bundle.tar.zst:application/zstd"
-oras manifest fetch --registry-config "$authfile" --descriptor \
-  "ghcr.io/mellifluousjdg/cap-source:$version" | \
-  python3 -c 'import json, sys; print(json.load(sys.stdin)["digest"])'
+```
+
+Display the published descriptor and record its `digest` field:
+
+```bash
+oras manifest fetch --descriptor \
+  "ghcr.io/mellifluousjdg/cap-source:$version"
 ```
 
 Record the returned manifest digest and archive SHA-256. Pull by digest into a
