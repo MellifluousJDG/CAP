@@ -73,14 +73,12 @@ podman tag cap:local "ghcr.io/mellifluousjdg/cap:$version"
 podman push "ghcr.io/mellifluousjdg/cap:$version"
 ```
 
-After pushing, obtain and record the registry manifest digest. Do not confuse a
-local image ID with the registry digest:
+After pushing, display the registry descriptor and record its `digest` field.
+Do not confuse a local image ID with the registry digest:
 
 ```bash
-version=<version>
 oras manifest fetch --descriptor \
-  "ghcr.io/mellifluousjdg/cap:$version" | \
-  python3 -c 'import json, sys; print(json.load(sys.stdin)["digest"])'
+  "ghcr.io/mellifluousjdg/cap:$version"
 ```
 
 Set the GHCR package visibility deliberately in GitHub's package settings and
@@ -181,31 +179,30 @@ sha256sum ../cap-<version>-compliance-bundle.tar.zst
 
 ## Publish the corresponding source artifact
 
-Authenticate with `oras login` as described above, then verify that the release
-tag is absent before publishing the single tested archive. Never replace an
-existing release tag:
+Authenticate with `oras login` as described above, then check whether the
+release source tag already exists:
 
 ```bash
 version=<version>
-check_error=$(mktemp)
-if oras manifest fetch "ghcr.io/mellifluousjdg/cap-source:$version" \
-  2>"$check_error"; then
-  echo "release source tag already exists; refusing to replace it" >&2
-  rm -f "$check_error"
-  exit 1
-elif ! grep -Fq 'not found' "$check_error"; then
-  cat "$check_error" >&2
-  rm -f "$check_error"
-  exit 1
-fi
-rm -f "$check_error"
+oras manifest fetch "ghcr.io/mellifluousjdg/cap-source:$version"
+```
+
+Proceed only if GHCR reports that the tag was not found. If the command returns
+a manifest or any other error, stop and investigate. Never replace an existing
+release tag. Publish the single tested archive:
+
+```bash
 oras push \
   --artifact-type application/vnd.cap.compliance-bundle.v1 \
   "ghcr.io/mellifluousjdg/cap-source:$version" \
   "../cap-$version-compliance-bundle.tar.zst:application/zstd"
+```
+
+Display the published descriptor and record its `digest` field:
+
+```bash
 oras manifest fetch --descriptor \
-  "ghcr.io/mellifluousjdg/cap-source:$version" | \
-  python3 -c 'import json, sys; print(json.load(sys.stdin)["digest"])'
+  "ghcr.io/mellifluousjdg/cap-source:$version"
 ```
 
 Record the returned manifest digest and archive SHA-256. Pull by digest into a
