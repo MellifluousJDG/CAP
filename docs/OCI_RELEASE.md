@@ -52,19 +52,18 @@ credential stores. Authenticate with the client that will publish the artifact:
 
 ```bash
 # For OCI image publication with Podman:
-printf '%s' "$GHCR_TOKEN" | podman login ghcr.io \
-  --username MellifluousJDG --password-stdin
+podman login ghcr.io --username MellifluousJDG
 
 # For corresponding-source publication with ORAS:
-printf '%s' "$GHCR_TOKEN" | oras login ghcr.io \
-  --username MellifluousJDG --password-stdin
+oras login ghcr.io --username MellifluousJDG
 ```
 
 Use a classic GitHub personal access token with `read:packages` and
-`write:packages`, and keep it out of command-line arguments and shell history.
-After `oras login`, invoke ORAS normally and let it use its default credential
-store. Pass `--registry-config` only when intentionally supplying an alternate
-credential file; doing so overrides the default ORAS credentials.
+`write:packages` when prompted for the password. Interactive prompting keeps the
+token out of command-line arguments and shell history. After `oras login`,
+invoke ORAS normally and let it use its default credential store. Pass
+`--registry-config` only when intentionally supplying an alternate credential
+file; doing so overrides the default ORAS credentials.
 
 Tag and push the tested release image, replacing `<version>` with the new version:
 
