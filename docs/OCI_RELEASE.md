@@ -31,7 +31,8 @@ validation records must also record the immutable manifest digest.
 
 ## Manual publication
 
-Publish release images manually; do not configure automated registry pushes.
+CAP release images are currently published manually. The commands below
+document the manual release procedure.
 Build the release image from the exact clean release checkout using the image
 build command documented in `docs/OCI_IMAGE.md`. Keep the canonical local name
 `cap:local` for the test and publication commands below. OCI labels are useful
@@ -62,11 +63,8 @@ printf '%s' "$GHCR_TOKEN" | oras login ghcr.io \
 Use a classic GitHub personal access token with `read:packages` and
 `write:packages`, and keep it out of command-line arguments and shell history.
 After `oras login`, invoke ORAS normally and let it use its default credential
-store. Only pass `--registry-config` when deliberately reusing another client's
-credential file and after verifying that the file contains the current login;
-forcing a stale Podman auth file causes ORAS to ignore a valid ORAS login. Do
-not log out at the end if the authenticated session was created separately and
-should remain available.
+store. Pass `--registry-config` only when intentionally supplying an alternate
+credential file; doing so overrides the default ORAS credentials.
 
 Tag and push the tested release image, replacing `<version>` with the new version:
 
